@@ -1,5 +1,6 @@
 #include "MoonEngine.h"
 #include "Core/Window.h"
+#include "imgui/imgui.h"
 
 using namespace MoonEngine;
 
@@ -23,6 +24,13 @@ class ApplicationLayer : Layer
 		cameraController->OnUpdate();
 		Renderer::DrawQuad(glm::vec2(), glm::vec2(1.0f), glm::vec3(1.0f));
 		Renderer::Render(*camera);
+	}
+
+	void DrawGUI()
+	{
+		ImGui::Begin("Debug");
+		ImGui::Button("Hello World");
+		ImGui::End();
 	}
 };
 

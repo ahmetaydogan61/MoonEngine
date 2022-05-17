@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Window.h"
 #include "Time.h"
+#include "ImGuiLayer.h"
 
 namespace MoonEngine
 {
@@ -42,6 +43,8 @@ namespace MoonEngine
 		}
 		DebugSys("All Layers Created");
 
+		ImGuiLayer::Init();
+
 		Time::Init();
 
 		while (Window::IsRunning())
@@ -50,6 +53,11 @@ namespace MoonEngine
 
 			for (Layer* layer : m_Layers)
 				layer->Update();
+
+			ImGuiLayer::BeginDrawUI();
+			for (Layer* layer : m_Layers)
+				layer->DrawGUI();
+			ImGuiLayer::EndDrawUI();
 
 			Window::Update();
 		}

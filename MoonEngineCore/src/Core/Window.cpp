@@ -11,6 +11,7 @@ namespace MoonEngine
 	std::string Window::m_Name;
 	uint32_t Window::m_Width;
 	uint32_t Window::m_Height;
+	bool Window::m_Vsync = true;
 	std::function<void(Event&)> Window::m_EventCallback;
 
 	int Window::Create(std::string name, uint32_t width, uint32_t height)
@@ -36,6 +37,7 @@ namespace MoonEngine
 			DebugErr("Failed To Initialize Glad");
 			return -1;
 		}
+
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -58,17 +60,13 @@ namespace MoonEngine
 
 		});
 
-		glfwSetMouseButtonCallback(m_GLWindow, [](GLFWwindow* window, int button, int action, int mods)
-		{
-		});
-
 		glfwSetScrollCallback(m_GLWindow, [](GLFWwindow* window, double xoffset, double yoffset)
 		{
 			MouseScrollEvent e{ (float) xoffset, (float) yoffset };
 			m_EventCallback(e);
 		});
 
-		glfwSwapInterval(1);
+		glfwSwapInterval(m_Vsync);
 		return 1;
 	}
 
@@ -78,9 +76,10 @@ namespace MoonEngine
 		glfwPollEvents();
 	}
 
-	void Window::Destroy()
+	void Window::SetVsync(bool state)
 	{
-		glfwTerminate(); 
+		m_Vsync = state;
+		glfwSwapInterval(m_Vsync);
 	}
 
 	void Window::SetEventCallback(const std::function<void(Event&)>& e)
@@ -91,5 +90,10 @@ namespace MoonEngine
 	bool Window::IsRunning()
 	{
 		return !glfwWindowShouldClose(m_GLWindow);
+	}
+
+	void Window::Destroy()
+	{
+		glfwTerminate();
 	}
 }
