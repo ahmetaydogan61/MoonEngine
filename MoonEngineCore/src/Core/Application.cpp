@@ -79,7 +79,10 @@ namespace MoonEngine
 		Window::Destroy();
 		
 		for (Layer* layer : m_Layers)
+		{
+			DebugSys(layer->LayerName + " Destroyed");
 			layer->Destroy();
+		}
 		for (Layer* layer : m_Layers)
 			delete layer;
 		m_Layers.clear();

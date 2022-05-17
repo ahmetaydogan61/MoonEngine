@@ -1,6 +1,4 @@
 #pragma once
-#include "glm/glm.hpp"
-
 namespace MoonEngine
 {
 	struct ShaderProgramSource

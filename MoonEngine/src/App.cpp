@@ -1,29 +1,27 @@
-#include "MoonEngine.h"
-#include "Core/Window.h"
-#include "imgui/imgui.h"
-
+#include "Core.h"
 using namespace MoonEngine;
 
 class ApplicationLayer : Layer
 {
 	OrthographicCamera* camera;
 	CameraControllerOrthographic* cameraController;
-
-	std::string LayerName = "Application Layer";
+	Scene* scene;
 
 	void Create()
 	{
+		LayerName = "Application Layer";
 		Renderer::Init();
 		camera = new OrthographicCamera(Window::GetAspectRatio());
 		cameraController = new CameraControllerOrthographic(*camera);
+		scene = new Scene();
+		scene->Create(camera);
+		scene->CreateEntity();
 	}
 
 	void Update()
 	{
-		Renderer::Clear();
 		cameraController->OnUpdate();
-		Renderer::DrawQuad(glm::vec2(), glm::vec2(1.0f), glm::vec3(1.0f));
-		Renderer::Render(*camera);
+		scene->Update();
 	}
 
 	void DrawGUI()

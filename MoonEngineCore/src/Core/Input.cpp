@@ -1,9 +1,7 @@
 #include "mpch.h"
-#include "Core.h"
+#include "Input.h"
 #include "Core/Window.h"
-#include "Core/Application.h"
 #include "Utils/OrthographicCamera.h"
-#include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
 namespace MoonEngine

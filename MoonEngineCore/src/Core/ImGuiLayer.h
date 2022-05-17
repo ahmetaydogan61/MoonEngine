@@ -1,10 +1,6 @@
 #pragma once
-#include "glm/glm.hpp"
-
 namespace MoonEngine
 {
-	class Event;
-
 	struct ImGuiLayer
 	{
 		static glm::vec2 ViewportSize;
