@@ -6,38 +6,38 @@ namespace MoonEngine
 {
 	class Scene;
 
-	struct Identity
+	struct IdentityComponent
 	{
 		std::string Name;
 
-		Identity() = default;
-		Identity(const Identity&) = default;
-		Identity(const std::string& name)
+		IdentityComponent() = default;
+		IdentityComponent(const IdentityComponent&) = default;
+		IdentityComponent(const std::string& name)
 			: Name(name)
 		{}
 	};
 
-	struct Transform
+	struct TransformComponent
 	{
 		glm::vec2 position{ 0.0f };
 		glm::vec2 size{ 1.0f };
 
-		Transform() = default;
-		Transform(glm::vec2 position)
+		TransformComponent() = default;
+		TransformComponent(glm::vec2 position)
 			:position(position)
 		{}
-		Transform(const Transform& transform) = default;
+		TransformComponent(const TransformComponent& transform) = default;
 	};
 
-	struct Sprite
+	struct SpriteComponent
 	{
 		glm::vec3 color{ 1.0f };
 
-		Sprite() = default;
-		Sprite(glm::vec3 color)
+		SpriteComponent() = default;
+		SpriteComponent(glm::vec3 color)
 			:color(color)
 		{}
-		Sprite(const Sprite& sprite) = default;
+		SpriteComponent(const SpriteComponent& sprite) = default;
 	};
 
 	struct CameraComponent

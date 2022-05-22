@@ -18,11 +18,11 @@ namespace MoonEngine
 		float x = Input::OrthoX();
 		float y = Input::OrthoY();
 
-		auto transforms = m_Scene->m_Registry.view<Transform>();
+		auto transforms = m_Scene->m_Registry.view<TransformComponent>();
 		for (auto entity : transforms)
 		{
-			glm::vec2 pos = transforms.get<Transform>(entity).position;
-			glm::vec2 scale = transforms.get<Transform>(entity).size;
+			glm::vec2 pos = transforms.get<TransformComponent>(entity).position;
+			glm::vec2 scale = transforms.get<TransformComponent>(entity).size;
 			float halfExtendX = scale.x / 2.0f;
 			float halfExtendY = scale.y / 2.0f;
 
@@ -60,9 +60,9 @@ namespace MoonEngine
 			if (ImGui::MenuItem("Create Camera"))
 			{
 				Entity& entity = m_Scene->CreateEntity();
-				entity.GetComponent<Identity>().Name = "Camera";
+				entity.GetComponent<IdentityComponent>().Name = "Camera";
 				entity.AddComponent<CameraComponent>();
-				entity.RemoveComponent<Sprite>();
+				entity.RemoveComponent<SpriteComponent>();
 			}
 
 			ImGui::EndPopup();
@@ -76,7 +76,7 @@ namespace MoonEngine
 
 	void HierarchyView::EntityTreeNode(Entity entity, int id)
 	{
-		std::string name = entity.GetComponent<Identity>().Name;
+		std::string name = entity.GetComponent<IdentityComponent>().Name;
 		name += "##" + std::to_string(id);
 
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
@@ -111,7 +111,7 @@ namespace MoonEngine
 		{
 			ImGuiUtils::TextCentered("Name");
 			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x);
-			ImGui::InputText("##Name", &m_SelectedEntity.GetComponent<Identity>().Name);
+			ImGui::InputText("##Name", &m_SelectedEntity.GetComponent<IdentityComponent>().Name);
 
 			ImGuiUtils::AddPadding(0, 5);
 			ImGui::Separator();
@@ -119,7 +119,7 @@ namespace MoonEngine
 
 			//Translation Start
 			ImGui::Text("Transform");
-			Transform& transform = m_SelectedEntity.GetComponent<Transform>();
+			TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
 			UtilVectorColumn("Position", transform.position);
 			UtilVectorColumn("Size", transform.size, 1.0f);
 			//Translation End
@@ -135,12 +135,12 @@ namespace MoonEngine
 			if (ImGui::BeginPopup("AddComponents"))
 			{
 				if (ImGui::MenuItem("Sprite"))
-					if (!m_SelectedEntity.HasComponent<Sprite>())
-						m_SelectedEntity.AddComponent<Sprite>();
+					if (!m_SelectedEntity.HasComponent<SpriteComponent>())
+						m_SelectedEntity.AddComponent<SpriteComponent>();
 
 				if (ImGui::MenuItem("Camera"))
-					if (!m_SelectedEntity.HasComponent<Camera>())
-						m_SelectedEntity.AddComponent<Camera>();
+					if (!m_SelectedEntity.HasComponent<CameraComponent>())
+						m_SelectedEntity.AddComponent<CameraComponent>();
 				ImGui::EndPopup();
 			}
 
@@ -156,13 +156,14 @@ namespace MoonEngine
 		float alpha = Maths::Normalize(150.0f, 0.0f, 255.0f);
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(color, color, color, alpha));
 
-		ShowComponent<Sprite>("Sprite", [](auto& component)
+		ShowComponent<SpriteComponent>("Sprite", [](auto& component)
 		{
 			ImGui::ColorEdit3("Color", &component.color[0]);
 		});
 
 		ShowComponent<CameraComponent>("Camera Component", [](auto& component)
 		{
+			ImGui::Checkbox("IsMain", &component.isMain);
 			ImGui::DragFloat("Distance", &component.distance, 0.1f, 0.0f, 0.0f, "%.2f");
 		});
 

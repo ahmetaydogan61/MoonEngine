@@ -27,10 +27,10 @@ namespace MoonEngine
 	{
 		Renderer::Clear();
 
-		auto group = m_Registry.group<Transform>(entt::get<Sprite>);
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 		for (auto entity : group)
 		{
-			auto [transform, sprite] = group.get<Transform, Sprite>(entity);
+			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
 		}
 
@@ -54,10 +54,10 @@ namespace MoonEngine
 		Renderer::Clear();
 
 		{
-			auto group = m_Registry.group<Transform>(entt::get<Sprite>);
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group)
 			{
-				auto [transform, sprite] = group.get<Transform, Sprite>(entity);
+				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				Renderer::DrawQuad(transform.position, transform.size, sprite.color);
 			}
 		}
@@ -65,10 +65,10 @@ namespace MoonEngine
 		Camera* sceneCamera = nullptr;
 		glm::vec2 cameraPosition;
 
-		auto cameras = m_Registry.view<Transform, CameraComponent>();
+		auto cameras = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto entity : cameras)
 		{
-			auto [transform, camera] = cameras.get<Transform, CameraComponent>(entity);
+			auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
 			if (camera.isMain)
 			{
 				sceneCamera = &camera.Camera;
@@ -99,10 +99,10 @@ namespace MoonEngine
 	Entity Scene::CreateEntity()
 	{
 		Entity e{ m_Registry.create() };
-		e.AddComponent<Identity>();
-		e.GetComponent<Identity>().Name = "Entity";
-		e.AddComponent<Transform>();
-		e.AddComponent<Sprite>();
+		e.AddComponent<IdentityComponent>();
+		e.GetComponent<IdentityComponent>().Name = "Entity";
+		e.AddComponent<TransformComponent>();
+		e.AddComponent<SpriteComponent>();
 		return e;
 	}
 
