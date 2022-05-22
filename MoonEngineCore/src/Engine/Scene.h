@@ -1,6 +1,7 @@
 #pragma once
 #include "entt/entt.hpp"
 #include "Core.h"
+#include "Utils/EditorCamera.h"
 
 namespace MoonEngine
 {
@@ -12,20 +13,16 @@ namespace MoonEngine
 	private:
 		static Scene* m_ActiveScene;
 		entt::registry m_Registry;
-		OrderedStack<Entity*> m_Entities;
 		friend class Entity;
-		friend class EditorLayer;
+		friend class HierarchyView;
 	public:
-		OrthographicCamera* Camera = nullptr;
 		Scene();
 		~Scene();
-		void OnEvent(Event& event);
 		void OnPlay();
-		void Create(OrthographicCamera* camera);
-		void Update();
-		void Update(Framebuffer& framebuffer);
-		Entity* GetEntityPointer(entt::entity e);
-		Entity* CreateEntity();
-		void DeleteEntity(int index);
+		void OnReset();
+		void UpdateRuntime();
+		void UpdateEditor(const EditorCamera* camera);
+		void ResizeViewport(float width, float height);
+		Entity CreateEntity();
 	};
 }

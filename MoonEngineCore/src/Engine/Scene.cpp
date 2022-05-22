@@ -1,7 +1,6 @@
 #include "mpch.h"
 #include "Scene.h"
 #include "Core/Window.h"
-#include "Utils/CameraControllerOrthographic.h"
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer.h"
@@ -18,21 +17,28 @@ namespace MoonEngine
 		DebugSys("Scene Created");
 	}
 
-	void Scene::OnEvent(Event& e)
-	{
-		Camera->OnEvent(e);
-	}
-
-	void Scene::Create(OrthographicCamera* camera)
-	{
-		Camera = camera;
-	}
-
 	void Scene::OnPlay()
+	{}
+
+	void Scene::OnReset()
+	{}
+
+	void Scene::UpdateEditor(const EditorCamera* camera)
 	{
+		Renderer::Clear();
+
+		auto group = m_Registry.group<Transform>(entt::get<Sprite>);
+		for (auto entity : group)
+		{
+			auto [transform, sprite] = group.get<Transform, Sprite>(entity);
+			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
+		}
+
+		if (camera)
+			Renderer::Render(camera->GetViewProjection());
 	}
 
-	void Scene::Update()
+	void Scene::UpdateRuntime()
 	{
 		m_Registry.view<Script>().each([=](auto entity, auto& nsc)
 		{
@@ -47,74 +53,61 @@ namespace MoonEngine
 
 		Renderer::Clear();
 
-		auto group = m_Registry.group<Transform>(entt::get<Sprite>);
-		for (auto entity : group)
 		{
-			auto [transform, sprite] = group.get<Transform, Sprite>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
-		}
-
-		if (Camera)
-			Renderer::Render(*Camera);
-	}
-
-	void Scene::Update(Framebuffer& framebuffer)
-	{
-		{
-			m_Registry.view<Script>().each([=](auto entity, auto& nsc)
+			auto group = m_Registry.group<Transform>(entt::get<Sprite>);
+			for (auto entity : group)
 			{
-				if (!nsc.Instance)
-				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity(entity);
-					nsc.Instance->Awake();
-				}
-				nsc.Instance->Update();
-			});
+				auto [transform, sprite] = group.get<Transform, Sprite>(entity);
+				Renderer::DrawQuad(transform.position, transform.size, sprite.color);
+			}
 		}
 
-		auto group = m_Registry.group<Transform>(entt::get<Sprite>);
-		for (auto entity : group)
+		Camera* sceneCamera = nullptr;
+		glm::vec2 cameraPosition;
+
+		auto cameras = m_Registry.view<Transform, CameraComponent>();
+		for (auto entity : cameras)
 		{
-			auto [transform, sprite] = group.get<Transform, Sprite>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
+			auto [transform, camera] = cameras.get<Transform, CameraComponent>(entity);
+			if (camera.isMain)
+			{
+				sceneCamera = &camera.Camera;
+				cameraPosition = transform.position;
+				break;
+			}
 		}
 
-		framebuffer.Bind();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		if (Camera)
-			Renderer::Render(*Camera);
-
-		framebuffer.Unbind();
-		glClear(GL_COLOR_BUFFER_BIT);
+		if (sceneCamera)
+		{
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
+			glm::mat4 m_View = glm::inverse(transform);
+			glm::mat4 viewProjection = sceneCamera->GetProjection() * m_View;
+			Renderer::Render(viewProjection);
+		}
 	}
 
-	Entity* Scene::GetEntityPointer(entt::entity e)
+	void Scene::ResizeViewport(float width, float height)
 	{
-		return new Entity(e);
+		auto camera = m_Registry.view<CameraComponent>();
+		for (auto entity : camera)
+		{
+			CameraComponent& component = camera.get<CameraComponent>(entity);
+			component.Camera.Resize(width, height, component.distance);
+		}
 	}
 
-	Entity* Scene::CreateEntity()
+	Entity Scene::CreateEntity()
 	{
-		Entity* e = new Entity(m_Registry.create());
-		e->AddComponent<Identity>();
-		e->GetComponent<Identity>().Name = "Entity";
-		e->AddComponent<Transform>();
-		e->AddComponent<Sprite>();
-		m_Entities.Push(e);
+		Entity e{ m_Registry.create() };
+		e.AddComponent<Identity>();
+		e.GetComponent<Identity>().Name = "Entity";
+		e.AddComponent<Transform>();
+		e.AddComponent<Sprite>();
 		return e;
-	}
-
-	void Scene::DeleteEntity(int index)
-	{
-		m_Entities.Get(index)->Destroy();
-		m_Entities.Pop(index);
 	}
 
 	Scene::~Scene()
 	{
-		delete Camera;
 		DebugSys("Scene Destroyed");
 	}
 }

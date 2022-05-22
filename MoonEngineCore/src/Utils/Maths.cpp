@@ -23,6 +23,11 @@ namespace MoonEngine
 			return value;
 	}
 
+	float Maths::Normalize(float value, float min, float max)
+	{
+		return (value - min) / (max - min);
+	}
+
 	int Maths::RandomInt(int from, int to)
 	{
 		int dif = to - from;

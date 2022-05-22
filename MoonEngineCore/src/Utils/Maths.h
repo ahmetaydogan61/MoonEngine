@@ -5,6 +5,7 @@ namespace MoonEngine
 	{
 		static int Clamp(int value, int min, int max);
 		static float Clamp(float value, float min, float max);
+		static float Normalize(float value, float min, float max);
 		static int RandomInt(int from, int to);
 		static float RandomFloat(float from, float to);
 		static int Lerp(int from, int to, int time);

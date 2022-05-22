@@ -58,16 +58,13 @@ namespace MoonEngine
         glShaderSource(id, 1, &src, nullptr);
         glCompileShader(id);
     
-        int result;
-        glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-        if (!result)
+        int success;
+        glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+        if (!success)
         {
-            int length;
-            glGetShaderiv(id, GL_COMPILE_STATUS, &length);
-            char* message = (char*)alloca(length * sizeof(char));
-            glGetShaderInfoLog(id, length, &length, message);
-            DebugErr("Failed to Compile Shader" << (type == GL_VERTEX_SHADER ? "vertex" : "fragment"));
-            DebugErr(message);
+            char infoLog[512];
+            glGetShaderInfoLog(id, 512, NULL, infoLog);
+            DebugErr((type == GL_VERTEX_SHADER ? "Vertex " : "Fragment ") << "Shader Compile Error: " << infoLog);
             glDeleteShader(id);
             return 0;
         }

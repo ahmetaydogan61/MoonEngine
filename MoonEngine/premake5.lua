@@ -17,6 +17,7 @@ project "MoonEngine"
 		"%{wks.location}/MoonEngineCore/src",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}"
 	}   
 

@@ -9,7 +9,7 @@ namespace MoonEngine
 		entt::entity m_ID = entt::null;
 		Scene* m_Scene = nullptr;
 		friend class Scene;
-		friend class EditorLayer;
+		friend class HierarchyView;
 
 		Entity(entt::entity id)
 		{
@@ -17,9 +17,9 @@ namespace MoonEngine
 			m_ID = id;
 		}
 	public:
-		Entity() = default;
+		Entity() {};
 
-		~Entity() = default;
+		~Entity() { m_Scene = nullptr; };
 
 		Entity(const Entity& entity)
 		{
@@ -27,15 +27,9 @@ namespace MoonEngine
 			m_Scene = entity.m_Scene;
 		};
 
-		bool operator==(const Entity& other) const
-		{
-			return m_ID == other.m_ID && m_Scene == other.m_Scene;
-		}
-
-		bool operator!=(const Entity& other) const
-		{
-			return !(*this == other);
-		}
+		bool operator==(const Entity& other) const { return m_ID == other.m_ID && m_Scene == other.m_Scene; }
+		bool operator!=(const Entity& other) const { return !(*this == other); }
+		operator bool() const { return m_ID != entt::null; }
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)

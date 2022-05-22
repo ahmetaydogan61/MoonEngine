@@ -2,7 +2,9 @@
 #include "Application.h"
 #include "Window.h"
 #include "Time.h"
+#include "Input.h"
 #include "ImGuiLayer.h"
+#include "Renderer/Renderer.h"
 
 namespace MoonEngine
 {
@@ -14,7 +16,7 @@ namespace MoonEngine
 		{
 			m_Instance = this;
 
-			if (Window::Create("MoonEngine", 1280, 720))
+			if (Window::Create("MoonEngine", 1366, 768))
 				DebugSys("Window Creation Successful");
 			else
 				DebugSys("Window Creation Failed!");
@@ -36,14 +38,16 @@ namespace MoonEngine
 		DebugSys("Application Run Started");
 		srand(static_cast <unsigned> (time(0)));
 
+		ImGuiLayer::Init();
+		Renderer::Init();
+
+		DebugSys("---Layer Creation Stared---");
 		for (Layer* layer : m_Layers)
 		{
 			layer->Create();
 			DebugSys(layer->LayerName + " Created");
 		}
-		DebugSys("All Layers Created");
-
-		ImGuiLayer::Init();
+		DebugSys("---Layer Creation Ended---");
 
 		Time::Init();
 
@@ -53,12 +57,13 @@ namespace MoonEngine
 
 			for (Layer* layer : m_Layers)
 				layer->Update();
-
+			
 			ImGuiLayer::BeginDrawUI();
 			for (Layer* layer : m_Layers)
 				layer->DrawGUI();
 			ImGuiLayer::EndDrawUI();
 
+			Input::Update(ImGuiLayer::ViewportPosition, ImGuiLayer::ViewportSize, ImGuiLayer::CameraProjection);
 			Window::Update();
 		}
 	}
@@ -87,6 +92,8 @@ namespace MoonEngine
 			delete layer;
 		m_Layers.clear();
 		
+		Renderer::Destroy();
+
 		DebugSys("Application Closed");
 	}
 }

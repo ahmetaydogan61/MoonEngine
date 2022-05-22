@@ -1,12 +1,11 @@
 #include "mpch.h"
 #include "Input.h"
 #include "Core/Window.h"
-#include "Utils/OrthographicCamera.h"
 #include "GLFW/glfw3.h"
 
 namespace MoonEngine
 {
-	glm::vec4 Input::orthoPos;
+	glm::vec4 Input::m_MouseOrthoPos;
 	bool Input::m_MouseButtons[3];
 	bool Input::m_LastMouseButtons[3];
 
@@ -58,12 +57,12 @@ namespace MoonEngine
 
 	float Input::OrthoX()
 	{
-		return orthoPos.x;
+		return m_MouseOrthoPos.x;
 	}
 
 	float Input::OrthoY()
 	{
-		return orthoPos.y;
+		return m_MouseOrthoPos.y;
 	}
 
 	void Input::UpdateMouseKeys()
@@ -87,15 +86,13 @@ namespace MoonEngine
 			m_MouseButtons[2] = false;
 	}
 
-	void Input::Update(glm::vec2 viewPortSize, glm::vec2 viewPortPos)
+	void Input::Update(const glm::vec2& viewPortPos, const  glm::vec2& viewPortSize, const  glm::mat4& viewProjection)
 	{
 		UpdateMouseKeys();
-		glm::vec2 m_ViewportSize = glm::vec2(viewPortSize.x, viewPortSize.y);
-		glm::vec2 m_ViewportPos = glm::vec2(viewPortPos.x, viewPortPos.y);
-		glm::mat4 inverseMat = glm::inverse(OrthographicCamera::MAIN->GetViewProjection());
-		float x = (2.0f * ((float)(GetX() - m_ViewportPos.x) / (m_ViewportSize.x - 0))) - 1.0f;
-		float y = (2.0f * (1.0f - ((float)(GetY() - m_ViewportPos.y) / (m_ViewportSize.y - 0)))) - 1.0f;
-		orthoPos = glm::vec4(x, y, 0.0f, 1.0f);
-		orthoPos = inverseMat * orthoPos;
+		glm::mat4 inverseMat = glm::inverse(viewProjection);
+		float x = (2.0f * ((float)(GetX() - viewPortPos.x) / (viewPortSize.x - 0))) - 1.0f;
+		float y = (2.0f * (1.0f - ((float)(GetY() - viewPortPos.y) / (viewPortSize.y - 0)))) - 1.0f;
+		m_MouseOrthoPos = glm::vec4(x, y, 0.0f, 1.0f);
+		m_MouseOrthoPos = inverseMat * m_MouseOrthoPos;
 	}
 }

@@ -23,6 +23,11 @@ namespace MoonEngine
 		if (!glfwInit())
 			return -1;
 
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+
 		m_GLWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
 		if (!m_GLWindow)
 		{
@@ -37,11 +42,6 @@ namespace MoonEngine
 			DebugErr("Failed To Initialize Glad");
 			return -1;
 		}
-
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
 
 		//Center the monitor
 		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -66,6 +66,7 @@ namespace MoonEngine
 			m_EventCallback(e);
 		});
 
+		glEnable(GL_BLEND);
 		glfwSwapInterval(m_Vsync);
 		return 1;
 	}

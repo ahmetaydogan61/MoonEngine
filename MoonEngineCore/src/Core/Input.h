@@ -5,11 +5,12 @@ namespace MoonEngine
 	class Input
 	{
 	private:
-		static glm::vec4 orthoPos;
+		static glm::vec4 m_MouseOrthoPos;
 		static bool m_MouseButtons[3];
 		static bool m_LastMouseButtons[3];
-		Input();
-		static void Update(glm::vec2 viewPortSize, glm::vec2 viewPortPos);
+		Input() = delete;
+		~Input() = delete;
+		static void Update(const glm::vec2& viewPortPos, const  glm::vec2& viewPortSize,const  glm::mat4& viewProjection);
 		friend class Application;
 	public:
 		static float GetX();

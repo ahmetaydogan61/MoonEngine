@@ -1,5 +1,6 @@
 #pragma once
 #include "ScriptableEntity.h"
+#include "SceneCamera.h"
 
 namespace MoonEngine
 {
@@ -25,6 +26,7 @@ namespace MoonEngine
 		Transform(glm::vec2 position)
 			:position(position)
 		{}
+		Transform(const Transform& transform) = default;
 	};
 
 	struct Sprite
@@ -35,6 +37,22 @@ namespace MoonEngine
 		Sprite(glm::vec3 color)
 			:color(color)
 		{}
+		Sprite(const Sprite& sprite) = default;
+	};
+
+	struct CameraComponent
+	{
+		SceneCamera Camera;
+		bool isMain = true;
+		float distance = 5.0f;
+
+		CameraComponent()
+		{
+			Camera.Resize(1.0f, 1.0f, distance);
+			isMain = true;
+		};
+		~CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 	};
 
 	struct Script

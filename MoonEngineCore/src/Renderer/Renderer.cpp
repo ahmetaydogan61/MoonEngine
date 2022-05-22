@@ -1,16 +1,16 @@
 #include "mpch.h"
 #include "Renderer.h"
 #include "glad/glad.h"
-#include "Utils/OrthographicCamera.h"
 
 namespace MoonEngine
 {
+	glm::vec4 Renderer::m_ClearColor;
 	float Renderer::m_RenderBuffer[MAX_INSTANCES * 7];
 	int Renderer::m_Index = 0;
 	Shader* Renderer::m_DefaultShader;
 	unsigned int Renderer::m_VertexArray;
 	unsigned int Renderer::m_VertexBuffer;
-	unsigned int Renderer::m_IndexBuffer;
+	unsigned int Renderer::m_ElementBufffer;
 	unsigned int Renderer::m_InstanceVertexBuffer;
 
 	float Renderer::m_Vertices[] =
@@ -62,8 +62,8 @@ namespace MoonEngine
 		glVertexAttribDivisor(2, 1);
 		glVertexAttribDivisor(3, 1);
 
-		glGenBuffers(1, &m_IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		glGenBuffers(1, &m_ElementBufffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ElementBufffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_Indices), &m_Indices[0], GL_STATIC_DRAW);
 
 		m_DefaultShader = new Shader("res/Shaders/Default.shader");
@@ -73,7 +73,7 @@ namespace MoonEngine
 	void Renderer::Clear()
 	{
 		m_Index = 0;
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& color)
@@ -88,16 +88,16 @@ namespace MoonEngine
 		m_RenderBuffer[m_Index++] = color.z;
 	}
 
-	void Renderer::Render(OrthographicCamera& camera)
+	void Renderer::Render(const glm::mat4& viewProjection)
 	{
 		m_DefaultShader->Bind();
 		glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_Index, &m_RenderBuffer[0], GL_DYNAMIC_DRAW);
 
-		m_DefaultShader->SetUniformMat4("u_VP", camera.GetViewProjection());
+		m_DefaultShader->SetUniformMat4("u_VP", viewProjection);
 
 		glBindVertexArray(m_VertexArray);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ElementBufffer);
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, m_Index / (2 + 2 + 3));
 	}
 
@@ -106,7 +106,14 @@ namespace MoonEngine
 		delete m_DefaultShader;
 		glDeleteBuffers(1, &m_VertexArray);
 		glDeleteBuffers(1, &m_VertexBuffer);
-		glDeleteBuffers(1, &m_IndexBuffer);
+		glDeleteBuffers(1, &m_ElementBufffer);
 		glDeleteBuffers(1, &m_InstanceVertexBuffer);
+		DebugSys("Renderer Destroyed");
 	}
+
+	void Renderer::SetClearColor(glm::vec4& color)
+	{
+		m_ClearColor = color; 
+		glClearColor(m_ClearColor.x, m_ClearColor.y, m_ClearColor.z, m_ClearColor.w);
+	};
 }
