@@ -3,6 +3,7 @@
 #include "Core/ImGuiLayer.h"
 #include "ImGuiUtils.h"
 #include <imgui/imgui_internal.h>
+#include "Utils/IconsFontAwesome.h"
 
 namespace MoonEngine
 {
@@ -18,7 +19,10 @@ namespace MoonEngine
 		m_HierarchyView.SetScene(m_Scene);
 
 		ImGuiUtils::StyleCustomDark(0);
-		Renderer::SetClearColor(glm::vec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
+
+		m_PlayTexture = new Texture("res/EditorIcons/play.png");
+		m_StopTexture = new Texture("res/EditorIcons/stop.png");
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -57,7 +61,7 @@ namespace MoonEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGuiIO& io = ImGui::GetIO();
 
-		ImGui::Begin("Viewport", &state, flags);
+		ImGui::Begin(ICON_FK_GAMEPAD "Viewport", &state, flags);
 
 		m_ViewportPosition.x = ImGui::GetCursorScreenPos().x;
 		m_ViewportPosition.y = ImGui::GetCursorScreenPos().y;
@@ -80,11 +84,14 @@ namespace MoonEngine
 	void EditorLayer::DrawGUI()
 	{
 		Dockspace(); //Start Dockspace
-		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0)); 
+		ImGuiStyle& style = ImGui::GetStyle();
+		float borderSize = style.WindowBorderSize;
+		style.WindowBorderSize = 0;
 		Menubar();
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetStyle().Colors[ImGuiCol_DockingEmptyBg]);
 		Sidemenubar();
-		ImGui::PopStyleColor(2);
+		style.WindowBorderSize = borderSize;
+		ImGui::PopStyleColor();
 
 		if (m_IsHierarchyActive)
 			m_HierarchyView.BeginHierarchyView(m_IsHierarchyActive);
@@ -146,9 +153,10 @@ namespace MoonEngine
 		{
 			if (ImGui::BeginMenuBar())
 			{
-				float buttonSize = 50.0f;
+				float buttonSize = height / 2.0f;
 				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0);
-				if (ImGui::Button(m_IsPlaying ? "Pause" : "Play", { buttonSize, height }))
+				Texture* icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
+				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f}))
 					m_IsPlaying = !m_IsPlaying;
 				ImGui::EndMenuBar();
 			}
@@ -207,7 +215,7 @@ namespace MoonEngine
 
 	void EditorLayer::DebugView(bool& state)
 	{
-		ImGui::Begin("Debug", &state);
+		ImGui::Begin(ICON_FK_CODE "Debug", &state);
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
 		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());

@@ -6,11 +6,15 @@
 
 namespace MoonEngine
 {
+	class Texture;
+
 	class EditorLayer : public Layer
 	{
 	private:
 		Scene* m_Scene;
 		EditorCamera* m_EditorCamera;
+		Texture* m_PlayTexture;
+		Texture* m_StopTexture;
 
 		HierarchyView m_HierarchyView;
 		EditorSettingsView m_EditorSettingsView;

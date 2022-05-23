@@ -8,6 +8,7 @@
 #include "backends/imgui_impl_opengl3.cpp"
 #include "GLFW/glfw3.h"
 #include "Event/Events.h"
+#include "Utils/IconsFontAwesome.h"
 
 namespace MoonEngine
 {
@@ -23,7 +24,7 @@ namespace MoonEngine
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 		//io.ConfigViewportsNoAutoMerge = true;
 		//io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -42,6 +43,14 @@ namespace MoonEngine
 		//io.Fonts->AddFontDefault();
 		//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
 		ImFont* font = io.Fonts->AddFontFromFileTTF("res/Fonts/Roboto/Roboto-Medium.ttf", 16.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+		ImFontConfig config;
+		config.MergeMode = true;
+
+		config.GlyphExtraSpacing.x = 5.0f;
+		config.OversampleH = 3;
+		config.OversampleV = 1;
+		static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_16_FK, 0};
+		io.Fonts->AddFontFromFileTTF("res/Fonts/ForkAwesome/forkawesome-webfont.ttf", 14.0f, &config, icon_ranges);
 	}
 
 	void ImGuiLayer::BeginDrawUI()

@@ -16,7 +16,7 @@ namespace MoonEngine
 		{
 			m_Instance = this;
 
-			if (Window::Create("MoonEngine", 1366, 768))
+			if (Window::Create("MoonEngine", 1920, 1080))
 				DebugSys("Window Creation Successful");
 			else
 				DebugSys("Window Creation Failed!");

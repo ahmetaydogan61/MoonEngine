@@ -53,13 +53,11 @@ namespace MoonEngine
 
 		Renderer::Clear();
 
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+		for (auto entity : group)
 		{
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
-			for (auto entity : group)
-			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-				Renderer::DrawQuad(transform.position, transform.size, sprite.color);
-			}
+			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
 		}
 
 		Camera* sceneCamera = nullptr;
