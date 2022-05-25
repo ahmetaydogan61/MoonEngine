@@ -16,7 +16,9 @@ project "MoonEngineCore"
 		"src/**.h",
 		"src/**.cpp",
 		"Includes/GLM/glm/**.hpp",
-		"Includes/GLM/glm/**.inl"
+		"Includes/GLM/glm/**.inl",
+		"Includes/ImGuizmo/ImGuizmo.h",
+		"Includes/ImGuizmo/ImGuizmo.cpp"
 	}
 
 	includedirs
@@ -28,7 +30,8 @@ project "MoonEngineCore"
 		"%{IncludeDirs.ImGui}/imgui",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb_image}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.ImGuizmo}"
 	}
 
 	links
@@ -38,6 +41,9 @@ project "MoonEngineCore"
 		"ImGui",
 		"opengl32.lib"
 	}
+
+	filter "files:Includes/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
 
 	filter "system:windows"
 		cppdialect "C++17"

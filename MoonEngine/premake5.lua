@@ -9,16 +9,18 @@ project "MoonEngine"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
 	}
 
 	includedirs
 	{
+		"src",
 		"%{wks.location}/MoonEngineCore/src",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb_image}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.ImGuizmo}"
 	}   
 
 	links

@@ -9,6 +9,7 @@
 #include "GLFW/glfw3.h"
 #include "Event/Events.h"
 #include "Utils/IconsFontAwesome.h"
+#include "ImGuizmo.h"	
 
 namespace MoonEngine
 {
@@ -58,6 +59,7 @@ namespace MoonEngine
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::EndDrawUI()

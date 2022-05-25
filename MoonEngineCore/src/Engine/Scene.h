@@ -12,10 +12,10 @@ namespace MoonEngine
 	{
 	private:
 		static Scene* m_ActiveScene;
-		entt::registry m_Registry;
 		friend class Entity;
 		friend class HierarchyView;
 	public:
+		entt::registry m_Registry;
 		Scene();
 		~Scene();
 		void OnPlay();

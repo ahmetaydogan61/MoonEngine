@@ -19,11 +19,11 @@ namespace MoonEngine
 
 	struct TransformComponent
 	{
-		glm::vec2 position{ 0.0f };
-		glm::vec2 size{ 1.0f };
+		glm::vec3 position{ 0.0f };
+		glm::vec3 size{ 1.0f };
 
 		TransformComponent() = default;
-		TransformComponent(glm::vec2 position)
+		TransformComponent(glm::vec3& position)
 			:position(position)
 		{}
 		TransformComponent(const TransformComponent& transform) = default;
@@ -31,10 +31,10 @@ namespace MoonEngine
 
 	struct SpriteComponent
 	{
-		glm::vec3 color{ 1.0f };
+		glm::vec4 color{ 1.0f };
 
 		SpriteComponent() = default;
-		SpriteComponent(glm::vec3 color)
+		SpriteComponent(glm::vec4& color)
 			:color(color)
 		{}
 		SpriteComponent(const SpriteComponent& sprite) = default;

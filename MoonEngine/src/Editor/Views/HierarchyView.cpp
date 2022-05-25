@@ -107,17 +107,7 @@ namespace MoonEngine
 	void HierarchyView::BeginInspectorView(bool& state)
 	{
 		ImGui::Begin(ICON_FK_SEARCH "Inspector", &state);
-
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("Close")) ;
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-
+		
 		if (m_SelectedEntity)
 		{
 			ImGuiUtils::TextCentered("Name", true);
@@ -141,7 +131,7 @@ namespace MoonEngine
 
 			ImGuiUtils::TextCentered("Add Component", true);
 
-			if (ImGui::Button(" + ", { 25.0f, 25.0f }))
+			if (ImGui::Button("+", { 25.0f, 25.0f }))
 				ImGui::OpenPopup("AddComponents");
 			if (ImGui::BeginPopup("AddComponents"))
 			{
@@ -172,13 +162,12 @@ namespace MoonEngine
 
 		ShowComponent<SpriteComponent>("Sprite", [](auto& component)
 		{
-			ImGui::ColorEdit3("Color", &component.color[0]);
+			ImGui::ColorEdit4("Color", &component.color[0]);
 		});
 
 		ShowComponent<CameraComponent>("Camera", [](auto& component)
 		{
 			float winWidth = 100.0f;
-
 			ImGui::Columns(2);
 			ImGui::SetColumnWidth(0, winWidth);
 			ImGuiUtils::TextCentered("Is Main", false);
@@ -202,6 +191,7 @@ namespace MoonEngine
 	{
 		if (m_SelectedEntity.HasComponent<T>())
 		{
+			ImGui::PushID(componentName.c_str());
 			float buttonSize = 25.0f;
 			ImVec2 contentRegion = ImGui::GetContentRegionAvail();
 			T& component = m_SelectedEntity.GetComponent<T>();
@@ -210,7 +200,7 @@ namespace MoonEngine
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
 			bool treeopen = ImGui::TreeNodeEx(componentName.c_str(), flags);
 			ImGui::SameLine(contentRegion.x - (buttonSize / 2) - ImGui::GetStyle().FramePadding.x);
-			if (ImGui::Button(":", { buttonSize, ImGui::GetFrameHeight() }))
+			if (ImGui::Button(":", {buttonSize, ImGui::GetFrameHeight()}))
 				ImGui::OpenPopup("SettingList");
 
 			if (ImGui::BeginPopup("SettingList"))
@@ -227,10 +217,11 @@ namespace MoonEngine
 				function(component);
 				ImGui::TreePop();
 			}
+			ImGui::PopID();
 		}
 	}
 
-	void HierarchyView::UtilVectorColumn(const std::string& vecName, glm::vec2& vector, float resetValue, float columnWidth)
+	void HierarchyView::UtilVectorColumn(const std::string& vecName, glm::vec3& vector, float resetValue, float columnWidth)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::PushID(vecName.c_str());
@@ -239,7 +230,7 @@ namespace MoonEngine
 		ImGuiUtils::TextCentered(vecName.c_str(), false);
 		ImGui::NextColumn();
 
-		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 2.5f });
 
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.75f, 0.15f, 0.1f, 1.0f });
@@ -264,6 +255,20 @@ namespace MoonEngine
 
 		ImGui::SameLine();
 		ImGui::DragFloat("##Y", &vector.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.2f, 0.75f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.2f, 0.85f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.2f, 1.0f, 1.0f });
+
+		if (ImGui::Button(" Z "))
+			vector.z = resetValue;
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Z", &vector.z, 0.1f, 0.0f, 0.0f, "%.2f");
 		ImGui::PopItemWidth();
 		ImGui::PopStyleColor(3);
 

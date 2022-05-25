@@ -1,9 +1,13 @@
 #include "EditorLayer.h"
-#include "Renderer/Texture.h"
 #include "Core/ImGuiLayer.h"
 #include "ImGuiUtils.h"
 #include <imgui/imgui_internal.h>
 #include "Utils/IconsFontAwesome.h"
+#include "ImGuizmo.h"
+#include "Engine/Components.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 namespace MoonEngine
 {
@@ -21,8 +25,11 @@ namespace MoonEngine
 		ImGuiUtils::StyleCustomDark(0);
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
 
-		m_PlayTexture = new Texture("res/EditorIcons/play.png");
-		m_StopTexture = new Texture("res/EditorIcons/stop.png");
+		m_PlayTexture = new Texture("res/EditorIcons/Play.png");
+		m_StopTexture = new Texture("res/EditorIcons/Stop.png");
+		m_SelectTexture = new Texture("res/EditorIcons/Select.png");
+		m_TranslateTexture = new Texture("res/EditorIcons/Translate.png");
+		m_ResizeTexture = new Texture("res/EditorIcons/Resize.png");
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -30,9 +37,18 @@ namespace MoonEngine
 		m_EditorCamera->OnEvent(event);
 	}
 
+
+	void EditorLayer::PlayScene()
+	{
+		m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
+	}
+
+	void EditorLayer::StopScene()
+	{}
+
 	void EditorLayer::Update()
 	{
-		if (m_ViewportSize.x != m_ViewportFramebuffer->GetWidth() || m_ViewportSize.x != m_ViewportFramebuffer->GetHeight())
+		if (m_ViewportSize.x != m_ViewportFramebuffer->GetWidth() || m_ViewportSize.y != m_ViewportFramebuffer->GetHeight())
 		{
 			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera->Resize(m_ViewportSize.x, m_ViewportSize.y);
@@ -41,11 +57,16 @@ namespace MoonEngine
 
 		if (!m_IsPlaying)
 		{
-			if (Input::MousePressed(0) && m_ViewportHovered)
+			if (Input::MousePressed(0) && m_ViewportHovered && !ImGuizmo::IsUsing())
 				m_HierarchyView.MouseSelect();
 
-			if(m_ViewportFocused)
-				m_EditorCamera->Update();
+			if (m_ViewportFocused)
+				m_EditorCamera->UpdateFocused();
+
+			if (m_ViewportHovered)
+				m_EditorCamera->UpdateHovered();
+
+			m_EditorCamera->Update();
 		}
 
 		m_ViewportFramebuffer->Bind();
@@ -71,7 +92,31 @@ namespace MoonEngine
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		m_ViewportFocused = ImGui::IsWindowFocused();
 
-		ImGui::Image((void*)(uint64_t)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
+		ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
+
+		Entity entity = m_HierarchyView.GetSelectedEntity();
+		if (entity && !m_IsPlaying && m_GizmoSelection != GIZMOSELECTION::NONE)
+		{
+			const glm::mat4& view = m_EditorCamera->GetView();
+			const glm::mat4& projection = m_EditorCamera->GetProjection();
+
+			TransformComponent& component = entity.GetComponent<TransformComponent>();
+			glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f)));
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.position) * rotation * glm::scale(glm::mat4(1.0f), component.size);
+
+			ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
+			ImGuizmo::SetOrthographic(true);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform));
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 finalPos, finalRot, finalSiz;
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(finalPos), glm::value_ptr(finalRot), glm::value_ptr(finalSiz));
+				component.position = finalPos;
+				component.size = finalSiz;
+			}
+		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -84,7 +129,7 @@ namespace MoonEngine
 	void EditorLayer::DrawGUI()
 	{
 		Dockspace(); //Start Dockspace
-		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0)); 
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 		ImGuiStyle& style = ImGui::GetStyle();
 		float borderSize = style.WindowBorderSize;
 		style.WindowBorderSize = 0;
@@ -154,21 +199,53 @@ namespace MoonEngine
 			if (ImGui::BeginMenuBar())
 			{
 				float buttonSize = height / 2.0f;
+
+				if (GizmoSelectButton(m_SelectTexture, buttonSize, height / 2.0f, GIZMOSELECTION::NONE == m_GizmoSelection))
+					m_GizmoSelection = GIZMOSELECTION::NONE;
+				
+				if (GizmoSelectButton(m_TranslateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
+					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+
+				if (GizmoSelectButton(m_ResizeTexture, buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
+					m_GizmoSelection = GIZMOSELECTION::SCALE;
+
 				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0);
 				Texture* icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
-				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f}))
+				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f }))
+				{
 					m_IsPlaying = !m_IsPlaying;
+					if (m_IsPlaying)
+						PlayScene();
+					else
+						StopScene();
+				}
 				ImGui::EndMenuBar();
 			}
 		}
 		ImGui::End();
 	}
 
-	void EditorLayer::PlayScene()
-	{}
+	bool EditorLayer::GizmoSelectButton(Texture* texture, float width, float height, bool selected)
+	{
+		if (selected)
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
 
-	void EditorLayer::PauseScene()
-	{}
+		bool returnValue = ImGui::ImageButton((ImTextureID)texture->GetID(), { width, height });
+
+		if (selected)
+			ImGui::PopStyleColor();
+
+		return returnValue;
+	}
+
+	void EditorLayer::DebugView(bool& state)
+	{
+		ImGui::Begin(ICON_FK_CODE "Debug", &state);
+		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
+		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
+		ImGui::End();
+	}
 
 	void EditorLayer::Dockspace()
 	{
@@ -211,15 +288,6 @@ namespace MoonEngine
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-	}
-
-	void EditorLayer::DebugView(bool& state)
-	{
-		ImGui::Begin(ICON_FK_CODE "Debug", &state);
-		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
-		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
-		ImGui::End();
 	}
 
 	void EditorLayer::Destroy()

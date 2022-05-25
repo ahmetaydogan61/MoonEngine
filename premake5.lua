@@ -12,6 +12,7 @@ IncludeDirs["ImGui"] = "%{wks.location}/MoonEngineCore/Includes/ImGui"
 IncludeDirs["glm"] = "%{wks.location}/MoonEngineCore/Includes/GLM"
 IncludeDirs["stb_image"] = "%{wks.location}/MoonEngineCore/Includes/stb_image"
 IncludeDirs["entt"] = "%{wks.location}/MoonEngineCore/Includes/ENTT"
+IncludeDirs["ImGuizmo"] = "%{wks.location}/MoonEngineCore/Includes/ImGuizmo"
 
 include "MoonEngineCore/Includes/GLFW"
 include "MoonEngineCore/Includes/Glad"
