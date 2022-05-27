@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Texture.h"
 #include "Renderer/Frambuffer.h"
 #include "glad/glad.h"
 
@@ -27,11 +28,12 @@ namespace MoonEngine
 	{
 		Renderer::Clear();
 
+
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
+			Renderer::DrawQuad(transform.position, transform.size, sprite.color, sprite.texture);
 		}
 
 		if (camera)

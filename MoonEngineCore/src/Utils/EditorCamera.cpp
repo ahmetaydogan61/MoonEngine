@@ -44,22 +44,22 @@ namespace MoonEngine
 	}
 
 	void EditorCamera::UpdateFocused()
-	{
-		if (Input::GetKey(KEY_W))
-			m_Position.y += m_MoveSpeed * Time::DeltaTime();
-		else if (Input::GetKey(KEY_S))
-			m_Position.y -= m_MoveSpeed * Time::DeltaTime();
-
-		if (Input::GetKey(KEY_A))
-			m_Position.x -= m_MoveSpeed * Time::DeltaTime();
-		else if (Input::GetKey(KEY_D))
-			m_Position.x += m_MoveSpeed * Time::DeltaTime();
-
-		SetView();
-	}
+	{}
 
 	void EditorCamera::UpdateHovered()
 	{
+		if (Input::GetKey(KEY_LEFT_CONTROL))
+		{
+			if (Input::GetKey(KEY_W))
+				m_Position.y += m_MoveSpeed * Time::DeltaTime();
+			else if (Input::GetKey(KEY_S))
+				m_Position.y -= m_MoveSpeed * Time::DeltaTime();
+
+			if (Input::GetKey(KEY_A))
+				m_Position.x -= m_MoveSpeed * Time::DeltaTime();
+			else if (Input::GetKey(KEY_D))
+				m_Position.x += m_MoveSpeed * Time::DeltaTime();
+		}
 	}
 
 	void EditorCamera::Update()

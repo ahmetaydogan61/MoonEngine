@@ -16,7 +16,7 @@ namespace MoonEngine
 		static bool m_Vsync;
 		static std::function<void(Event&)> m_EventCallback;
 	public:
-		static int Create(std::string name, uint32_t width, uint32_t height);
+		static int Create(std::string name, uint32_t width, uint32_t height, bool fullscreen);
 		static void Update();
 		static void Destroy();
 		

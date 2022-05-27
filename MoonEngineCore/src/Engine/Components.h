@@ -1,6 +1,7 @@
 #pragma once
 #include "ScriptableEntity.h"
 #include "SceneCamera.h"
+#include "Renderer/Texture.h"
 
 namespace MoonEngine
 {
@@ -32,6 +33,7 @@ namespace MoonEngine
 	struct SpriteComponent
 	{
 		glm::vec4 color{ 1.0f };
+		Texture* texture = nullptr;
 
 		SpriteComponent() = default;
 		SpriteComponent(glm::vec4& color)

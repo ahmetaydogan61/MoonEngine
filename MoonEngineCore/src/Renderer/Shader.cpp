@@ -122,6 +122,11 @@ namespace MoonEngine
     {
         glUniformMatrix4fv(GetUnfiformLocation(name), 1, GL_FALSE, &matrix[0][0]);
     }
+
+    void Shader::SetUniform1iv(const std::string& name, int size, const int i[])
+    {
+        glUniform1iv(GetUnfiformLocation(name), size, i);
+    }
     
     int Shader::GetUnfiformLocation(const std::string& name)
     {

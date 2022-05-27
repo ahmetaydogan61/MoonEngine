@@ -1,8 +1,10 @@
 #pragma once
-#include "Shader.h"
 
 namespace MoonEngine
 {
+	class Shader;
+	class Texture;
+
 	class Renderer
 	{
 	private:
@@ -17,6 +19,13 @@ namespace MoonEngine
 		static unsigned int m_InstanceVertexBuffer;
 		static float m_Vertices[];
 		static unsigned int m_Indices[];
+
+		static int m_TexureIds[32];
+		static int CreateTextureCache(Texture* texture);
+		static std::unordered_map<Texture*, int> m_TextureCache;
+		static Texture* m_WhiteTexture;
+		static int m_TextureID;
+
 		static glm::vec4 m_ClearColor;
 	public:
 		static void SetClearColor(glm::vec4& clearColor);
@@ -24,6 +33,7 @@ namespace MoonEngine
 		static void Clear();
 		static void Render(const glm::mat4& viewProjection);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Texture* texture);
 		static void Destroy();
 		
 	};

@@ -25,6 +25,7 @@ namespace MoonEngine
 		void SetUniform4f(const std::string& name, float f, float f1, float f2, float f3);
 		void SetUniformVec3(const std::string& name, const glm::vec3& matrix);
 		void SetUniformMat4(const std::string& name, const glm::mat4& matrix);
+		void SetUniform1iv(const std::string& name,int size, const int i[]);
 	private:
 		ShaderProgramSource ParseShader(const std::string& filepath);
 		unsigned int CompileShader(unsigned int type, const std::string& source);

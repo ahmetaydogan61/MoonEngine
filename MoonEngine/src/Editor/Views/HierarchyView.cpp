@@ -44,7 +44,32 @@ namespace MoonEngine
 
 	void HierarchyView::BeginHierarchyView(bool& state)
 	{
-		ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state);
+		bool createEntity = false;
+		bool createCamera = false;
+
+		float height = ImGui::GetFrameHeight();
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+
+		ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state, window_flags);
+
+		if (ImGui::BeginMenuBar())
+		{
+			auto& contentRegion = ImGui::GetContentRegionAvail();
+			float buttonSize = 25.0f;
+			ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
+			if (ImGui::Button(":", { 25.0f, 25.0f }))
+				ImGui::OpenPopup("CreateStuff");
+			if (ImGui::BeginPopup("CreateStuff"))
+			{
+				if (ImGui::MenuItem("Create Camera"))
+					createCamera = true;
+
+				if (ImGui::MenuItem("Create Entity"))
+					createEntity = true;
+				ImGui::EndPopup();
+			}
+			ImGui::EndMenuBar();
+		}
 
 		int id = 0;
 		m_Scene->m_Registry.each([&](auto entityID)
@@ -56,21 +81,27 @@ namespace MoonEngine
 		if (ImGui::BeginPopupContextWindow(0, 1, false))
 		{
 			if (ImGui::MenuItem("Create Camera"))
-			{
-				Entity& entity = m_Scene->CreateEntity();
-				entity.GetComponent<IdentityComponent>().Name = "Camera";
-				entity.AddComponent<CameraComponent>();
-				entity.RemoveComponent<SpriteComponent>();
-			}
+				createCamera = true;
 
 			if (ImGui::MenuItem("Create Entity"))
-				m_Scene->CreateEntity();
+				createEntity = true;
 
 			ImGui::EndPopup();
 		}
 
 		if (!ImGui::IsAnyItemHovered() && ImGui::IsAnyMouseDown() && ImGui::IsWindowHovered())
 			m_SelectedEntity = {};
+
+		if (createEntity)
+			m_Scene->CreateEntity();
+
+		if (createCamera)
+		{
+			Entity& entity = m_Scene->CreateEntity();
+			entity.GetComponent<IdentityComponent>().Name = "Camera";
+			entity.AddComponent<CameraComponent>();
+			entity.RemoveComponent<SpriteComponent>();
+		}
 
 		ImGui::End();
 	}
@@ -107,7 +138,7 @@ namespace MoonEngine
 	void HierarchyView::BeginInspectorView(bool& state)
 	{
 		ImGui::Begin(ICON_FK_SEARCH "Inspector", &state);
-		
+
 		if (m_SelectedEntity)
 		{
 			ImGuiUtils::TextCentered("Name", true);
@@ -199,8 +230,8 @@ namespace MoonEngine
 			ImGui::AlignTextToFramePadding();
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
 			bool treeopen = ImGui::TreeNodeEx(componentName.c_str(), flags);
-			ImGui::SameLine(contentRegion.x - (buttonSize / 2) - ImGui::GetStyle().FramePadding.x);
-			if (ImGui::Button(":", {buttonSize, ImGui::GetFrameHeight()}))
+			ImGui::SameLine(contentRegion.x - (buttonSize / 2.0f) - ImGui::GetStyle().FramePadding.x);
+			if (ImGui::Button(":", { buttonSize, ImGui::GetFrameHeight() }))
 				ImGui::OpenPopup("SettingList");
 
 			if (ImGui::BeginPopup("SettingList"))

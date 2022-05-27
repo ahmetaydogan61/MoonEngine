@@ -14,7 +14,7 @@ namespace MoonEngine
 	bool Window::m_Vsync = true;
 	std::function<void(Event&)> Window::m_EventCallback;
 
-	int Window::Create(std::string name, uint32_t width, uint32_t height)
+	int Window::Create(std::string name, uint32_t width, uint32_t height, bool fullscreen)
 	{
 		m_Name = name;
 		m_Width = width;
@@ -28,14 +28,22 @@ namespace MoonEngine
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
 
-		m_GLWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+		m_GLWindow = glfwCreateWindow(width, height, name.c_str(), fullscreen ? monitor : NULL, NULL);
 		if (!m_GLWindow)
 		{
 			glfwTerminate();
 			return -1;
 		}
-
 		glfwMakeContextCurrent(m_GLWindow);
+		
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (!status)
 		{
@@ -45,7 +53,7 @@ namespace MoonEngine
 
 		//Center the monitor
 		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowPos(m_GLWindow, (vidmode-> width - m_Width) / 2, (vidmode-> height - m_Height) / 2);
+		glfwSetWindowPos(m_GLWindow, (vidmode->width - m_Width) / 2, (vidmode->height - m_Height) / 2);
 
 		//Callbacks
 		glfwSetWindowSizeCallback(m_GLWindow, [](GLFWwindow* window, int width, int height)
@@ -57,12 +65,11 @@ namespace MoonEngine
 		glfwSetFramebufferSizeCallback(m_GLWindow, [](GLFWwindow* window, int width, int height)
 		{
 			glViewport(0, 0, width, height);
-
 		});
 
 		glfwSetScrollCallback(m_GLWindow, [](GLFWwindow* window, double xoffset, double yoffset)
 		{
-			MouseScrollEvent e{ (float) xoffset, (float) yoffset };
+			MouseScrollEvent e{ (float)xoffset, (float)yoffset };
 			m_EventCallback(e);
 		});
 

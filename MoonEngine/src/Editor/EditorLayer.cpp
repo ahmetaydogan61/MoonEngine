@@ -37,11 +37,8 @@ namespace MoonEngine
 		m_EditorCamera->OnEvent(event);
 	}
 
-
 	void EditorLayer::PlayScene()
-	{
-		m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
-	}
+	{}
 
 	void EditorLayer::StopScene()
 	{}
@@ -52,7 +49,6 @@ namespace MoonEngine
 		{
 			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera->Resize(m_ViewportSize.x, m_ViewportSize.y);
-			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
 		}
 
 		if (!m_IsPlaying)
@@ -67,7 +63,17 @@ namespace MoonEngine
 				m_EditorCamera->UpdateHovered();
 
 			m_EditorCamera->Update();
+
+			if (!Input::GetKey(KEY_LEFT_CONTROL))
+				if (Input::GetKey(KEY_Q))
+					m_GizmoSelection = GIZMOSELECTION::NONE;
+				else if (Input::GetKey(KEY_W))
+					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+				else if (Input::GetKey(KEY_E))
+					m_GizmoSelection = GIZMOSELECTION::SCALE;
 		}
+		else
+			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
 
 		m_ViewportFramebuffer->Bind();
 
@@ -94,27 +100,48 @@ namespace MoonEngine
 
 		ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
 
+
 		Entity entity = m_HierarchyView.GetSelectedEntity();
-		if (entity && !m_IsPlaying && m_GizmoSelection != GIZMOSELECTION::NONE)
+		if (entity && !m_IsPlaying)
 		{
-			const glm::mat4& view = m_EditorCamera->GetView();
-			const glm::mat4& projection = m_EditorCamera->GetProjection();
+			//Gizmo Selector Window
+			const auto& currentWinPos = ImGui::GetWindowPos();
+			ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+			ImGui::Begin("GizmoWindow", &m_IsViewportActive, childFlags);
+			float buttonSize = 25.0f;
+			ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x, currentWinPos.y + (buttonSize * 3.0f) / 2.0f });
 
-			TransformComponent& component = entity.GetComponent<TransformComponent>();
-			glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f)));
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.position) * rotation * glm::scale(glm::mat4(1.0f), component.size);
+			if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
+				m_GizmoSelection = GIZMOSELECTION::NONE;
 
-			ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
-			ImGuizmo::SetOrthographic(true);
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform));
+			if (GizmoSelectButton(m_TranslateTexture, buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
+				m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
-			if (ImGuizmo::IsUsing())
+			if (GizmoSelectButton(m_ResizeTexture, buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
+				m_GizmoSelection = GIZMOSELECTION::SCALE;
+			ImGui::End();
+
+			if (m_GizmoSelection != GIZMOSELECTION::NONE)
 			{
-				glm::vec3 finalPos, finalRot, finalSiz;
-				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(finalPos), glm::value_ptr(finalRot), glm::value_ptr(finalSiz));
-				component.position = finalPos;
-				component.size = finalSiz;
+				const glm::mat4& view = m_EditorCamera->GetView();
+				const glm::mat4& projection = m_EditorCamera->GetProjection();
+
+				TransformComponent& component = entity.GetComponent<TransformComponent>();
+				glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f)));
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.position) * rotation * glm::scale(glm::mat4(1.0f), component.size);
+
+				ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
+				ImGuizmo::SetOrthographic(true);
+				ImGuizmo::SetDrawlist();
+				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform));
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 finalPos, finalRot, finalSiz;
+					ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(finalPos), glm::value_ptr(finalRot), glm::value_ptr(finalSiz));
+					component.position = finalPos;
+					component.size = finalSiz;
+				}
 			}
 		}
 
@@ -202,7 +229,7 @@ namespace MoonEngine
 
 				if (GizmoSelectButton(m_SelectTexture, buttonSize, height / 2.0f, GIZMOSELECTION::NONE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::NONE;
-				
+
 				if (GizmoSelectButton(m_TranslateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
