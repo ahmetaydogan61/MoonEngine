@@ -33,6 +33,16 @@ namespace ImGuiUtils
 		
 	}
 
+	static void Image(ImTextureID textID, const ImVec2& size)
+	{
+		ImGui::Image(textID, size, { 0, 1 }, { 1, 0 });
+	}
+
+	static bool ImageButton(ImTextureID textID, const ImVec2& size)
+	{
+		return ImGui::ImageButton(textID, size, { 0, 1 }, { 1, 0 });
+	}
+
 	static void StyleCustomDark(int cartoony)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();

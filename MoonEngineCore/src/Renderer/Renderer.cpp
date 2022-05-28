@@ -111,6 +111,9 @@ namespace MoonEngine
 		for (int i = 0; i < 32; i++)
 			m_TexureIds[i] = i;
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		DebugSys("Renderer Initialized");
 	}
 

@@ -6,11 +6,16 @@
 #include <imgui/imgui.cpp>
 #include "Utils/IconsFontAwesome.h"
 
+#include <filesystem>
+
 namespace MoonEngine
 {
+	Texture* m_NoSpriteTexture;
+
 	void HierarchyView::SetScene(Scene* scene)
 	{
 		m_Scene = scene;
+		m_NoSpriteTexture = new Texture("res/EditorIcons/Frame.png");
 	}
 
 	void HierarchyView::MouseSelect()
@@ -191,9 +196,66 @@ namespace MoonEngine
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
 
-		ShowComponent<SpriteComponent>("Sprite", [](auto& component)
+		ShowComponent<SpriteComponent>("Sprite", [](SpriteComponent& component)
 		{
+			ImGuiUtils::AddPadding(0, 5);
+
 			ImGui::ColorEdit4("Color", &component.color[0]);
+
+			ImGuiUtils::AddPadding(0, 5);
+
+			float cellMultp = 3.0f;
+			float cellSize = 25.0f;
+			float cellPadding = 2.0f;
+
+			ImGui::Text("Image:"); ImGui::SameLine();
+			auto& imagePos = ImGui::GetCursorPos();
+			ImGui::Image((ImTextureID)m_NoSpriteTexture->GetID(), { cellSize * cellMultp, cellSize * cellMultp });
+			Texture* text = component.texture;
+			if (text)
+			{
+				ImGui::SetCursorPos(imagePos);
+				ImGuiUtils::AddPadding(cellSize / cellPadding, cellSize / cellPadding);
+				ImGuiUtils::Image((ImTextureID)text->GetID(), { cellSize * cellPadding, cellSize * cellPadding });
+			}
+			
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path texturePath = std::filesystem::path("res") / path;
+					Texture* texture = new Texture(texturePath.string());
+					if (texture->GetID())
+					{
+						delete component.texture;
+						component.texture = texture;
+					}
+					else
+					{
+						DebugErr(texturePath.string());
+						delete texture;
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (text)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, {1.0f, 0.0f, 0.0f, 1.0f});
+				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+				ImGui::SameLine();
+				ImGui::SetCursorPos(imagePos);
+				ImGuiUtils::AddPadding(2 * cellSize, 0);
+				if (ImGui::Button("X##DeleteButton", { cellSize, cellSize}))
+				{
+					text = nullptr;
+					delete component.texture;
+					component.texture = nullptr;
+				}
+				ImGui::PopStyleColor(2);
+			}
+			ImGuiUtils::AddPadding(0, 5);
 		});
 
 		ShowComponent<CameraComponent>("Camera", [](auto& component)
@@ -213,7 +275,6 @@ namespace MoonEngine
 			ImGui::DragFloat("##Distance", &component.distance, 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 		});
-
 		ImGui::PopStyleColor(3);
 	}
 

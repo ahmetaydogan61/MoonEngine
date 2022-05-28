@@ -17,6 +17,7 @@ namespace MoonEngine
 		template<typename T, typename Function>
 		void ShowComponent(std::string componentName, Function func);
 		void UtilVectorColumn(const std::string& vecName, glm::vec3& vector, float resetValue = 0.0f, float columnWidth = 100.0f);
+
 	public:
 		void SetScene(Scene* scene);
 		void BeginHierarchyView(bool& state);

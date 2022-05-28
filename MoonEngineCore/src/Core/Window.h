@@ -28,5 +28,6 @@ namespace MoonEngine
 		static uint32_t GetWidth() { return m_Width; }
 		static uint32_t GetHeight() { return m_Height; }
 		static float GetAspectRatio() { return (float) m_Width / (float) m_Height; }
+		static void SetIcon(const std::string& path);
 	};
 }

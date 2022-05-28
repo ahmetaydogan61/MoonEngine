@@ -2,6 +2,7 @@
 #include "Core.h"
 #include "Views/HierarchyView.h"
 #include "Views/EditorSettingsView.h"
+#include "Views/ContentView.h"
 #include "Renderer/Frambuffer.h"
 #include "Renderer/Texture.h"
 
@@ -28,11 +29,13 @@ namespace MoonEngine
 
 		HierarchyView m_HierarchyView;
 		EditorSettingsView m_EditorSettingsView;
+		ContentView m_ContentView;
 		bool m_IsHierarchyActive = true;
 		bool m_IsInspectorActive = true;
 		bool m_IsViewportActive = true;
+		bool m_IsContentActive = true;
 		bool m_IsEditorSettingsActive = false;
-		bool m_IsDebugActive = true;
+		bool m_IsDebugActive = false;
 		
 		bool m_IsPlaying = false;
 		void PlayScene();
@@ -52,6 +55,8 @@ namespace MoonEngine
 
 		bool GizmoSelectButton(Texture* texture, float width, float height, bool selected);
 		GIZMOSELECTION m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+		bool m_IsSnapping = false;
+		float m_SnapAmount = 0.25f;
 	public:
 		void Create();
 		void Update();

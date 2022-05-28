@@ -2,6 +2,8 @@
 #include "Window.h"
 #include "Event/Events.h"
 
+#include "stb_image.h"
+
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -73,7 +75,6 @@ namespace MoonEngine
 			m_EventCallback(e);
 		});
 
-		glEnable(GL_BLEND);
 		glfwSwapInterval(m_Vsync);
 		return 1;
 	}
@@ -84,12 +85,6 @@ namespace MoonEngine
 		glfwPollEvents();
 	}
 
-	void Window::SetVsync(bool state)
-	{
-		m_Vsync = state;
-		glfwSwapInterval(m_Vsync);
-	}
-
 	void Window::SetEventCallback(const std::function<void(Event&)>& e)
 	{
 		m_EventCallback = e;
@@ -98,6 +93,20 @@ namespace MoonEngine
 	bool Window::IsRunning()
 	{
 		return !glfwWindowShouldClose(m_GLWindow);
+	}
+
+	void Window::SetVsync(bool state)
+	{
+		m_Vsync = state;
+		glfwSwapInterval(m_Vsync);
+	}
+
+	void Window::SetIcon(const std::string& path)
+	{
+		GLFWimage images[1];
+		images[0].pixels = stbi_load(path.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
+		glfwSetWindowIcon(m_GLWindow, 1, images);
+		stbi_image_free(images[0].pixels);
 	}
 
 	void Window::Destroy()

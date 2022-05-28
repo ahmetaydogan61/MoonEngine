@@ -30,6 +30,8 @@ namespace MoonEngine
 		m_SelectTexture = new Texture("res/EditorIcons/Select.png");
 		m_TranslateTexture = new Texture("res/EditorIcons/Translate.png");
 		m_ResizeTexture = new Texture("res/EditorIcons/Resize.png");
+
+		Window::SetIcon("res/EditorIcons/Logo.png");
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -71,6 +73,8 @@ namespace MoonEngine
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 				else if (Input::GetKey(KEY_E))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
+
+			m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
 		}
 		else
 			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
@@ -109,7 +113,7 @@ namespace MoonEngine
 			ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 			ImGui::Begin("GizmoWindow", &m_IsViewportActive, childFlags);
 			float buttonSize = 25.0f;
-			ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x, currentWinPos.y + (buttonSize * 3.0f) / 2.0f });
+			ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x * 2.0f, currentWinPos.y + (buttonSize * 3.0f) / 2.0f });
 
 			if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
 				m_GizmoSelection = GIZMOSELECTION::NONE;
@@ -133,7 +137,7 @@ namespace MoonEngine
 				ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
 				ImGuizmo::SetOrthographic(true);
 				ImGuizmo::SetDrawlist();
-				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform));
+				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_IsSnapping ? &m_SnapAmount : NULL);
 
 				if (ImGuizmo::IsUsing())
 				{
@@ -165,23 +169,26 @@ namespace MoonEngine
 		style.WindowBorderSize = borderSize;
 		ImGui::PopStyleColor();
 
-		if (m_IsHierarchyActive)
-			m_HierarchyView.BeginHierarchyView(m_IsHierarchyActive);
+		if (demoWindow)
+			ImGui::ShowDemoWindow();
+		
+		if (m_IsDebugActive)
+			DebugView(m_IsDebugActive);
+		
+		if (m_IsEditorSettingsActive)
+			m_EditorSettingsView.BeginEditorSettings(m_IsEditorSettingsActive);
+
+		if (m_IsContentActive)
+			m_ContentView.BeginContentView(m_IsContentActive);
 
 		if (m_IsInspectorActive)
 			m_HierarchyView.BeginInspectorView(m_IsInspectorActive);
 
+		if (m_IsHierarchyActive)
+			m_HierarchyView.BeginHierarchyView(m_IsHierarchyActive);
+
 		if (m_IsViewportActive)
 			ViewportView(m_IsViewportActive);
-
-		if (m_IsEditorSettingsActive)
-			m_EditorSettingsView.BeginEditorSettings(m_IsEditorSettingsActive);
-
-		if (m_IsDebugActive)
-			DebugView(m_IsDebugActive);
-
-		if (demoWindow)
-			ImGui::ShowDemoWindow();
 
 		ImGui::End(); //End Dockspace
 	}
@@ -204,12 +211,15 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Editor Settings", " ", m_IsEditorSettingsActive, true))
 					m_IsEditorSettingsActive = !m_IsEditorSettingsActive;
 
+				if (ImGui::MenuItem("Content Browser", " ", m_IsContentActive, true))
+					m_IsContentActive = !m_IsContentActive;
+
 				if (ImGui::MenuItem("Debug", " ", m_IsDebugActive, true))
 					m_IsDebugActive = !m_IsDebugActive;
-
+#ifdef ENGINE_DEBUG
 				if (ImGui::MenuItem("Demo Window", " ", demoWindow, true))
 					demoWindow = !demoWindow;
-
+#endif // ENGINE_DEBUG
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -257,7 +267,7 @@ namespace MoonEngine
 		if (selected)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
 
-		bool returnValue = ImGui::ImageButton((ImTextureID)texture->GetID(), { width, height });
+		bool returnValue = ImGuiUtils::ImageButton((ImTextureID)texture->GetID(), { width, height });
 
 		if (selected)
 			ImGui::PopStyleColor();

@@ -51,9 +51,15 @@ namespace MoonEngine
 	Texture::Texture(const std::string& filepath)
 		:m_TexBuffer(0), m_FilePath(filepath), m_LocalBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0)
 	{
-		//stbi_set_flip_vertically_on_load(1);
+		stbi_set_flip_vertically_on_load(1);
 		m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_BPP, 4);
 		
+		if (!m_LocalBuffer)
+		{
+			DebugWar("Texture Creation Failed");
+			return;
+		}
+
 		glGenTextures(1, &m_TexBuffer);
 		glBindTexture(GL_TEXTURE_2D, m_TexBuffer);
 	
@@ -70,11 +76,6 @@ namespace MoonEngine
 			stbi_image_free(m_LocalBuffer);
 	}
 	
-	Texture::~Texture()
-	{
-		glDeleteTextures(1, &m_TexBuffer);
-	}
-	
 	void Texture::Bind(unsigned int slot) const
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
@@ -84,5 +85,10 @@ namespace MoonEngine
 	void Texture::Unbind() const
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	Texture::~Texture()
+	{
+		glDeleteTextures(1, &m_TexBuffer);
 	}
 }
