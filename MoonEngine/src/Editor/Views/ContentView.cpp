@@ -6,7 +6,7 @@
 
 namespace MoonEngine
 {
-	extern const std::filesystem::path resourcesPath = "res";
+	extern const std::filesystem::path resourcesPath = "res/Assets";
 
 	ContentView::ContentView()
 		: m_CurrentDirectory(resourcesPath)

@@ -10,6 +10,7 @@ namespace MoonEngine
 		Scene* m_Scene = nullptr;
 		friend class Scene;
 		friend class HierarchyView;
+		friend class Serializer;
 
 		Entity(entt::entity id)
 		{

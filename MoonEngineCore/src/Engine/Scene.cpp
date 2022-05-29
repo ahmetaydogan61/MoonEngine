@@ -41,8 +41,6 @@ namespace MoonEngine
 
 	void Scene::UpdateRuntime()
 	{
-		DebugNor("Hello World");
-
 		m_Registry.view<Script>().each([=](auto entity, auto& nsc)
 		{
 			if (!nsc.Instance)

@@ -9,14 +9,16 @@ project "MoonEngineCore"
 	pchheader "mpch.h"
 	pchsource "src/mpch.cpp"
 
-	defines { "_CRT_SECURE_NO_WARNINGS", "GLFW_INCLUDE_NONE" }
+	defines { "_CRT_SECURE_NO_WARNINGS", "GLFW_INCLUDE_NONE", "YAML_CPP_STATIC_DEFINE" }
 
 	files
 	{
 		"src/**.h",
 		"src/**.cpp",
+		
 		"Includes/GLM/glm/**.hpp",
 		"Includes/GLM/glm/**.inl",
+
 		"Includes/ImGuizmo/ImGuizmo.h",
 		"Includes/ImGuizmo/ImGuizmo.cpp"
 	}
@@ -31,6 +33,7 @@ project "MoonEngineCore"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.yaml_cpp}",
 		"%{IncludeDirs.ImGuizmo}"
 	}
 
@@ -39,6 +42,7 @@ project "MoonEngineCore"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"yaml-cpp",
 		"opengl32.lib"
 	}
 

@@ -6,6 +6,8 @@
 #include "ImGuizmo.h"
 #include "Engine/Components.h"
 
+#include "Utils/Serializer.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
@@ -44,6 +46,46 @@ namespace MoonEngine
 
 	void EditorLayer::StopScene()
 	{}
+
+	void EditorLayer::DrawGUI()
+	{
+		Dockspace(); //Start Dockspace
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+		ImGuiStyle& style = ImGui::GetStyle();
+		float borderSize = style.WindowBorderSize;
+		style.WindowBorderSize = 0;
+		Menubar();
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
+		Sidemenubar();
+		style.WindowBorderSize = borderSize;
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+
+		if (demoWindow)
+			ImGui::ShowDemoWindow();
+
+		if (m_IsDebugActive)
+			DebugView(m_IsDebugActive);
+
+		if (m_IsEditorSettingsActive)
+			m_EditorSettingsView.BeginEditorSettings(m_IsEditorSettingsActive);
+
+		if (m_IsContentActive)
+			m_ContentView.BeginContentView(m_IsContentActive);
+
+		if (m_IsInspectorActive)
+			m_HierarchyView.BeginInspectorView(m_IsInspectorActive);
+
+		if (m_IsHierarchyActive)
+			m_HierarchyView.BeginHierarchyView(m_IsHierarchyActive);
+
+		if (m_IsViewportActive)
+			ViewportView(m_IsViewportActive);
+
+		ImGui::End(); //End Dockspace
+
+		Statusbar();
+	}
 
 	void EditorLayer::Update()
 	{
@@ -104,7 +146,6 @@ namespace MoonEngine
 
 		ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
 
-
 		Entity entity = m_HierarchyView.GetSelectedEntity();
 		if (entity && !m_IsPlaying)
 		{
@@ -157,46 +198,22 @@ namespace MoonEngine
 		ImGuiLayer::CameraProjection = m_EditorCamera->GetViewProjection();
 	}
 
-	void EditorLayer::DrawGUI()
-	{
-		Dockspace(); //Start Dockspace
-		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-		ImGuiStyle& style = ImGui::GetStyle();
-		float borderSize = style.WindowBorderSize;
-		style.WindowBorderSize = 0;
-		Menubar();
-		Sidemenubar();
-		style.WindowBorderSize = borderSize;
-		ImGui::PopStyleColor();
-
-		if (demoWindow)
-			ImGui::ShowDemoWindow();
-		
-		if (m_IsDebugActive)
-			DebugView(m_IsDebugActive);
-		
-		if (m_IsEditorSettingsActive)
-			m_EditorSettingsView.BeginEditorSettings(m_IsEditorSettingsActive);
-
-		if (m_IsContentActive)
-			m_ContentView.BeginContentView(m_IsContentActive);
-
-		if (m_IsInspectorActive)
-			m_HierarchyView.BeginInspectorView(m_IsInspectorActive);
-
-		if (m_IsHierarchyActive)
-			m_HierarchyView.BeginHierarchyView(m_IsHierarchyActive);
-
-		if (m_IsViewportActive)
-			ViewportView(m_IsViewportActive);
-
-		ImGui::End(); //End Dockspace
-	}
-
 	void EditorLayer::Menubar()
 	{
 		ImGui::BeginMainMenuBar();
 		{
+			if (ImGui::BeginMenu("File"))
+			{
+				Serializer serializer{ m_Scene };
+				if (ImGui::MenuItem("Save", "Ctrl + S"))
+					serializer.Serialize("res/Assets/Scenes/Example.moon");
+
+				if(ImGui::MenuItem("Load", "Ctrl + L"))
+					serializer.Deserialize("res/Assets/Scenes/Example.moon");
+
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("Views", true))
 			{
 				if (ImGui::MenuItem("Viewport", " ", m_IsViewportActive, true))
@@ -256,6 +273,22 @@ namespace MoonEngine
 					else
 						StopScene();
 				}
+				ImGui::EndMenuBar();
+			}
+		}
+		ImGui::End();
+	}
+
+	void EditorLayer::Statusbar()
+	{
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+		float height = ImGui::GetFrameHeight();
+
+		if (ImGui::BeginViewportSideBar("##Statusbar", NULL, ImGuiDir_Down, height, window_flags))
+		{
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::Text(m_IsPlaying ? "Play Mode" : "Edit Mode");
 				ImGui::EndMenuBar();
 			}
 		}

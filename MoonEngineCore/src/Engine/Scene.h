@@ -14,6 +14,7 @@ namespace MoonEngine
 		static Scene* m_ActiveScene;
 		friend class Entity;
 		friend class HierarchyView;
+		friend class Serializer;
 	public:
 		entt::registry m_Registry;
 		Scene();

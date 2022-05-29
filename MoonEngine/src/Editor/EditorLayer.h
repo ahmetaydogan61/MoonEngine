@@ -44,6 +44,7 @@ namespace MoonEngine
 		void Dockspace();
 		void Menubar();
 		void Sidemenubar();
+		void Statusbar();
 		void ViewportView(bool& state);
 		void DebugView(bool& state);
 

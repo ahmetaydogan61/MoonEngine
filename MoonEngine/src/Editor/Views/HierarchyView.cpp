@@ -224,7 +224,7 @@ namespace MoonEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path texturePath = std::filesystem::path("res") / path;
+					std::filesystem::path texturePath = std::filesystem::path("res/Assets") / path;
 					Ref<Texture> texture = CreateRef<Texture>(texturePath.string());
 					if (texture->GetID())
 						component.texture = texture;
