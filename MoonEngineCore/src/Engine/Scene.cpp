@@ -28,7 +28,6 @@ namespace MoonEngine
 	{
 		Renderer::Clear();
 
-
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 		for (auto entity : group)
 		{
@@ -42,6 +41,8 @@ namespace MoonEngine
 
 	void Scene::UpdateRuntime()
 	{
+		DebugNor("Hello World");
+
 		m_Registry.view<Script>().each([=](auto entity, auto& nsc)
 		{
 			if (!nsc.Instance)
@@ -59,11 +60,11 @@ namespace MoonEngine
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color);
+			Renderer::DrawQuad(transform.position, transform.size, sprite.color, sprite.texture);
 		}
 
 		Camera* sceneCamera = nullptr;
-		glm::vec2 cameraPosition;
+		glm::vec3 cameraPosition;
 
 		auto cameras = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto entity : cameras)

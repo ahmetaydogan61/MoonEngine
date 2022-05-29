@@ -33,7 +33,7 @@ namespace MoonEngine
 	struct SpriteComponent
 	{
 		glm::vec4 color{ 1.0f };
-		Texture* texture = nullptr;
+		Ref<Texture> texture;
 
 		SpriteComponent() = default;
 		SpriteComponent(glm::vec4& color)

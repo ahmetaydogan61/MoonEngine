@@ -15,7 +15,7 @@ namespace MoonEngine
 	private:
 		std::filesystem::path m_CurrentDirectory;
 
-		Texture* m_FolderIcon;
-		Texture* m_FileIcon;
+		Ref<Texture> m_FolderIcon;
+		Ref<Texture> m_FileIcon;
 	};
 }

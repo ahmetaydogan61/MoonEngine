@@ -1,5 +1,5 @@
 #pragma once
-#define DebugNor(message) std::cout << message << std::endl
-#define DebugSys(message) std::cout << "[System]: " << message << std::endl
-#define DebugWar(message) std::cout << "[Warning]: " << message << std::endl
-#define DebugErr(message) std::cout << "[Error]: " << message << std::endl
+#define DebugNor(message) std::cout << message << '\n'
+#define DebugSys(message) std::cout << "[System]: " << message << '\n'
+#define DebugWar(message) std::cout << "[Warning]: " << message << '\n'
+#define DebugErr(message) std::cout << "[Error]: " << message << '\n'

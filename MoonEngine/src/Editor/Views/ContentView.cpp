@@ -11,8 +11,8 @@ namespace MoonEngine
 	ContentView::ContentView()
 		: m_CurrentDirectory(resourcesPath)
 	{
-		m_FolderIcon = new Texture("res/EditorIcons/Folder.png");
-		m_FileIcon = new Texture("res/EditorIcons/File.png");
+		m_FolderIcon = CreateRef<Texture>("res/EditorIcons/Folder.png");
+		m_FileIcon = CreateRef<Texture>("res/EditorIcons/File.png");
 	}
 
 	void ContentView::BeginContentView(bool& state)
@@ -54,10 +54,9 @@ namespace MoonEngine
 			std::string filenameString = relativePath.filename().string();
 
 			ImGui::PushID(filenameString.c_str());
-			Texture* icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+			Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
-
 			if (ImGui::BeginDragDropSource())
 			{
 				const wchar_t* itemPath = relativePath.c_str();
@@ -70,7 +69,6 @@ namespace MoonEngine
 			{
 				if (directoryEntry.is_directory())
 					m_CurrentDirectory /= path.filename();
-
 			}
 			ImGui::TextWrapped(filenameString.c_str());
 

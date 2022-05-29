@@ -16,7 +16,7 @@ namespace MoonEngine
 	void EditorLayer::Create()
 	{
 		LayerName = "Editor Layer";
-		m_Scene = new Scene();
+		m_Scene = CreateRef<Scene>();
 
 		m_EditorCamera = new EditorCamera();
 		m_ViewportFramebuffer = new Framebuffer();

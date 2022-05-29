@@ -1,4 +1,5 @@
 #pragma once
+#include "Core.h"
 
 namespace MoonEngine
 {
@@ -12,7 +13,7 @@ namespace MoonEngine
 		static float m_RenderBuffer[];
 		static int m_Index;
 
-		static Shader* m_DefaultShader;
+		static Ref<Shader> m_DefaultShader;
 		static unsigned int m_VertexArray;
 		static unsigned int m_VertexBuffer;
 		static unsigned int m_ElementBufffer;
@@ -21,9 +22,9 @@ namespace MoonEngine
 		static unsigned int m_Indices[];
 
 		static int m_TexureIds[32];
-		static int CreateTextureCache(Texture* texture);
-		static std::unordered_map<Texture*, int> m_TextureCache;
-		static Texture* m_WhiteTexture;
+		static int CreateTextureCache(Ref<Texture> texture);
+		static std::unordered_map<Ref<Texture>, int> m_TextureCache;
+		static Ref<Texture> m_WhiteTexture;
 		static int m_TextureID;
 
 		static glm::vec4 m_ClearColor;
@@ -33,8 +34,7 @@ namespace MoonEngine
 		static void Clear();
 		static void Render(const glm::mat4& viewProjection);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Texture* texture);
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture> texture);
 		static void Destroy();
-		
 	};
 }

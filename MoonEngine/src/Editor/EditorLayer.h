@@ -19,7 +19,7 @@ namespace MoonEngine
 	class EditorLayer : public Layer
 	{
 	private:
-		Scene* m_Scene;
+		Ref<Scene> m_Scene;
 		EditorCamera* m_EditorCamera;
 		Texture* m_PlayTexture;
 		Texture* m_StopTexture;

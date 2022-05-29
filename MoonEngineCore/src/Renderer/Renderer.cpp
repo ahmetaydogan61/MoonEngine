@@ -11,19 +11,19 @@ namespace MoonEngine
 	int Renderer::m_Index = 0;
 	int Renderer::m_TexureIds[];
 
-	Shader* Renderer::m_DefaultShader;
+	Ref<Shader> Renderer::m_DefaultShader;
 	unsigned int Renderer::m_VertexArray;
 	unsigned int Renderer::m_VertexBuffer;
 	unsigned int Renderer::m_ElementBufffer;
 	unsigned int Renderer::m_InstanceVertexBuffer;
 	
-	std::unordered_map<Texture*, int> Renderer::m_TextureCache;
+	std::unordered_map<Ref<Texture>, int> Renderer::m_TextureCache;
 	int Renderer::m_TextureID = 0;
-	Texture* Renderer::m_WhiteTexture;
+	Ref<Texture> Renderer::m_WhiteTexture;
 	
 	glm::vec4 Renderer::m_ClearColor;
 
-	int Renderer::CreateTextureCache(Texture* texture)
+	int Renderer::CreateTextureCache(Ref<Texture> texture)
 	{
 		if (m_TextureID > 32)
 			return 0;
@@ -105,8 +105,8 @@ namespace MoonEngine
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		m_DefaultShader = new Shader("res/Shaders/Default.shader");
-		m_WhiteTexture = new Texture(1, 1);
+		m_DefaultShader = CreateRef<Shader>("res/Shaders/Default.shader");
+		m_WhiteTexture = CreateRef<Texture>(1, 1);
 
 		for (int i = 0; i < 32; i++)
 			m_TexureIds[i] = i;
@@ -143,7 +143,7 @@ namespace MoonEngine
 		m_RenderBuffer[m_Index++] = 0.0f; //TexID zero if not given
 	}
 	
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Texture* texture)
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture> texture)
 	{
 		if ((m_Index / RENDERBUFFERSIZE) >= MAX_INSTANCES) return;
 		m_RenderBuffer[m_Index++] = position.x;
@@ -182,7 +182,6 @@ namespace MoonEngine
 
 	void Renderer::Destroy()
 	{
-		delete m_DefaultShader;
 		glDeleteBuffers(1, &m_VertexArray);
 		glDeleteBuffers(1, &m_VertexBuffer);
 		glDeleteBuffers(1, &m_ElementBufffer);
