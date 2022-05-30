@@ -20,7 +20,9 @@ project "MoonEngineCore"
 		"Includes/GLM/glm/**.inl",
 
 		"Includes/ImGuizmo/ImGuizmo.h",
-		"Includes/ImGuizmo/ImGuizmo.cpp"
+		"Includes/ImGuizmo/ImGuizmo.cpp",
+
+		"Includes/uuid_v4/**.h"
 	}
 
 	includedirs
@@ -34,7 +36,8 @@ project "MoonEngineCore"
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.yaml_cpp}",
-		"%{IncludeDirs.ImGuizmo}"
+		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.uuid_v4}"
 	}
 
 	links

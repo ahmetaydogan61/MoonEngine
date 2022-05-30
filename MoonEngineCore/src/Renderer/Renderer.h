@@ -34,7 +34,7 @@ namespace MoonEngine
 		static void Clear();
 		static void Render(const glm::mat4& viewProjection);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture> texture);
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture>& texture);
 		static void Destroy();
 	};
 }

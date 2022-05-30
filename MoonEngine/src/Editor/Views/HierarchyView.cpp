@@ -11,6 +11,7 @@
 namespace MoonEngine
 {
 	Ref<Texture> m_NoSpriteTexture;
+	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 
 	void HierarchyView::SetScene(Ref<Scene> scene)
 	{
@@ -28,8 +29,8 @@ namespace MoonEngine
 		auto transforms = m_Scene->m_Registry.view<TransformComponent>();
 		for (auto entity : transforms)
 		{
-			glm::vec2 pos = transforms.get<TransformComponent>(entity).position;
-			glm::vec2 scale = transforms.get<TransformComponent>(entity).size;
+			glm::vec2 pos = transforms.get<TransformComponent>(entity).Position;
+			glm::vec2 scale = transforms.get<TransformComponent>(entity).Size;
 			float halfExtendX = scale.x / 2.0f;
 			float halfExtendY = scale.y / 2.0f;
 
@@ -158,8 +159,8 @@ namespace MoonEngine
 			//Translation Start
 			ImGui::Text("Transform");
 			TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
-			UtilVectorColumn("Position", transform.position);
-			UtilVectorColumn("Size", transform.size, 1.0f);
+			UtilVectorColumn("Position", transform.Position);
+			UtilVectorColumn("Size", transform.Size, 1.0f);
 			//Translation End
 
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
@@ -197,11 +198,11 @@ namespace MoonEngine
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
 
-		ShowComponent<SpriteComponent>("Sprite", [](auto& component)
+		ShowComponent<SpriteComponent>("Sprite", [](SpriteComponent& component)
 		{
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-			ImGui::ColorEdit4("Color", &component.color[0]);
+			ImGui::ColorEdit4("Color", &component.Color[0]);
 
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 
@@ -212,7 +213,7 @@ namespace MoonEngine
 			ImGui::Text("Image:"); ImGui::SameLine();
 			auto& imagePos = ImGui::GetCursorPos();
 			ImGui::Image((ImTextureID)m_NoSpriteTexture->GetID(), { cellSize * cellMultp, cellSize * cellMultp });
-			Ref<Texture> componentTexture = component.texture;
+			Ref<Texture> componentTexture = component.Texture;
 			if (componentTexture)
 			{
 				ImGui::SetCursorPos(imagePos);
@@ -227,8 +228,8 @@ namespace MoonEngine
 					const wchar_t* path = (const wchar_t*)payload->Data;
 					std::filesystem::path texturePath = std::filesystem::path("res/Assets") / path;
 					Ref<Texture> texture = CreateRef<Texture>(texturePath.string());
-					if (texture->GetID())
-						component.texture = texture;
+					if (texture->IsValid())
+						component.Texture = texture;
 					else
 						DebugErr(texturePath.string());
 				}
@@ -245,7 +246,7 @@ namespace MoonEngine
 				if (ImGui::Button("X##DeleteButton", { cellSize, cellSize }))
 				{
 					componentTexture = nullptr;
-					component.texture = nullptr;
+					component.Texture = nullptr;
 				}
 
 				ImGuiUtils::AddPadding(0.0f, cellSize / cellPadding);
@@ -254,7 +255,7 @@ namespace MoonEngine
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 		});
 
-		ShowComponent<CameraComponent>("Camera", [](auto& component)
+		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
 		{
 			float winWidth = 100.0f;
 			ImGui::Columns(2);
@@ -268,7 +269,7 @@ namespace MoonEngine
 			ImGui::SetColumnWidth(0, winWidth);
 			ImGuiUtils::TextCentered("Distance", true);
 			ImGui::NextColumn();
-			ImGui::DragFloat("##Distance", &component.distance, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::DragFloat("##Distance", &component.Distance, 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 		});
 		ImGui::PopStyleColor(3);

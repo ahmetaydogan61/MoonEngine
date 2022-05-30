@@ -82,9 +82,8 @@ namespace MoonEngine
 		if (m_IsViewportActive)
 			ViewportView(m_IsViewportActive);
 
-		ImGui::End(); //End Dockspace
-
 		Statusbar();
+		ImGui::End(); //End Dockspace
 	}
 
 	void EditorLayer::Update()
@@ -173,7 +172,7 @@ namespace MoonEngine
 
 				TransformComponent& component = entity.GetComponent<TransformComponent>();
 				glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f)));
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.position) * rotation * glm::scale(glm::mat4(1.0f), component.size);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.Position) * rotation * glm::scale(glm::mat4(1.0f), component.Size);
 
 				ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
 				ImGuizmo::SetOrthographic(true);
@@ -184,8 +183,8 @@ namespace MoonEngine
 				{
 					glm::vec3 finalPos, finalRot, finalSiz;
 					ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(finalPos), glm::value_ptr(finalRot), glm::value_ptr(finalSiz));
-					component.position = finalPos;
-					component.size = finalSiz;
+					component.Position = finalPos;
+					component.Size = finalSiz;
 				}
 			}
 		}
@@ -214,8 +213,8 @@ namespace MoonEngine
 				{
 					m_Scene = CreateRef<Scene>();
 					m_HierarchyView.SetScene(m_Scene);
-					Serializer serializer{ m_Scene };
-					serializer.Deserialize("res/Assets/Scenes/Example.moon");
+					Serializer actualSerializer{ m_Scene };
+					actualSerializer.Deserialize("res/Assets/Scenes/Example.moon");
 				}
 
 				ImGui::EndMenu();

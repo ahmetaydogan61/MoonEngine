@@ -143,7 +143,7 @@ namespace MoonEngine
 		m_RenderBuffer[m_Index++] = 0.0f; //TexID zero if not given
 	}
 	
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture> texture)
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture>& texture)
 	{
 		if ((m_Index / RENDERBUFFERSIZE) >= MAX_INSTANCES) return;
 		m_RenderBuffer[m_Index++] = position.x;

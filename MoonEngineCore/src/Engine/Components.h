@@ -3,9 +3,23 @@
 #include "SceneCamera.h"
 #include "Renderer/Texture.h"
 
+#include "endianness.h"
+#include "uuid_v4.h"
+
 namespace MoonEngine
 {
 	class Scene;
+
+	struct UUIDComponent
+	{
+		UUIDv4::UUID ID;
+		UUIDComponent()
+		{
+			UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+			ID = uuidGenerator.getUUID();
+		}
+		UUIDComponent(const UUIDComponent&) = default;
+	};
 
 	struct IdentityComponent
 	{
@@ -20,24 +34,24 @@ namespace MoonEngine
 
 	struct TransformComponent
 	{
-		glm::vec3 position{ 0.0f };
-		glm::vec3 size{ 1.0f };
+		glm::vec3 Position{ 0.0f };
+		glm::vec3 Size{ 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(glm::vec3& position)
-			:position(position)
+			:Position(position)
 		{}
 		TransformComponent(const TransformComponent& transform) = default;
 	};
 
 	struct SpriteComponent
 	{
-		glm::vec4 color{ 1.0f };
-		Ref<Texture> texture;
+		glm::vec4 Color{ 1.0f };
+		Ref<Texture> Texture;
 
 		SpriteComponent() = default;
 		SpriteComponent(glm::vec4& color)
-			:color(color)
+			:Color(color)
 		{}
 		SpriteComponent(const SpriteComponent& sprite) = default;
 	};
@@ -46,11 +60,11 @@ namespace MoonEngine
 	{
 		SceneCamera Camera;
 		bool isMain = true;
-		float distance = 5.0f;
+		float Distance = 5.0f;
 
 		CameraComponent()
 		{
-			Camera.Resize(1.0f, 1.0f, distance);
+			Camera.Resize(1.0f, 1.0f, Distance);
 			isMain = true;
 		};
 		~CameraComponent() = default;

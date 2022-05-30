@@ -7,7 +7,7 @@ namespace MoonEngine
 {
 	class Entity;
 	class Framebuffer;
-
+	
 	class Scene
 	{
 	private:
@@ -15,8 +15,8 @@ namespace MoonEngine
 		friend class Entity;
 		friend class HierarchyView;
 		friend class Serializer;
-	public:
 		entt::registry m_Registry;
+	public:
 		Scene();
 		~Scene();
 		void OnPlay();

@@ -32,7 +32,7 @@ namespace MoonEngine
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color, sprite.texture);
+			Renderer::DrawQuad(transform.Position, transform.Size, sprite.Color, sprite.Texture);
 		}
 
 		if (camera)
@@ -58,7 +58,7 @@ namespace MoonEngine
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.position, transform.size, sprite.color, sprite.texture);
+			Renderer::DrawQuad(transform.Position, transform.Size, sprite.Color, sprite.Texture);
 		}
 
 		Camera* sceneCamera = nullptr;
@@ -71,7 +71,7 @@ namespace MoonEngine
 			if (camera.isMain)
 			{
 				sceneCamera = &camera.Camera;
-				cameraPosition = transform.position;
+				cameraPosition = transform.Position;
 				break;
 			}
 		}
@@ -91,13 +91,14 @@ namespace MoonEngine
 		for (auto entity : camera)
 		{
 			CameraComponent& component = camera.get<CameraComponent>(entity);
-			component.Camera.Resize(width, height, component.distance);
+			component.Camera.Resize(width, height, component.Distance);
 		}
 	}
 
 	Entity Scene::CreateEntity()
 	{
 		Entity e{ m_Registry.create() };
+		e.AddComponent<UUIDComponent>();
 		e.AddComponent<IdentityComponent>();
 		e.GetComponent<IdentityComponent>().Name = "Entity";
 		e.AddComponent<TransformComponent>();

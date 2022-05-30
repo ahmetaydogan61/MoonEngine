@@ -88,15 +88,16 @@ namespace MoonEngine
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;
-		out << YAML::Key << "Entity" << YAML::Value << "12837192831273"; // TODO: Entity ID goes here
+		auto& uuid = entity.GetComponent<UUIDComponent>();
+		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.str();
 
 		if (entity.HasComponent<IdentityComponent>())
 		{
 			out << YAML::Key << "IdentityComponent";
 			out << YAML::BeginMap;
 
-			auto& tag = entity.GetComponent<IdentityComponent>().Name;
-			out << YAML::Key << "Name" << YAML::Value << tag;
+			auto& name = entity.GetComponent<IdentityComponent>().Name;
+			out << YAML::Key << "Name" << YAML::Value << name;
 
 			out << YAML::EndMap;
 		}
@@ -107,8 +108,8 @@ namespace MoonEngine
 			out << YAML::BeginMap;
 
 			TransformComponent& component = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Position" << YAML::Value << component.position;
-			out << YAML::Key << "Size" << YAML::Value << component.size;
+			out << YAML::Key << "Position" << YAML::Value << component.Position;
+			out << YAML::Key << "Size" << YAML::Value << component.Size;
 
 			out << YAML::EndMap;
 		}
@@ -121,7 +122,7 @@ namespace MoonEngine
 			CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
 
 			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.isMain;
-			out << YAML::Key << "Distance" << YAML::Value << cameraComponent.distance;
+			out << YAML::Key << "Distance" << YAML::Value << cameraComponent.Distance;
 
 			out << YAML::EndMap;
 		}
@@ -132,7 +133,11 @@ namespace MoonEngine
 			out << YAML::BeginMap;
 
 			SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
-			out << YAML::Key << "Color" << YAML::Value << spriteComponent.color;
+			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
+			if(spriteComponent.Texture)
+					out << YAML::Key << "TexturePath" << YAML::Value << spriteComponent.Texture->Filepath;
+			else
+					out << YAML::Key << "TexturePath" << YAML::Value << "null";
 
 			out << YAML::EndMap;
 		}
@@ -182,29 +187,33 @@ namespace MoonEngine
 		{
 			for (auto entity : entities)
 			{
-				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
+				Entity deserializedEntity = m_Scene->CreateEntity();
 
+				auto& uuidComponent = deserializedEntity.GetComponent<UUIDComponent>();
+				uuidComponent.ID.fromStr(entity["Entity"].as<std::string>().c_str());
+				
 				std::string name;
 				auto idComponent = entity["IdentityComponent"];
 				if (idComponent)
 					name = idComponent["Name"].as<std::string>();
-				
-				Entity deserializedEntity = m_Scene->CreateEntity();
 				deserializedEntity.GetComponent<IdentityComponent>().Name = name;
-				
+
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
 					TransformComponent& component = deserializedEntity.GetComponent<TransformComponent>();
-					component.position = transformComponent["Position"].as<glm::vec3>();
-					component.size = transformComponent["Size"].as<glm::vec3>();
+					component.Position = transformComponent["Position"].as<glm::vec3>();
+					component.Size = transformComponent["Size"].as<glm::vec3>();
 				}
 
 				auto spriteComponent = entity["SpriteComponent"];
 				if (spriteComponent)
 				{
 					SpriteComponent& component = deserializedEntity.GetComponent<SpriteComponent>();
-					component.color = spriteComponent["Color"].as<glm::vec4>();
+					component.Color = spriteComponent["Color"].as<glm::vec4>();
+					auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
+					if (texturePath != "null")
+						component.Texture = CreateRef<Texture>(spriteComponent["TexturePath"].as<std::string>());
 				}
 				else
 					deserializedEntity.RemoveComponent<SpriteComponent>();
@@ -212,10 +221,10 @@ namespace MoonEngine
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
-					auto& cc = deserializedEntity.AddComponent<CameraComponent>();
+					auto& component = deserializedEntity.AddComponent<CameraComponent>();
 
-					cc.isMain = cameraComponent["IsMain"].as<bool>();
-					cc.distance = cameraComponent["Distance"].as<bool>();
+					component.isMain = cameraComponent["IsMain"].as<bool>();
+					component.Distance = cameraComponent["Distance"].as<float>();
 				}
 			}
 		}

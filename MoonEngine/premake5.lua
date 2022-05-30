@@ -20,7 +20,8 @@ project "MoonEngine"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
-		"%{IncludeDirs.ImGuizmo}"
+		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.uuid_v4}"
 	}   
 
 	links
