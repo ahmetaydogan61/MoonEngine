@@ -204,12 +204,19 @@ namespace MoonEngine
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				Serializer serializer{ m_Scene };
-				if (ImGui::MenuItem("Save", "Ctrl + S"))
+				if (ImGui::MenuItem("Save", " "))
+				{
+					Serializer serializer{ m_Scene };
 					serializer.Serialize("res/Assets/Scenes/Example.moon");
+				}
 
-				if(ImGui::MenuItem("Load", "Ctrl + L"))
+				if (ImGui::MenuItem("Load", " "))
+				{
+					m_Scene = CreateRef<Scene>();
+					m_HierarchyView.SetScene(m_Scene);
+					Serializer serializer{ m_Scene };
 					serializer.Deserialize("res/Assets/Scenes/Example.moon");
+				}
 
 				ImGui::EndMenu();
 			}

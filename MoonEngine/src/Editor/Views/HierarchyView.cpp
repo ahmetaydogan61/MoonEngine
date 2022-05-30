@@ -10,12 +10,13 @@
 
 namespace MoonEngine
 {
-	Texture* m_NoSpriteTexture;
+	Ref<Texture> m_NoSpriteTexture;
 
 	void HierarchyView::SetScene(Ref<Scene> scene)
 	{
 		m_Scene = scene;
-		m_NoSpriteTexture = new Texture("res/EditorIcons/Frame.png");
+		m_SelectedEntity = {};
+		m_NoSpriteTexture = CreateRef<Texture>("res/EditorIcons/Frame.png");
 	}
 
 	void HierarchyView::MouseSelect()
@@ -218,7 +219,7 @@ namespace MoonEngine
 				ImGuiUtils::AddPadding(cellSize / cellPadding, cellSize / cellPadding);
 				ImGuiUtils::Image((ImTextureID)componentTexture->GetID(), { cellSize * cellPadding, cellSize * cellPadding });
 			}
-			
+
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
@@ -236,12 +237,12 @@ namespace MoonEngine
 
 			if (componentTexture)
 			{
-				ImGui::PushStyleColor(ImGuiCol_Text, {1.0f, 0.0f, 0.0f, 1.0f});
+				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
 				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 				ImGui::SameLine();
 				ImGui::SetCursorPos(imagePos);
 				ImGuiUtils::AddPadding(2.0f * cellSize, 0.0f);
-				if (ImGui::Button("X##DeleteButton", { cellSize, cellSize}))
+				if (ImGui::Button("X##DeleteButton", { cellSize, cellSize }))
 				{
 					componentTexture = nullptr;
 					component.texture = nullptr;
