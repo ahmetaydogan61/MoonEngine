@@ -21,6 +21,7 @@ project "MoonEngine"
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.imfilebrowser}",
 		"%{IncludeDirs.uuid_v4}"
 	}   
 

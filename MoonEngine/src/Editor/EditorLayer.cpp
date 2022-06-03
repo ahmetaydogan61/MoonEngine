@@ -1,12 +1,14 @@
 #include "EditorLayer.h"
 #include "Core/ImGuiLayer.h"
 #include "ImGuiUtils.h"
-#include <imgui/imgui_internal.h>
 #include "Utils/IconsFontAwesome.h"
 #include "ImGuizmo.h"
 #include "Engine/Components.h"
 
 #include "Utils/Serializer.h"
+
+#include <imgui/imgui_internal.h>
+#include "imfilebrowser.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -14,6 +16,9 @@
 namespace MoonEngine
 {
 	bool demoWindow = false;
+	
+	ImGui::FileBrowser saveDialog{ ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir };
+	ImGui::FileBrowser loadDialog{ ImGuiFileBrowserFlags_EnterNewFilename };
 
 	void EditorLayer::Create()
 	{
@@ -36,9 +41,13 @@ namespace MoonEngine
 
 		Window::SetIcon("res/EditorIcons/Logo.png");
 
-		Serializer actualSerializer{ m_Scene };
-		actualSerializer.Deserialize("res/Assets/Scenes/Example.moon");
+		saveDialog.SetTitle("Save Scene");
+		saveDialog.SetTypeFilters({ ".moon" });
+		saveDialog.SetPwd("res/Assets");
 
+		loadDialog.SetTitle("Load Scene");
+		loadDialog.SetTypeFilters({ ".moon" });
+		loadDialog.SetPwd("res/Assets");
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -225,23 +234,40 @@ namespace MoonEngine
 
 	void EditorLayer::Menubar()
 	{
+		saveDialog.Display();
+		loadDialog.Display();
+
+		if (saveDialog.HasSelected())
+		{
+			Serializer serializer{ m_Scene };
+			serializer.Serialize(saveDialog.GetSelected().string() + "/" + m_Scene->SceneName.c_str() + ".moon");
+			saveDialog.ClearSelected();
+		}
+
+		if (loadDialog.HasSelected())
+		{
+			m_Scene = CreateRef<Scene>();
+			m_HierarchyView.SetScene(m_Scene);
+			Serializer serializer{ m_Scene };
+			serializer.Deserialize(loadDialog.GetSelected().string());
+			loadDialog.ClearSelected();
+		}
+
 		ImGui::BeginMainMenuBar();
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Save", " "))
-				{
-					Serializer serializer{ m_Scene };
-					serializer.Serialize("res/Assets/Scenes/Example.moon");
-				}
-
-				if (ImGui::MenuItem("Load", " "))
+				if (ImGui::MenuItem("New Scene", " "))
 				{
 					m_Scene = CreateRef<Scene>();
 					m_HierarchyView.SetScene(m_Scene);
-					Serializer actualSerializer{ m_Scene };
-					actualSerializer.Deserialize("res/Assets/Scenes/Example.moon");
 				}
+
+				if (ImGui::MenuItem("Save", " "))
+					saveDialog.Open();
+
+				if (ImGui::MenuItem("Load", " "))
+					loadDialog.Open();
 
 				ImGui::EndMenu();
 			}
@@ -298,7 +324,7 @@ namespace MoonEngine
 				if (GizmoSelectButton(m_ResizeTexture, buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 
-				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0);
+				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0.0f);
 				Ref<Texture> icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
 				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f }))
 				{
@@ -307,6 +333,15 @@ namespace MoonEngine
 						PlayScene();
 					else
 						StopScene();
+				}
+
+				float sceneNameTextSize = 200.0f;
+				static char sceneName[255];
+				ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - sceneNameTextSize , 0.0f);
+				if (ImGui::InputTextWithHint("##SceneName", "Scene Name", sceneName, 255, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_Scene->SceneName = sceneName;
+					memset(sceneName, 0, 255);
 				}
 				ImGui::EndMenuBar();
 			}
@@ -324,6 +359,7 @@ namespace MoonEngine
 			if (ImGui::BeginMenuBar())
 			{
 				ImGui::Text(m_IsPlaying ? "Play Mode" : "Edit Mode");
+				ImGui::Text("Active Scene: %s", m_Scene->SceneName.c_str());
 				ImGui::EndMenuBar();
 			}
 		}

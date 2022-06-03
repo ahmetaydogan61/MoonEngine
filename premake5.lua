@@ -13,6 +13,7 @@ IncludeDirs["glm"] = "%{wks.location}/MoonEngineCore/Includes/GLM"
 IncludeDirs["stb_image"] = "%{wks.location}/MoonEngineCore/Includes/stb_image"
 IncludeDirs["entt"] = "%{wks.location}/MoonEngineCore/Includes/ENTT"
 IncludeDirs["ImGuizmo"] = "%{wks.location}/MoonEngineCore/Includes/ImGuizmo"
+IncludeDirs["imfilebrowser"] = "%{wks.location}/MoonEngineCore/Includes/ImFileBrowser"
 IncludeDirs["yaml_cpp"] = "%{wks.location}/MoonEngineCore/Includes/yaml-cpp/include"
 IncludeDirs["uuid_v4"] = "%{wks.location}/MoonEngineCore/Includes/uuid_v4"
 

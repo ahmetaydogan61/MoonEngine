@@ -21,6 +21,7 @@ project "MoonEngineCore"
 
 		"Includes/ImGuizmo/ImGuizmo.h",
 		"Includes/ImGuizmo/ImGuizmo.cpp",
+		"Includes/ImFileBrowser/imfilebrowser.h",
 
 		"Includes/uuid_v4/**.h"
 	}
@@ -37,6 +38,7 @@ project "MoonEngineCore"
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.yaml_cpp}",
 		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.imfilebrowser}",
 		"%{IncludeDirs.uuid_v4}"
 	}
 

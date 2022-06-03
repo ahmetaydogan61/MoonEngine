@@ -54,7 +54,7 @@ namespace MoonEngine
 	int Renderer::m_TextureID = 0;
 	int Renderer::m_TextureIDs[32];
 
-	int Renderer::CreateTextureCache(Ref<Texture> texture)
+	int Renderer::CreateTextureCache(const Ref<Texture>& texture)
 	{
 		if (m_TextureID > 32)
 			return 0;
@@ -150,7 +150,7 @@ namespace MoonEngine
 		quadCount++;
 	}
 
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, Ref<Texture>& texture)
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color,const Ref<Texture>& texture)
 	{
 		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
@@ -194,7 +194,7 @@ namespace MoonEngine
 		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
-		glDrawElements(GL_TRIANGLES, maxIndex, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::Destroy()

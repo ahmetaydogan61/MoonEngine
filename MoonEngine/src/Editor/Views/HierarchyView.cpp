@@ -1,11 +1,11 @@
 #include "HierarchyView.h"
-#include "imgui/misc/cpp/imgui_stdlib.h"
-#include "imgui/misc/cpp/imgui_stdlib.cpp"
 #include "Engine/Components.h"
 #include "../ImGuiUtils.h"
-#include <imgui/imgui.cpp>
 #include "Utils/IconsFontAwesome.h"
 
+#include <imgui/imgui.cpp>
+#include "imgui/misc/cpp/imgui_stdlib.h"
+#include "imgui/misc/cpp/imgui_stdlib.cpp"
 #include <filesystem>
 
 namespace MoonEngine
