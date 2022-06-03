@@ -109,6 +109,7 @@ namespace MoonEngine
 
 			TransformComponent& component = entity.GetComponent<TransformComponent>();
 			out << YAML::Key << "Position" << YAML::Value << component.Position;
+			out << YAML::Key << "Rotation" << YAML::Value << component.Rotation;
 			out << YAML::Key << "Size" << YAML::Value << component.Size;
 
 			out << YAML::EndMap;
@@ -203,6 +204,7 @@ namespace MoonEngine
 				{
 					TransformComponent& component = deserializedEntity.GetComponent<TransformComponent>();
 					component.Position = transformComponent["Position"].as<glm::vec3>();
+					component.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 					component.Size = transformComponent["Size"].as<glm::vec3>();
 				}
 

@@ -1,25 +1,24 @@
 #shader vertex
 #version 330 core
-layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aOffset;
-layout(location = 2) in vec3 aSize;
-layout(location = 3) in vec4 aColor;
-layout(location = 4) in vec2 aTexCoords;
-layout(location = 5) in float aTexIndex;
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec4 aColor;
+layout(location = 2) in vec2 aTexCoords;
+layout(location = 3) in float aTexID;
 
 out vec4 fColor;
 out vec2 fTexCoords;
-out float fTexIndex;
+out float fTexID;
 
-uniform mat4 u_VP;
+uniform mat4 uVP;
 
 void main()
 {
-    fColor = aColor;
-    fTexCoords = aTexCoords;
-    fTexIndex = aTexIndex;
-    gl_Position = u_VP * vec4((aPos * aSize) + aOffset, 1.0);
-}
+	fColor = aColor;
+	fTexCoords = aTexCoords;
+	fTexID = aTexID;
+	
+	gl_Position = uVP * vec4(aPosition, 1.0);
+};
 
 #shader fragment
 #version 330 core
@@ -27,12 +26,12 @@ out vec4 FragColor;
 
 in vec4 fColor;
 in vec2 fTexCoords;
-in float fTexIndex;
+in float fTexID;
 
-uniform sampler2D u_Texture[32];
+uniform sampler2D uTexture[32];
 
 void main()
 {
-    int textureIndex = int(fTexIndex);
-    FragColor = texture(u_Texture[textureIndex], fTexCoords) * fColor;
-}
+	int index = int(fTexID);
+	FragColor = texture(uTexture[index], fTexCoords) * fColor;
+};

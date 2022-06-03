@@ -160,6 +160,9 @@ namespace MoonEngine
 			ImGui::Text("Transform");
 			TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
 			UtilVectorColumn("Position", transform.Position);
+			glm::vec3 rotation = glm::degrees(transform.Rotation);
+			UtilVectorColumn("Rotation", rotation);
+			transform.Rotation = glm::radians(rotation);
 			UtilVectorColumn("Size", transform.Size, 1.0f);
 			//Translation End
 

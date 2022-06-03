@@ -4,24 +4,55 @@
 #include "Texture.h"
 #include "Shader.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 namespace MoonEngine
 {
-	const int RENDERBUFFERSIZE = 3 + 3 + 4 + 2 + 1;
-	float Renderer::m_RenderBuffer[MAX_INSTANCES * RENDERBUFFERSIZE];
-	int Renderer::m_Index = 0;
-	int Renderer::m_TexureIds[];
+	glm::vec4 Renderer::m_ClearColor;
+
+	unsigned int va;
+	unsigned int vb;
+	unsigned int ib;
+
+	const uint32_t maxQuads = 200;
+	const uint32_t maxVertex = maxQuads * 4;
+	const uint32_t maxIndex = maxQuads * 6;
+
+	glm::vec4 vertices[] =
+	{
+		{ -0.5f, -0.5f, 0.0f, 1.0f},
+		{  0.5f, -0.5f, 0.0f, 1.0f},
+		{  0.5f,  0.5f, 0.0f, 1.0f},
+		{ -0.5f,  0.5f, 0.0f, 1.0f}
+	};
+
+	glm::vec2 texCoords[] =
+	{
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f }
+	};
+
+	struct Vertex
+	{
+		glm::vec3 position;
+		glm::vec4 color;
+		glm::vec2 texCoords;
+		float texID;
+	};
+	int strideLenght = 10;
+
+	Vertex* verts;
+	int index = 0;
+	int quadCount = 0;
 
 	Ref<Shader> Renderer::m_DefaultShader;
-	unsigned int Renderer::m_VertexArray;
-	unsigned int Renderer::m_VertexBuffer;
-	unsigned int Renderer::m_ElementBufffer;
-	unsigned int Renderer::m_InstanceVertexBuffer;
-	
+	Ref<Texture> Renderer::m_WhiteTexture;
 	std::unordered_map<Ref<Texture>, int> Renderer::m_TextureCache;
 	int Renderer::m_TextureID = 0;
-	Ref<Texture> Renderer::m_WhiteTexture;
-	
-	glm::vec4 Renderer::m_ClearColor;
+	int Renderer::m_TextureIDs[32];
 
 	int Renderer::CreateTextureCache(Ref<Texture> texture)
 	{
@@ -35,81 +66,56 @@ namespace MoonEngine
 		return m_TextureID;
 	}
 
-	float Renderer::m_Vertices[] =
-	{
-		//Position				//Size				//Color						//TexCoords		//TexIDs
-		-0.5f, -0.5f, 0.0f,		1.0f, 1.0f,	1.0f,	0.5f, 0.5f, 0.5f, 1.0f,		0.0f, 0.0f,		0.0f,
-		 0.5f, -0.5f, 0.0f,		1.0f, 1.0f,	1.0f,	0.5f, 0.5f, 0.5f, 1.0f,		1.0f, 0.0f,		0.0f,
-		 0.5f,  0.5f, 0.0f,		1.0f, 1.0f,	1.0f,	0.5f, 0.5f, 0.5f, 1.0f,		1.0f, 1.0f,		0.0f,
-		-0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 1.0f,	0.5f, 0.5f, 0.5f, 1.0f,		0.0f, 1.0f,		0.0f
-	};
-
-	unsigned int Renderer::m_Indices[] =
-	{
-		0, 1, 2,
-		0, 2, 3
-	};
-
-
 	void Renderer::Init()
 	{
-		glGenBuffers(1, &m_InstanceVertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(m_RenderBuffer), &m_RenderBuffer[0], GL_DYNAMIC_DRAW);
+		verts = new Vertex[maxVertex * sizeof(Vertex)];
 
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
+		glGenVertexArrays(1, &va);
+		glBindVertexArray(va);
 
-		glGenBuffers(1, &m_VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(m_Vertices), &m_Vertices[0], GL_DYNAMIC_DRAW);
+		glGenBuffers(1, &vb);
+		glBindBuffer(GL_ARRAY_BUFFER, vb);
+		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
 
-		//Position
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), 0);
 
-		//Position Offset
 		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVertexBuffer);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), 0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, color)));
 
-		//Size
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, texCoords)));
 
-		//Color
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, texID)));
 
-		//TexCoords
-		glEnableVertexAttribArray(4);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), (void*)(10 * sizeof(float)));
 
-		//TexIndex
-		glEnableVertexAttribArray(5);
-		glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVertexBuffer);
-		glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, RENDERBUFFERSIZE * sizeof(float), (void*)(12 * sizeof(float)));
+		unsigned int* quadIndices = new unsigned int[maxIndex];
+		int indicesOffset = 0;
+		for (int i = 0; i < maxIndex; i += 6)
+		{
+			quadIndices[i + 0] = indicesOffset + 0;
+			quadIndices[i + 1] = indicesOffset + 1;
+			quadIndices[i + 2] = indicesOffset + 2;
 
-		glVertexAttribDivisor(0, 0);
-		glVertexAttribDivisor(1, 1);
-		glVertexAttribDivisor(2, 1);
-		glVertexAttribDivisor(3, 1);
-		glVertexAttribDivisor(4, 0);
-		glVertexAttribDivisor(5, 1);
+			quadIndices[i + 3] = indicesOffset + 0;
+			quadIndices[i + 4] = indicesOffset + 2;
+			quadIndices[i + 5] = indicesOffset + 3;
 
-		glGenBuffers(1, &m_ElementBufffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ElementBufffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_Indices), &m_Indices[0], GL_STATIC_DRAW);
+			indicesOffset += 4;
+		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glGenBuffers(1, &ib);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxIndex * sizeof(unsigned int), &quadIndices[0], GL_STATIC_DRAW);
 
 		m_DefaultShader = CreateRef<Shader>("res/Shaders/Default.shader");
 		m_WhiteTexture = CreateRef<Texture>(1, 1);
-
+		
 		for (int i = 0; i < 32; i++)
-			m_TexureIds[i] = i;
+			m_TextureIDs[i] = i;
+
+		delete[] quadIndices;
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -119,73 +125,80 @@ namespace MoonEngine
 
 	void Renderer::Clear()
 	{
-		m_Index = 0;
+		index = 0;
+		quadCount = 0;
+
 		m_TextureCache.clear();
 		m_TextureID = 0;
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
 	{
-		if ((m_Index / RENDERBUFFERSIZE) >= MAX_INSTANCES) return;
-		m_RenderBuffer[m_Index++] = position.x;
-		m_RenderBuffer[m_Index++] = position.y;
-		m_RenderBuffer[m_Index++] = position.z;
-		m_RenderBuffer[m_Index++] = size.x;
-		m_RenderBuffer[m_Index++] = size.y;
-		m_RenderBuffer[m_Index++] = size.z;
-		m_RenderBuffer[m_Index++] = color.x;
-		m_RenderBuffer[m_Index++] = color.y;
-		m_RenderBuffer[m_Index++] = color.z;
-		m_RenderBuffer[m_Index++] = color.w;
-		m_RenderBuffer[m_Index++] = 0.0f; //TexCoords zero to ignore
-		m_RenderBuffer[m_Index++] = 0.0f; //TexCoords zero to ignore
-		m_RenderBuffer[m_Index++] = 0.0f; //TexID zero if not given
+		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
+
+		for (int i = 0; i < 4; i++)
+		{
+			verts[i + (quadCount * 4)].position = transform * vertices[i];
+			verts[i + (quadCount * 4)].color = color;
+			verts[i + (quadCount * 4)].texCoords = texCoords[i];
+			verts[i + (quadCount * 4)].texID = 0;
+			index += strideLenght;
+		}
+		quadCount++;
 	}
-	
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, Ref<Texture>& texture)
+
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, Ref<Texture>& texture)
 	{
-		if ((m_Index / RENDERBUFFERSIZE) >= MAX_INSTANCES) return;
-		m_RenderBuffer[m_Index++] = position.x;
-		m_RenderBuffer[m_Index++] = position.y;
-		m_RenderBuffer[m_Index++] = position.z;
-		m_RenderBuffer[m_Index++] = size.x;
-		m_RenderBuffer[m_Index++] = size.y;
-		m_RenderBuffer[m_Index++] = size.z;
-		m_RenderBuffer[m_Index++] = color.x;
-		m_RenderBuffer[m_Index++] = color.y;
-		m_RenderBuffer[m_Index++] = color.z;
-		m_RenderBuffer[m_Index++] = color.w;
-		m_RenderBuffer[m_Index++] = 0.0f; //TexCoords zero to ignore
-		m_RenderBuffer[m_Index++] = 0.0f; //TexCoords zero to ignore
-		if (texture == nullptr)
-			m_RenderBuffer[m_Index++] = 0.0f;
-		else
-			m_RenderBuffer[m_Index++] = CreateTextureCache(texture);
+		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
+
+		for (int i = 0; i < 4; i++)
+		{
+			verts[i + (quadCount * 4)].position = transform * vertices[i];
+			verts[i + (quadCount * 4)].color = color;
+			verts[i + (quadCount * 4)].texCoords = texCoords[i];
+			if(texture == nullptr)
+				verts[i + (quadCount * 4)].texID = 0;
+			else	
+				verts[i + (quadCount * 4)].texID = CreateTextureCache(texture);
+			index += strideLenght;
+		}
+		quadCount++;
+	}
+
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			verts[i + (quadCount * 4)].position = transform * vertices[i];
+			verts[i + (quadCount * 4)].color = color;
+			verts[i + (quadCount * 4)].texCoords = texCoords[i];
+			verts[i + (quadCount * 4)].texID = 0;
+			index += strideLenght;
+		}
+		quadCount++;
 	}
 
 	void Renderer::Render(const glm::mat4& viewProjection)
 	{
-		m_DefaultShader->Bind();
-		glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_Index, &m_RenderBuffer[0], GL_DYNAMIC_DRAW);
-		
 		m_WhiteTexture->Bind(0);
 
-		m_DefaultShader->SetUniformMat4("u_VP", viewProjection);
-		m_DefaultShader->SetUniform1iv("u_Texture", 8, m_TexureIds);
+		m_DefaultShader->Bind();
+		m_DefaultShader->SetUniformMat4("uVP", viewProjection);
+		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
 
-		glBindVertexArray(m_VertexArray);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ElementBufffer);
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, m_Index / RENDERBUFFERSIZE);
+		glBindVertexArray(va);
+		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glDrawElements(GL_TRIANGLES, maxIndex, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::Destroy()
 	{
-		glDeleteBuffers(1, &m_VertexArray);
-		glDeleteBuffers(1, &m_VertexBuffer);
-		glDeleteBuffers(1, &m_ElementBufffer);
-		glDeleteBuffers(1, &m_InstanceVertexBuffer);
 		DebugSys("Renderer Destroyed");
 	}
 

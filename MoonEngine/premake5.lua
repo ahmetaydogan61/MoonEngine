@@ -43,5 +43,6 @@ project "MoonEngine"
 		optimize "On"
 	
 	filter "configurations:Final"
+		kind "WindowedApp"
 		defines {"ENGINE_FINAL"}
 		optimize "On"

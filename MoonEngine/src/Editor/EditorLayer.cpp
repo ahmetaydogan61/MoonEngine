@@ -27,13 +27,18 @@ namespace MoonEngine
 		ImGuiUtils::StyleCustomDark(0);
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
 
-		m_PlayTexture = new Texture("res/EditorIcons/Play.png");
-		m_StopTexture = new Texture("res/EditorIcons/Stop.png");
-		m_SelectTexture = new Texture("res/EditorIcons/Select.png");
-		m_TranslateTexture = new Texture("res/EditorIcons/Translate.png");
-		m_ResizeTexture = new Texture("res/EditorIcons/Resize.png");
+		m_PlayTexture = CreateRef<Texture>("res/EditorIcons/Play.png");
+		m_StopTexture = CreateRef<Texture>("res/EditorIcons/Stop.png");
+		m_SelectTexture = CreateRef<Texture>("res/EditorIcons/Select.png");
+		m_TranslateTexture = CreateRef<Texture>("res/EditorIcons/Translate.png");
+		m_RotateTexture = CreateRef<Texture>("res/EditorIcons/Rotate.png");
+		m_ResizeTexture = CreateRef<Texture>("res/EditorIcons/Resize.png");
 
 		Window::SetIcon("res/EditorIcons/Logo.png");
+
+		Serializer actualSerializer{ m_Scene };
+		actualSerializer.Deserialize("res/Assets/Scenes/Example.moon");
+
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -113,6 +118,8 @@ namespace MoonEngine
 				else if (Input::GetKey(KEY_W))
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 				else if (Input::GetKey(KEY_E))
+					m_GizmoSelection = GIZMOSELECTION::RORTATE;
+				else if (Input::GetKey(KEY_R))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 
 			m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
@@ -133,65 +140,84 @@ namespace MoonEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGuiIO& io = ImGui::GetIO();
 
-		ImGui::Begin(ICON_FK_GAMEPAD "Viewport", &state, flags);
-
-		m_ViewportPosition.x = ImGui::GetCursorScreenPos().x;
-		m_ViewportPosition.y = ImGui::GetCursorScreenPos().y;
-		m_ViewportSize.x = ImGui::GetContentRegionAvail().x;
-		m_ViewportSize.y = ImGui::GetContentRegionAvail().y;
-
-		m_ViewportHovered = ImGui::IsWindowHovered();
-		m_ViewportFocused = ImGui::IsWindowFocused();
-
-		ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
-
-		Entity entity = m_HierarchyView.GetSelectedEntity();
-		if (entity && !m_IsPlaying)
+		if (ImGui::Begin(ICON_FK_GAMEPAD "Viewport", &state, flags))
 		{
-			//Gizmo Selector Window
-			const auto& currentWinPos = ImGui::GetWindowPos();
-			ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-			ImGui::Begin("GizmoWindow", &m_IsViewportActive, childFlags);
-			float buttonSize = 25.0f;
-			ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x * 2.0f, currentWinPos.y + (buttonSize * 3.0f) / 2.0f });
+			m_ViewportPosition.x = ImGui::GetCursorScreenPos().x;
+			m_ViewportPosition.y = ImGui::GetCursorScreenPos().y;
+			m_ViewportSize.x = ImGui::GetContentRegionAvail().x;
+			m_ViewportSize.y = ImGui::GetContentRegionAvail().y;
 
-			if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
-				m_GizmoSelection = GIZMOSELECTION::NONE;
+			m_ViewportHovered = ImGui::IsWindowHovered();
+			m_ViewportFocused = ImGui::IsWindowFocused();
 
-			if (GizmoSelectButton(m_TranslateTexture, buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
-				m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+			ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
 
-			if (GizmoSelectButton(m_ResizeTexture, buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
-				m_GizmoSelection = GIZMOSELECTION::SCALE;
-			ImGui::End();
-
-			if (m_GizmoSelection != GIZMOSELECTION::NONE)
+			Entity entity = m_HierarchyView.GetSelectedEntity();
+			if (entity && !m_IsPlaying)
 			{
-				const glm::mat4& view = m_EditorCamera->GetView();
-				const glm::mat4& projection = m_EditorCamera->GetProjection();
+				//Gizmo Selector Window
+				ImGuiStyle& style = ImGui::GetStyle();
+				ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+				float buttonSize = 25.0f;
+				const auto& currentWinPos = ImGui::GetWindowPos();
+				ImGui::SetNextWindowSize({ buttonSize + style.FramePadding.x * 2.0f, (buttonSize * 2) * 3 });
 
-				TransformComponent& component = entity.GetComponent<TransformComponent>();
-				glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f)));
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.Position) * rotation * glm::scale(glm::mat4(1.0f), component.Size);
+				float windowBorder = style.WindowBorderSize;
+				style.WindowBorderSize = 0.0f;
 
-				ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
-				ImGuizmo::SetOrthographic(true);
-				ImGuizmo::SetDrawlist();
-				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_IsSnapping ? &m_SnapAmount : NULL);
-
-				if (ImGuizmo::IsUsing())
+				ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.0f, 0.0f, 0.0f, 0.0f });
+				if (ImGui::Begin("GizmoWindow", &m_IsViewportActive, childFlags))
 				{
-					glm::vec3 finalPos, finalRot, finalSiz;
-					ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(finalPos), glm::value_ptr(finalRot), glm::value_ptr(finalSiz));
-					component.Position = finalPos;
-					component.Size = finalSiz;
+
+					ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x * 2.0f, currentWinPos.y + (buttonSize * 4.0f) / 2.0f });
+
+					if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
+						m_GizmoSelection = GIZMOSELECTION::NONE;
+
+					if (GizmoSelectButton(m_TranslateTexture, buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
+						m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+
+					if (GizmoSelectButton(m_RotateTexture, buttonSize, buttonSize, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+						m_GizmoSelection = GIZMOSELECTION::RORTATE;
+
+					if (GizmoSelectButton(m_ResizeTexture, buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
+						m_GizmoSelection = GIZMOSELECTION::SCALE;
+
+					style.WindowBorderSize = windowBorder;
+
+					ImGui::End();
+				}
+				ImGui::PopStyleColor();
+				//End Gizmo Selector Window
+
+				if (m_GizmoSelection != GIZMOSELECTION::NONE)
+				{
+					const glm::mat4& view = m_EditorCamera->GetView();
+					const glm::mat4& projection = m_EditorCamera->GetProjection();
+
+					TransformComponent& component = entity.GetComponent<TransformComponent>();
+					glm::mat4 rotation = glm::toMat4(glm::quat(component.Rotation));
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), component.Position) * rotation * glm::scale(glm::mat4(1.0f), component.Size);
+
+					ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
+					ImGuizmo::SetOrthographic(true);
+					ImGuizmo::SetDrawlist();
+					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_IsSnapping ? &m_SnapAmount : NULL);
+
+					if (ImGuizmo::IsUsing())
+					{
+						glm::vec3 finalPos, finalRot, finalSiz;
+						Maths::DecomposeTransform(transform, finalPos, finalRot, finalSiz);
+						glm::vec3 deltaRotation = finalRot - component.Rotation;
+						component.Position = finalPos;
+						component.Rotation += deltaRotation;
+						component.Size = finalSiz;
+					}
 				}
 			}
 		}
-
 		ImGui::End();
 		ImGui::PopStyleVar();
-
 		ImGuiLayer::ViewportPosition = m_ViewportPosition;
 		ImGuiLayer::ViewportSize = m_ViewportSize;
 		ImGuiLayer::CameraProjection = m_EditorCamera->GetViewProjection();
@@ -266,11 +292,14 @@ namespace MoonEngine
 				if (GizmoSelectButton(m_TranslateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
+				if (GizmoSelectButton(m_RotateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+					m_GizmoSelection = GIZMOSELECTION::RORTATE;
+
 				if (GizmoSelectButton(m_ResizeTexture, buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 
 				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0);
-				Texture* icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
+				Ref<Texture> icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
 				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f }))
 				{
 					m_IsPlaying = !m_IsPlaying;
@@ -301,7 +330,7 @@ namespace MoonEngine
 		ImGui::End();
 	}
 
-	bool EditorLayer::GizmoSelectButton(Texture* texture, float width, float height, bool selected)
+	bool EditorLayer::GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected)
 	{
 		if (selected)
 			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);

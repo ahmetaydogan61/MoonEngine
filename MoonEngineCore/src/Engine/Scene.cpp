@@ -32,7 +32,7 @@ namespace MoonEngine
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.Position, transform.Size, sprite.Color, sprite.Texture);
+			Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 		}
 
 		if (camera)
@@ -58,7 +58,7 @@ namespace MoonEngine
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.Position, transform.Size, sprite.Color, sprite.Texture);
+			Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 		}
 
 		Camera* sceneCamera = nullptr;

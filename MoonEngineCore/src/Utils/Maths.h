@@ -3,6 +3,7 @@ namespace MoonEngine
 {
 	struct Maths
 	{
+		static bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
 		static int Clamp(int value, int min, int max);
 		static float Clamp(float value, float min, float max);
 		static float Normalize(float value, float min, float max);

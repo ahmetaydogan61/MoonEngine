@@ -13,6 +13,7 @@ namespace MoonEngine
 		//These are the values from ImGuizmo OPERATION enum
 		NONE = -1, 
 		TRANSLATE = 7,
+		RORTATE = 120,
 		SCALE = 896,
 	};
 
@@ -21,11 +22,12 @@ namespace MoonEngine
 	private:
 		Ref<Scene> m_Scene;
 		EditorCamera* m_EditorCamera;
-		Texture* m_PlayTexture;
-		Texture* m_StopTexture;
-		Texture* m_SelectTexture;
-		Texture* m_TranslateTexture;
-		Texture* m_ResizeTexture;
+		Ref<Texture> m_PlayTexture;
+		Ref<Texture> m_StopTexture;
+		Ref<Texture> m_SelectTexture;
+		Ref<Texture> m_TranslateTexture;
+		Ref<Texture> m_RotateTexture;
+		Ref<Texture> m_ResizeTexture;
 
 		HierarchyView m_HierarchyView;
 		EditorSettingsView m_EditorSettingsView;
@@ -54,7 +56,7 @@ namespace MoonEngine
 		bool m_ViewportHovered = false;
 		bool m_ViewportFocused = false;
 
-		bool GizmoSelectButton(Texture* texture, float width, float height, bool selected);
+		bool GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected);
 		GIZMOSELECTION m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 		bool m_IsSnapping = false;
 		float m_SnapAmount = 0.25f;

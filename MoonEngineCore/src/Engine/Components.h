@@ -35,6 +35,7 @@ namespace MoonEngine
 	struct TransformComponent
 	{
 		glm::vec3 Position{ 0.0f };
+		glm::vec3 Rotation{ 0.0f };
 		glm::vec3 Size{ 1.0f };
 
 		TransformComponent() = default;
