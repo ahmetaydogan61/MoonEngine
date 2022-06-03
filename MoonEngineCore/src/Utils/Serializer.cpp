@@ -150,7 +150,7 @@ namespace MoonEngine
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+		out << YAML::Key << "Scene" << YAML::Value << m_Scene->SceneName;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		m_Scene->m_Registry.each([&](auto entityID)
 		{
@@ -182,6 +182,7 @@ namespace MoonEngine
 			return false;
 
 		std::string sceneName = data["Scene"].as<std::string>();
+		m_Scene->SceneName = sceneName;
 
 		auto entities = data["Entities"];
 		if (entities)

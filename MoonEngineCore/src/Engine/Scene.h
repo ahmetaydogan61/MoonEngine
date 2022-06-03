@@ -17,7 +17,7 @@ namespace MoonEngine
 		friend class Serializer;
 		entt::registry m_Registry;
 	public:
-		std::string SceneName = "Untitled Scene";
+		std::string SceneName = "Untitled";
 		Scene();
 		~Scene();
 		void OnPlay();
