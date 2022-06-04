@@ -15,9 +15,15 @@ namespace MoonEngine
 	unsigned int vb;
 	unsigned int ib;
 
-	const uint32_t maxQuads = 200;
+	const uint32_t maxQuads = 1000;
 	const uint32_t maxVertex = maxQuads * 4;
 	const uint32_t maxIndex = maxQuads * 6;
+
+	struct RenderData
+	{
+		glm::mat4 ViewProjection;
+	};
+	static RenderData* rData;
 
 	glm::vec4 vertices[] =
 	{
@@ -68,6 +74,7 @@ namespace MoonEngine
 
 	void Renderer::Init()
 	{
+		rData = new RenderData();
 		verts = new Vertex[maxVertex * sizeof(Vertex)];
 
 		glGenVertexArrays(1, &va);
@@ -125,13 +132,20 @@ namespace MoonEngine
 
 	void Renderer::Clear()
 	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::Begin(const glm::mat4& viewProjection)
+	{
+		Clear();
+		rData->ViewProjection = viewProjection;
+	}
+
+	void Renderer::End()
+	{
+		Render();
 		index = 0;
 		quadCount = 0;
-
-		m_TextureCache.clear();
-		m_TextureID = 0;
-		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
@@ -152,6 +166,9 @@ namespace MoonEngine
 
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color,const Ref<Texture>& texture)
 	{
+		if (quadCount >= maxQuads)
+			End();
+
 		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
 
@@ -182,19 +199,20 @@ namespace MoonEngine
 		quadCount++;
 	}
 
-	void Renderer::Render(const glm::mat4& viewProjection)
+	void Renderer::Render()
 	{
-		m_WhiteTexture->Bind(0);
-
-		m_DefaultShader->Bind();
-		m_DefaultShader->SetUniformMat4("uVP", viewProjection);
-		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
 
 		glBindVertexArray(va);
 		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
 		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
+
+		m_WhiteTexture->Bind(0);
+
+		m_DefaultShader->Bind();
+		m_DefaultShader->SetUniformMat4("uVP", rData->ViewProjection);
+		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
 	}
 
 	void Renderer::Destroy()

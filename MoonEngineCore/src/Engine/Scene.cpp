@@ -26,17 +26,19 @@ namespace MoonEngine
 
 	void Scene::UpdateEditor(const EditorCamera* camera)
 	{
-		Renderer::Clear();
-
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
-		for (auto entity : group)
-		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
-		}
-
 		if (camera)
-			Renderer::Render(camera->GetViewProjection());
+		{
+			Renderer::Begin(camera->GetViewProjection());
+
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+			for (auto entity : group)
+			{
+				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
+			}
+
+			Renderer::End();
+		}
 	}
 
 	void Scene::UpdateRuntime()
@@ -51,15 +53,6 @@ namespace MoonEngine
 			}
 			nsc.Instance->Update();
 		});
-
-		Renderer::Clear();
-
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
-		for (auto entity : group)
-		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color);
-		}
 
 		Camera* sceneCamera = nullptr;
 		glm::vec3 cameraPosition;
@@ -81,7 +74,17 @@ namespace MoonEngine
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
 			glm::mat4 m_View = glm::inverse(transform);
 			glm::mat4 viewProjection = sceneCamera->GetProjection() * m_View;
-			Renderer::Render(viewProjection);
+
+			Renderer::Begin(viewProjection);
+
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+			for (auto entity : group)
+			{
+				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
+			}
+
+			Renderer::End();
 		}
 	}
 

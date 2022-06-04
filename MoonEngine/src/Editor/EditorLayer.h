@@ -40,8 +40,8 @@ namespace MoonEngine
 		bool m_IsDebugActive = false;
 		
 		bool m_IsPlaying = false;
-		void PlayScene();
-		void StopScene();
+		void OnPlay();
+		void OnStop();
 
 		void Dockspace();
 		void Menubar();

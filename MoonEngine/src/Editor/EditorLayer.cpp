@@ -47,7 +47,7 @@ namespace MoonEngine
 
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
-		loadDialog.SetPwd("res/Assets");
+		loadDialog.SetPwd("res/Assets/Scenes");
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -55,11 +55,15 @@ namespace MoonEngine
 		m_EditorCamera->OnEvent(event);
 	}
 
-	void EditorLayer::PlayScene()
-	{}
+	void EditorLayer::OnPlay()
+	{
+		m_Scene->OnPlay();
+	}
 
-	void EditorLayer::StopScene()
-	{}
+	void EditorLayer::OnStop()
+	{
+		m_Scene->OnReset();
+	}
 
 	void EditorLayer::DrawGUI()
 	{
@@ -330,9 +334,9 @@ namespace MoonEngine
 				{
 					m_IsPlaying = !m_IsPlaying;
 					if (m_IsPlaying)
-						PlayScene();
+						OnPlay();
 					else
-						StopScene();
+						OnStop();
 				}
 
 				float sceneNameTextSize = 200.0f;

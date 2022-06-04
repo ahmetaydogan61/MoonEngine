@@ -11,6 +11,8 @@ namespace MoonEngine
 		static float RandomFloat(float from, float to);
 		static int Lerp(int from, int to, int time);
 		static float Lerp(float from, float to, float time);
-		static glm::vec2 Lerp(glm::vec2 from, glm::vec2 to, float time);
+		static glm::vec2 Lerp(const glm::vec2& from, const glm::vec2& to, float time);
+		static glm::vec3 Lerp(const glm::vec3& from, const glm::vec3& to, float time);
+		static glm::vec4 Lerp(const glm::vec4& from, const glm::vec4& to, float time);
 	};
 }

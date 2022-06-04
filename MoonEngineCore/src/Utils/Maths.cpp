@@ -124,7 +124,17 @@ namespace MoonEngine
 		return from + time * (to - from);
 	}
 
-	glm::vec2 Maths::Lerp(glm::vec2 from, glm::vec2 to, float time)
+	glm::vec2 Maths::Lerp(const glm::vec2& from, const glm::vec2& to, float time)
+	{
+		return from + time * (to - from);
+	}
+
+	glm::vec3 Maths::Lerp(const glm::vec3& from,const glm::vec3& to, float time)
+	{
+		return from + time * (to - from);
+	}
+
+	glm::vec4 Maths::Lerp(const glm::vec4& from, const glm::vec4& to, float time)
 	{
 		return from + time * (to - from);
 	}
