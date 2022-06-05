@@ -7,14 +7,17 @@
 #include "Renderer/Texture.h"
 #include "Renderer/Frambuffer.h"
 #include "glad/glad.h"
+#include "Systems/ParticleSystem.h"
 
 namespace MoonEngine
 {
 	Scene* Scene::m_ActiveScene;
+	Ref<ParticleSystem> particleSystem;
 
 	Scene::Scene()
 	{
 		m_ActiveScene = this;
+		particleSystem = CreateRef<ParticleSystem>();
 		DebugSys("Scene Created");
 	}
 
@@ -83,6 +86,16 @@ namespace MoonEngine
 				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 			}
+
+			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
+			for (auto entity : particleGroup)
+			{
+				auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
+				for (int i = 0; i < particle.count; i++)
+					particleSystem->Emit(particle, transform.Position);
+			}
+
+			particleSystem->Update();
 
 			Renderer::End();
 		}

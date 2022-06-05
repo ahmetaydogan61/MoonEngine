@@ -15,17 +15,12 @@ namespace MoonEngine
 	unsigned int vb;
 	unsigned int ib;
 
-	const uint32_t maxQuads = 1000;
+	const uint32_t maxQuads = 2500;
 	const uint32_t maxVertex = maxQuads * 4;
 	const uint32_t maxIndex = maxQuads * 6;
+	Renderer::RenderData* Renderer::rData;
 
-	struct RenderData
-	{
-		glm::mat4 ViewProjection;
-	};
-	static RenderData* rData;
-
-	glm::vec4 vertices[] =
+	glm::vec4 vertexPosition[] =
 	{
 		{ -0.5f, -0.5f, 0.0f, 1.0f},
 		{  0.5f, -0.5f, 0.0f, 1.0f},
@@ -50,39 +45,39 @@ namespace MoonEngine
 	};
 	int strideLenght = 10;
 
-	Vertex* verts;
+	Vertex* vertices;
 	int index = 0;
 	int quadCount = 0;
 
 	Ref<Shader> Renderer::m_DefaultShader;
 	Ref<Texture> Renderer::m_WhiteTexture;
 	std::unordered_map<Ref<Texture>, int> Renderer::m_TextureCache;
-	int Renderer::m_TextureID = 0;
+	int Renderer::m_TextureIndex = 0;
 	int Renderer::m_TextureIDs[32];
 
 	int Renderer::CreateTextureCache(const Ref<Texture>& texture)
 	{
-		if (m_TextureID > 32)
+		if (m_TextureIndex > 32)
 			return 0;
 		if (m_TextureCache.find(texture) != m_TextureCache.end())
 			return m_TextureCache[texture];
-		m_TextureID++;
-		texture->Bind(m_TextureID);
-		m_TextureCache[texture] = m_TextureID;
-		return m_TextureID;
+		m_TextureIndex++;
+		texture->Bind(m_TextureIndex);
+		m_TextureCache[texture] = m_TextureIndex;
+		return m_TextureIndex;
 	}
 
 	void Renderer::Init()
 	{
 		rData = new RenderData();
-		verts = new Vertex[maxVertex * sizeof(Vertex)];
+		vertices = new Vertex[maxVertex * sizeof(Vertex)];
 
 		glGenVertexArrays(1, &va);
 		glBindVertexArray(va);
 
 		glGenBuffers(1, &vb);
 		glBindBuffer(GL_ARRAY_BUFFER, vb);
-		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), 0);
@@ -95,7 +90,6 @@ namespace MoonEngine
 
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, texID)));
-
 
 		unsigned int* quadIndices = new unsigned int[maxIndex];
 		int indicesOffset = 0;
@@ -139,6 +133,7 @@ namespace MoonEngine
 	{
 		Clear();
 		rData->ViewProjection = viewProjection;
+		rData->DrawCalls = 0;
 	}
 
 	void Renderer::End()
@@ -146,25 +141,11 @@ namespace MoonEngine
 		Render();
 		index = 0;
 		quadCount = 0;
+		m_TextureCache.clear();
+		m_TextureIndex = 0;
 	}
 
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
-	{
-		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
-
-		for (int i = 0; i < 4; i++)
-		{
-			verts[i + (quadCount * 4)].position = transform * vertices[i];
-			verts[i + (quadCount * 4)].color = color;
-			verts[i + (quadCount * 4)].texCoords = texCoords[i];
-			verts[i + (quadCount * 4)].texID = 0;
-			index += strideLenght;
-		}
-		quadCount++;
-	}
-
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color,const Ref<Texture>& texture)
 	{
 		if (quadCount >= maxQuads)
 			End();
@@ -174,13 +155,51 @@ namespace MoonEngine
 
 		for (int i = 0; i < 4; i++)
 		{
-			verts[i + (quadCount * 4)].position = transform * vertices[i];
-			verts[i + (quadCount * 4)].color = color;
-			verts[i + (quadCount * 4)].texCoords = texCoords[i];
+			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
+			vertices[i + (quadCount * 4)].color = color;
+			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
+			vertices[i + (quadCount * 4)].texID = 0;
+			index += strideLenght;
+		}
+		quadCount++;
+	}
+
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, const Ref<Texture>& texture)
+	{
+		if (quadCount >= maxQuads || m_TextureIndex >= 32)
+			End();
+
+		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
+
+		for (int i = 0; i < 4; i++)
+		{
+			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
+			vertices[i + (quadCount * 4)].color = color;
+			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
 			if(texture == nullptr)
-				verts[i + (quadCount * 4)].texID = 0;
+				vertices[i + (quadCount * 4)].texID = 0;
 			else	
-				verts[i + (quadCount * 4)].texID = CreateTextureCache(texture);
+				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
+			index += strideLenght;
+		}
+		quadCount++;
+	}
+
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color,const Ref<Texture>& texture)
+	{
+		if (quadCount >= maxQuads || m_TextureIndex >= 32)
+			End();
+
+		for (int i = 0; i < 4; i++)
+		{
+			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
+			vertices[i + (quadCount * 4)].color = color;
+			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
+			if (texture == nullptr)
+				vertices[i + (quadCount * 4)].texID = 0;
+			else
+				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
 			index += strideLenght;
 		}
 		quadCount++;
@@ -188,12 +207,15 @@ namespace MoonEngine
 
 	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
+		if (quadCount >= maxQuads)
+			End();
+
 		for (int i = 0; i < 4; i++)
 		{
-			verts[i + (quadCount * 4)].position = transform * vertices[i];
-			verts[i + (quadCount * 4)].color = color;
-			verts[i + (quadCount * 4)].texCoords = texCoords[i];
-			verts[i + (quadCount * 4)].texID = 0;
+			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
+			vertices[i + (quadCount * 4)].color = color;
+			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
+			vertices[i + (quadCount * 4)].texID = 0;
 			index += strideLenght;
 		}
 		quadCount++;
@@ -201,18 +223,22 @@ namespace MoonEngine
 
 	void Renderer::Render()
 	{
-
-		glBindVertexArray(va);
-		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &verts[0], GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
-		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
+		if (quadCount <= 0)
+			return;
 
 		m_WhiteTexture->Bind(0);
 
 		m_DefaultShader->Bind();
 		m_DefaultShader->SetUniformMat4("uVP", rData->ViewProjection);
 		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
+	
+		glBindVertexArray(va);
+		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
+
+		rData->DrawCalls++;
 	}
 
 	void Renderer::Destroy()

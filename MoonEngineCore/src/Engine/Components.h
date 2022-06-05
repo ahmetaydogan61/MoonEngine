@@ -86,4 +86,24 @@ namespace MoonEngine
 			DestroyScript = [](Script* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 		}
 	};
+
+	struct ParticleComponent
+	{
+		int count = 5;
+
+		//Position
+		glm::vec3 Direction, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
+
+		//Size
+		glm::vec3 SizeStart = { 0.5f, 0.5f, 0.0f }, SizeEnd = { 0.0f, 0.0f, 0.0f };
+		float SizeChangeSpeed = 1.0f;
+
+		//Color
+		Ref<Texture> Texture = nullptr;
+		glm::vec4 ColorStart = { 1.0f, 0.0f, 0.0f, 1.0f }, ColorEnd = { 0.0f, 0.4f, 1.0f, 1.0f };
+		float ColorChangeSpeed = 2.0f;
+
+		//Lifecycle
+		float LifeTime = 1.0f;
+	};
 }

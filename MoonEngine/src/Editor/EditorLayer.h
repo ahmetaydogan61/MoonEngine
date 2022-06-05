@@ -29,7 +29,7 @@ namespace MoonEngine
 		Ref<Texture> m_RotateTexture;
 		Ref<Texture> m_ResizeTexture;
 
-		HierarchyView m_HierarchyView;
+		HierarchyView m_HierarchyView; 
 		EditorSettingsView m_EditorSettingsView;
 		ContentView m_ContentView;
 		bool m_IsHierarchyActive = true;

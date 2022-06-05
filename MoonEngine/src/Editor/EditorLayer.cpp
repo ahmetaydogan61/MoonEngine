@@ -13,6 +13,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "Engine/Systems/ParticleSystem.h"
+
 namespace MoonEngine
 {
 	bool demoWindow = false;
@@ -43,7 +45,7 @@ namespace MoonEngine
 
 		saveDialog.SetTitle("Save Scene");
 		saveDialog.SetTypeFilters({ ".moon" });
-		saveDialog.SetPwd("res/Assets");
+		saveDialog.SetPwd("res/Assets/Scenes");
 
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
@@ -125,7 +127,7 @@ namespace MoonEngine
 
 			m_EditorCamera->Update();
 
-			if (!Input::GetKey(KEY_LEFT_CONTROL))
+			if (!Input::GetKey(KEY_LEFT_CONTROL) && m_ViewportFocused)
 				if (Input::GetKey(KEY_Q))
 					m_GizmoSelection = GIZMOSELECTION::NONE;
 				else if (Input::GetKey(KEY_W))
@@ -387,6 +389,8 @@ namespace MoonEngine
 	{
 		ImGui::Begin(ICON_FK_CODE "Debug", &state);
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
+		ImGui::Text("Particles: %d", ParticleSystem::AWAKECOUNT);
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
 		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
 		ImGui::End();

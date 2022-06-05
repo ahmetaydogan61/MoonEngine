@@ -53,6 +53,7 @@ namespace MoonEngine
 	{
 		bool createEntity = false;
 		bool createCamera = false;
+		bool createParticle = false;
 
 		float height = ImGui::GetFrameHeight();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
@@ -73,6 +74,10 @@ namespace MoonEngine
 
 				if (ImGui::MenuItem("Create Entity"))
 					createEntity = true;
+
+				if (ImGui::MenuItem("Create Particle"))
+					createParticle = true;
+
 				ImGui::EndPopup();
 			}
 			ImGui::EndMenuBar();
@@ -93,6 +98,9 @@ namespace MoonEngine
 			if (ImGui::MenuItem("Create Entity"))
 				createEntity = true;
 
+			if (ImGui::MenuItem("Create Particle"))
+				createParticle = true;
+
 			ImGui::EndPopup();
 		}
 
@@ -100,7 +108,10 @@ namespace MoonEngine
 			m_SelectedEntity = {};
 
 		if (createEntity)
-			m_Scene->CreateEntity();
+		{
+			Entity entity = m_Scene->CreateEntity();
+			m_SelectedEntity = entity;
+		}
 
 		if (createCamera)
 		{
@@ -108,6 +119,16 @@ namespace MoonEngine
 			entity.GetComponent<IdentityComponent>().Name = "Camera";
 			entity.AddComponent<CameraComponent>();
 			entity.RemoveComponent<SpriteComponent>();
+			m_SelectedEntity = entity;
+		}
+
+		if (createParticle)
+		{
+			Entity& entity = m_Scene->CreateEntity();
+			entity.RemoveComponent<SpriteComponent>();
+			entity.GetComponent<IdentityComponent>().Name = "Particle";
+			entity.AddComponent<ParticleComponent>();
+			m_SelectedEntity = entity;
 		}
 
 		ImGui::End();
@@ -183,6 +204,11 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Camera"))
 					if (!m_SelectedEntity.HasComponent<CameraComponent>())
 						m_SelectedEntity.AddComponent<CameraComponent>();
+
+				if (ImGui::MenuItem("Particle"))
+					if (!m_SelectedEntity.HasComponent<ParticleComponent>())
+						m_SelectedEntity.AddComponent<ParticleComponent>();
+
 				ImGui::EndPopup();
 			}
 
@@ -258,6 +284,73 @@ namespace MoonEngine
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 		});
 
+		ShowComponent<ParticleComponent>("Particle", [](ParticleComponent& component)
+		{
+			ImGui::DragInt("Count", &component.count, 0.1f);
+
+			ImGui::DragFloat("Lifetime", &component.LifeTime, 0.1f, 0.0f, 0.0f, "%.2f");
+			
+			ImGui::DragFloat3("Direction", &component.Direction[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::DragFloat3("Direction Velocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");
+
+			ImGui::DragFloat3("Start Size", &component.SizeStart[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::DragFloat3("End Size", &component.SizeEnd[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::DragFloat("Size Change Speed", &component.SizeChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+
+			ImGui::ColorEdit4("Start Color", &component.ColorStart[0]);
+			ImGui::ColorEdit4("End Color", &component.ColorEnd[0]);
+			ImGui::DragFloat("Color Change Speed", &component.ColorChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+
+			ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+			float cellMultp = 3.0f;
+			float cellSize = 25.0f;
+			float cellPadding = 2.0f;
+
+			ImGui::Text("Image:"); ImGui::SameLine();
+			auto& imagePos = ImGui::GetCursorPos();
+			ImGui::Image((ImTextureID)m_NoSpriteTexture->GetID(), { cellSize * cellMultp, cellSize * cellMultp });
+			Ref<Texture> componentTexture = component.Texture;
+			if (componentTexture)
+			{
+				ImGui::SetCursorPos(imagePos);
+				ImGuiUtils::AddPadding(cellSize / cellPadding, cellSize / cellPadding);
+				ImGuiUtils::Image((ImTextureID)componentTexture->GetID(), { cellSize * cellPadding, cellSize * cellPadding });
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path texturePath = std::filesystem::path("res/Assets") / path;
+					Ref<Texture> texture = CreateRef<Texture>(texturePath.string());
+					if (texture->IsValid())
+						component.Texture = texture;
+					else
+						DebugErr(texturePath.string());
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (componentTexture)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+				ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+				ImGui::SameLine();
+				ImGui::SetCursorPos(imagePos);
+				ImGuiUtils::AddPadding(2.0f * cellSize, 0.0f);
+				if (ImGui::Button("X##DeleteButton", { cellSize, cellSize }))
+				{
+					componentTexture = nullptr;
+					component.Texture = nullptr;
+				}
+
+				ImGuiUtils::AddPadding(0.0f, cellSize / cellPadding);
+				ImGui::PopStyleColor(2);
+			}
+		});
+
 		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
 		{
 			float winWidth = 100.0f;
@@ -278,6 +371,7 @@ namespace MoonEngine
 		ImGui::PopStyleColor(3);
 	}
 
+	//Tools
 	template<typename T, typename Function>
 	void HierarchyView::ShowComponent(std::string componentName, Function function)
 	{
