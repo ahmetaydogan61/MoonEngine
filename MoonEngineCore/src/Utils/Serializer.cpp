@@ -115,6 +115,56 @@ namespace MoonEngine
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<SpriteComponent>())
+		{
+			out << YAML::Key << "SpriteComponent";
+			out << YAML::BeginMap;
+
+			SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
+			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
+			if (spriteComponent.Texture)
+				out << YAML::Key << "TexturePath" << YAML::Value << spriteComponent.Texture->Filepath;
+			else
+				out << YAML::Key << "TexturePath" << YAML::Value << "null";
+
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<ParticleComponent>())
+		{
+			out << YAML::Key << "ParticleComponent";
+			out << YAML::BeginMap;
+
+			ParticleComponent& particleComponent = entity.GetComponent<ParticleComponent>();
+			
+			out << YAML::Key << "Rate" << YAML::Value << particleComponent.Rate;
+
+			//Position
+			out << YAML::Key << "Direction" << YAML::Value << particleComponent.Direction;
+			out << YAML::Key << "DirectionVelocity" << YAML::Value << particleComponent.DirectionVelocity;
+
+			//Size
+			out << YAML::Key << "SizeStart" << YAML::Value << particleComponent.SizeStart;
+			out << YAML::Key << "SizeEnd" << YAML::Value << particleComponent.SizeEnd;
+			out << YAML::Key << "SizeChangeSpeed" << YAML::Value << particleComponent.SizeChangeSpeed;
+			
+			//Color
+			if (particleComponent.Texture)
+				out << YAML::Key << "TexturePath" << YAML::Value << particleComponent.Texture->Filepath;
+			else
+				out << YAML::Key << "TexturePath" << YAML::Value << "null";
+
+			out << YAML::Key << "ColorStart" << YAML::Value << particleComponent.ColorStart;
+			out << YAML::Key << "ColorEnd" << YAML::Value << particleComponent.ColorEnd;
+			out << YAML::Key << "ColorChangeSpeed" << YAML::Value << particleComponent.ColorChangeSpeed;
+
+
+			//Lifecylce
+			out << YAML::Key << "Lifetime" << YAML::Value << particleComponent.Lifetime;
+
+			out << YAML::EndMap;
+		}
+
 		if (entity.HasComponent<CameraComponent>())
 		{
 			out << YAML::Key << "CameraComponent";
@@ -124,21 +174,6 @@ namespace MoonEngine
 
 			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.isMain;
 			out << YAML::Key << "Distance" << YAML::Value << cameraComponent.Distance;
-
-			out << YAML::EndMap;
-		}
-
-		if (entity.HasComponent<SpriteComponent>())
-		{
-			out << YAML::Key << "SpriteComponent";
-			out << YAML::BeginMap;
-
-			SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
-			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
-			if(spriteComponent.Texture)
-					out << YAML::Key << "TexturePath" << YAML::Value << spriteComponent.Texture->Filepath;
-			else
-					out << YAML::Key << "TexturePath" << YAML::Value << "null";
 
 			out << YAML::EndMap;
 		}
@@ -221,11 +256,29 @@ namespace MoonEngine
 				else
 					deserializedEntity.RemoveComponent<SpriteComponent>();
 
+				auto particleComponent = entity["ParticleComponent"];
+				if (particleComponent)
+				{
+					ParticleComponent& component = deserializedEntity.AddComponent<ParticleComponent>();
+					component.Rate = particleComponent["Rate"].as<int>();
+					component.Direction = particleComponent["Direction"].as<glm::vec3>();
+					component.DirectionVelocity = particleComponent["DirectionVelocity"].as<glm::vec3>();
+					component.SizeStart = particleComponent["SizeStart"].as<glm::vec3>();
+					component.SizeEnd = particleComponent["SizeEnd"].as<glm::vec3>();
+					component.SizeChangeSpeed = particleComponent["SizeChangeSpeed"].as<float>();
+					auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
+					if (texturePath != "null")
+						component.Texture = CreateRef<Texture>(spriteComponent["TexturePath"].as<std::string>());
+					component.ColorStart= particleComponent["ColorStart"].as<glm::vec4>();
+					component.ColorEnd= particleComponent["ColorEnd"].as<glm::vec4>();
+					component.ColorChangeSpeed= particleComponent["ColorChangeSpeed"].as<float>();
+					component.Lifetime = particleComponent["Lifetime"].as<float>();
+				}
+
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
-					auto& component = deserializedEntity.AddComponent<CameraComponent>();
-
+					CameraComponent& component = deserializedEntity.AddComponent<CameraComponent>();
 					component.isMain = cameraComponent["IsMain"].as<bool>();
 					component.Distance = cameraComponent["Distance"].as<float>();
 				}

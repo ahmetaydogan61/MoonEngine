@@ -25,8 +25,8 @@ namespace MoonEngine
 
 			//Lifecycle
 			bool Active = false;
-			float LifeTime = 1.0f;
-			float LifeRemaining = 0.0f;
+			float Lifetime = 1.0f;
+			float LifeElapsed = 0.0f;
 		};
 		std::vector<Particle> m_ParticlePool;
 		uint32_t m_PoolIndex;

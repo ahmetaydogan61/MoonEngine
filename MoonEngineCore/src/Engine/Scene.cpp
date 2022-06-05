@@ -12,12 +12,11 @@
 namespace MoonEngine
 {
 	Scene* Scene::m_ActiveScene;
-	Ref<ParticleSystem> particleSystem;
 
 	Scene::Scene()
 	{
 		m_ActiveScene = this;
-		particleSystem = CreateRef<ParticleSystem>();
+		m_ParticleSystem = CreateRef<ParticleSystem>();
 		DebugSys("Scene Created");
 	}
 
@@ -80,22 +79,22 @@ namespace MoonEngine
 
 			Renderer::Begin(viewProjection);
 
+			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
+			for (auto entity : particleGroup)
+			{
+				auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
+				for (int i = 0; i < particle.Rate; i++)
+					m_ParticleSystem->Emit(particle, transform.Position);
+			}
+
+			m_ParticleSystem->Update();
+
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 			}
-
-			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
-			for (auto entity : particleGroup)
-			{
-				auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
-				for (int i = 0; i < particle.count; i++)
-					particleSystem->Emit(particle, transform.Position);
-			}
-
-			particleSystem->Update();
 
 			Renderer::End();
 		}

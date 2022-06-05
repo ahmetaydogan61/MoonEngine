@@ -7,7 +7,8 @@ namespace MoonEngine
 {
 	class Entity;
 	class Framebuffer;
-	
+	class ParticleSystem;
+
 	class Scene
 	{
 	private:
@@ -16,6 +17,7 @@ namespace MoonEngine
 		friend class HierarchyView;
 		friend class Serializer;
 		entt::registry m_Registry;
+		Ref<ParticleSystem> m_ParticleSystem;
 	public:
 		std::string SceneName = "Untitled";
 		Scene();

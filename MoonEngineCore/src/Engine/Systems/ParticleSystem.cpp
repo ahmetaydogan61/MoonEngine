@@ -24,17 +24,17 @@ namespace MoonEngine
 			if (!particle.Active)
 				continue;
 
-			if (particle.LifeRemaining >= particle.LifeTime)
+			if (particle.LifeElapsed >= particle.Lifetime)
 			{
 				particle.Active = false;
 				AWAKECOUNT--;
 				continue;
 			}
 
-			particle.LifeRemaining += deltaTime;
+			particle.LifeElapsed += deltaTime;
 			particle.Position += particle.Direction * deltaTime;
 
-			float life = particle.LifeRemaining / particle.LifeTime;
+			float life = particle.LifeElapsed / particle.Lifetime;
 			glm::vec4 color = Maths::Lerp(particle.ColorStart, particle.ColorEnd, life * particle.ColorChangeSpeed);
 
 			if (particle.Size.x > 0.0f && particle.Size.y > 0.0f)
@@ -82,8 +82,8 @@ namespace MoonEngine
 		particle.ColorChangeSpeed = component.ColorChangeSpeed;
 
 		//Lifecycle
-		particle.LifeTime = component.LifeTime;
-		particle.LifeRemaining = 0.0f;
+		particle.Lifetime = component.Lifetime;
+		particle.LifeElapsed = 0.0f;
 
 		m_PoolIndex--;
 		if (m_PoolIndex == 0)

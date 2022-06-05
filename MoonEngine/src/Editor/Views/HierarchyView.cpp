@@ -286,9 +286,9 @@ namespace MoonEngine
 
 		ShowComponent<ParticleComponent>("Particle", [](ParticleComponent& component)
 		{
-			ImGui::DragInt("Count", &component.count, 0.1f);
+			ImGui::DragInt("Count", &component.Rate, 0.1f);
 
-			ImGui::DragFloat("Lifetime", &component.LifeTime, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::DragFloat("Lifetime", &component.Lifetime, 0.1f, 0.0f, 0.0f, "%.2f");
 			
 			ImGui::DragFloat3("Direction", &component.Direction[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::DragFloat3("Direction Velocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");

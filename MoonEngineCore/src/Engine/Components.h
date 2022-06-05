@@ -89,7 +89,7 @@ namespace MoonEngine
 
 	struct ParticleComponent
 	{
-		int count = 5;
+		int Rate = 5;
 
 		//Position
 		glm::vec3 Direction, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
@@ -104,6 +104,6 @@ namespace MoonEngine
 		float ColorChangeSpeed = 2.0f;
 
 		//Lifecycle
-		float LifeTime = 1.0f;
+		float Lifetime = 1.0f;
 	};
 }
