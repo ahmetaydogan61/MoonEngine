@@ -16,7 +16,6 @@ namespace MoonEngine
 	Scene::Scene()
 	{
 		m_ActiveScene = this;
-		m_ParticleSystem = CreateRef<ParticleSystem>();
 		DebugSys("Scene Created");
 	}
 
@@ -63,7 +62,7 @@ namespace MoonEngine
 		for (auto entity : cameras)
 		{
 			auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
-			if (camera.isMain)
+			if (camera.IsMain)
 			{
 				sceneCamera = &camera.Camera;
 				cameraPosition = transform.Position;
@@ -79,15 +78,31 @@ namespace MoonEngine
 
 			Renderer::Begin(viewProjection);
 
+			float deltaTime = Time::DeltaTime();
+
 			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
 			for (auto entity : particleGroup)
 			{
 				auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
-				for (int i = 0; i < particle.Rate; i++)
-					m_ParticleSystem->Emit(particle, transform.Position);
-			}
+				if (particle.Play)
+				{
+					if (particle.m_DurationElapsed == 0 && particle.BurstMode)
+						particle.Spawn(particle, transform.Position);
+					else if (!particle.BurstMode)
+						particle.Spawn(particle, transform.Position);
 
-			m_ParticleSystem->Update();
+					particle.m_DurationElapsed += deltaTime;
+					if (particle.m_DurationElapsed >= particle.Duration)
+					{
+						particle.m_DurationElapsed = 0.0f;
+						particle.Play = particle.AutoPlay;
+					}
+				}
+				else
+					particle.m_DurationElapsed = 0.0f;
+
+				particle.Update();
+			}
 
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group)

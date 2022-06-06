@@ -10,31 +10,30 @@ namespace MoonEngine
 	private:
 		struct Particle
 		{
+			//Lifecycle
+			bool Active = false;
+			float Lifetime, LifeElapsed;
+
 			//Position
-			glm::vec3 Position;
-			glm::vec3 Direction;
+			glm::vec3 Position, Direction;
 
 			//Size
-			glm::vec3 Size, SizeStart, SizeEnd;
+			glm::vec3 SizeStart, SizeEnd;
 			float SizeChangeSpeed;
 
 			//Color
 			Ref<Texture> Texture;
 			glm::vec4 ColorStart, ColorEnd;
 			float ColorChangeSpeed;
-
-			//Lifecycle
-			bool Active = false;
-			float Lifetime = 1.0f;
-			float LifeElapsed = 0.0f;
 		};
 		std::vector<Particle> m_ParticlePool;
 		uint32_t m_PoolIndex;
 	public:
-		static int AWAKECOUNT;
 		ParticleSystem();
 
-		void Emit(const ParticleComponent& component, glm::vec3 position);
+		void Spawn(const ParticleComponent& component, glm::vec3 position);
 		void Update();
+		void ResizePool(int size) { m_ParticlePool.resize(size); m_PoolIndex = m_ParticlePool.size() - 1; }
+		int PoolSize() { return m_ParticlePool.size(); }
 	};
 }

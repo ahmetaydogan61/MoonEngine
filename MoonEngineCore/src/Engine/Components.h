@@ -6,6 +6,8 @@
 #include "endianness.h"
 #include "uuid_v4.h"
 
+#include "Systems/ParticleSystem.h"
+
 namespace MoonEngine
 {
 	class Scene;
@@ -60,16 +62,16 @@ namespace MoonEngine
 	struct CameraComponent
 	{
 		SceneCamera Camera;
-		bool isMain = true;
+		bool IsMain = true;
 		float Distance = 5.0f;
 
 		CameraComponent()
 		{
 			Camera.Resize(1.0f, 1.0f, Distance);
-			isMain = true;
+			IsMain = true;
 		};
 		~CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(const CameraComponent& camera) = default;
 	};
 
 	struct Script
@@ -89,10 +91,28 @@ namespace MoonEngine
 
 	struct ParticleComponent
 	{
-		int Rate = 5;
+	private:
+		ParticleSystem m_ParticleSystem;
+		float m_DurationElapsed = 0.0f;
+		friend class Scene;
+	public:
+		ParticleComponent()
+		{
+			m_ParticleSystem.ResizePool(MaxParticles);
+		}
+		ParticleComponent(const ParticleComponent& particle) = default;
+		~ParticleComponent() = default;
+
+		int Rate = 3;
+		int MaxParticles = 5000;
+		
+		bool BurstMode = false;
+		bool AutoPlay = true, Play = true;
+		float Duration = 0.5f;
+		float Lifetime = 1.5f;
 
 		//Position
-		glm::vec3 Direction, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
+		glm::vec3 Direction{}, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
 
 		//Size
 		glm::vec3 SizeStart = { 0.5f, 0.5f, 0.0f }, SizeEnd = { 0.0f, 0.0f, 0.0f };
@@ -101,9 +121,27 @@ namespace MoonEngine
 		//Color
 		Ref<Texture> Texture = nullptr;
 		glm::vec4 ColorStart = { 1.0f, 0.0f, 0.0f, 1.0f }, ColorEnd = { 0.0f, 0.4f, 1.0f, 1.0f };
-		float ColorChangeSpeed = 2.0f;
+		float ColorChangeSpeed = 1.0f;
 
-		//Lifecycle
-		float Lifetime = 1.0f;
+		int PoolSize()
+		{
+			return m_ParticleSystem.PoolSize();
+		}
+
+		void Resize()
+		{
+			m_ParticleSystem.ResizePool(MaxParticles);
+		}
+
+		void Spawn(const ParticleComponent& component, const glm::vec3 position)
+		{
+			for (int i = 0; i < Rate; i++)
+				m_ParticleSystem.Spawn(component, position);
+		}
+
+		void Update()
+		{
+			m_ParticleSystem.Update();
+		}
 	};
 }

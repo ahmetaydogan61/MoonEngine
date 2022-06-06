@@ -245,6 +245,7 @@ namespace MoonEngine
 
 		if (saveDialog.HasSelected())
 		{
+			//Save Scene
 			Serializer serializer{ m_Scene };
 			serializer.Serialize(saveDialog.GetSelected().string() + "/" + m_Scene->SceneName.c_str() + ".moon");
 			saveDialog.ClearSelected();
@@ -252,7 +253,10 @@ namespace MoonEngine
 
 		if (loadDialog.HasSelected())
 		{
+			//Load Scene
 			m_Scene = CreateRef<Scene>();
+			m_IsPlaying = false;
+			OnStop();
 			m_HierarchyView.SetScene(m_Scene);
 			Serializer serializer{ m_Scene };
 			serializer.Deserialize(loadDialog.GetSelected().string());
@@ -365,6 +369,9 @@ namespace MoonEngine
 			if (ImGui::BeginMenuBar())
 			{
 				ImGui::Text(m_IsPlaying ? "Play Mode" : "Edit Mode");
+				std::string sceneName = "Active Scene: " + m_Scene->SceneName;
+				auto& itemWidth = ImGui::CalcTextSize(sceneName.c_str());
+				ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - itemWidth.x - ImGui::GetStyle().FramePadding.x, 0.0f);
 				ImGui::Text("Active Scene: %s", m_Scene->SceneName.c_str());
 				ImGui::EndMenuBar();
 			}
@@ -390,7 +397,6 @@ namespace MoonEngine
 		ImGui::Begin(ICON_FK_CODE "Debug", &state);
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
-		ImGui::Text("Particles: %d", ParticleSystem::AWAKECOUNT);
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
 		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
 		ImGui::End();

@@ -18,7 +18,7 @@ namespace ImGuiUtils
 		ImGui::SetCursorScreenPos(p0);
 	}
 
-	static void TextCentered(const char* text, bool sameLine)
+	static void Label(const char* text, bool sameLine)
 	{
 		ImVec4 buttonColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);

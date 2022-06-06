@@ -143,12 +143,12 @@ namespace MoonEngine
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		bool opened = ImGui::TreeNodeEx(name.c_str(), flags);
-		if (ImGui::IsItemClicked(0))
+
+		if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1))
 			m_SelectedEntity = entity;
 
 		if (ImGui::BeginPopupContextItem())
 		{
-			m_SelectedEntity = entity;
 			if (ImGui::MenuItem("Delete Entity"))
 			{
 				entity.Destroy();
@@ -169,7 +169,7 @@ namespace MoonEngine
 
 		if (m_SelectedEntity)
 		{
-			ImGuiUtils::TextCentered("Name", true);
+			ImGuiUtils::Label("Name", true);
 			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x);
 			ImGui::InputText("##Name", &m_SelectedEntity.GetComponent<IdentityComponent>().Name);
 
@@ -191,7 +191,7 @@ namespace MoonEngine
 			ImGui::Separator();
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-			ImGuiUtils::TextCentered("Add Component", true);
+			ImGuiUtils::Label("Add Component", true);
 
 			if (ImGui::Button("+", { 25.0f, 25.0f }))
 				ImGui::OpenPopup("AddComponents");
@@ -286,28 +286,137 @@ namespace MoonEngine
 
 		ShowComponent<ParticleComponent>("Particle", [](ParticleComponent& component)
 		{
-			ImGui::DragInt("Count", &component.Rate, 0.1f);
+			float columnWidth = 100.0f;
+			float columnSpacing = 10.0f;
 
-			ImGui::DragFloat("Lifetime", &component.Lifetime, 0.1f, 0.0f, 0.0f, "%.2f");
-			
-			ImGui::DragFloat3("Direction", &component.Direction[0], 0.1f, 0.0f, 0.0f, "%.2f");
-			ImGui::DragFloat3("Direction Velocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Play Options", false);
+			ImGui::NextColumn();
+			if (ImGui::Button("Play"))
+				component.Play = true;
+			ImGui::SameLine();
+			ImGuiUtils::Label("Auto Play", true);
+			ImGui::Checkbox("##AutoPlay", &component.AutoPlay);
+			ImGui::Columns(1);
 
-			ImGui::DragFloat3("Start Size", &component.SizeStart[0], 0.1f, 0.0f, 0.0f, "%.2f");
-			ImGui::DragFloat3("End Size", &component.SizeEnd[0], 0.1f, 0.0f, 0.0f, "%.2f");
-			ImGui::DragFloat("Size Change Speed", &component.SizeChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Duration", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat("##Duration", &component.Duration, 0.1f);
+			ImGui::Columns(1);
 
-			ImGui::ColorEdit4("Start Color", &component.ColorStart[0]);
-			ImGui::ColorEdit4("End Color", &component.ColorEnd[0]);
-			ImGui::DragFloat("Color Change Speed", &component.ColorChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGuiUtils::AddPadding(0.0f, 5.0f);
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Max Particles", false);
+			ImGui::NextColumn();
+			ImGui::DragInt("##MaxParts", &component.MaxParticles);
+			ImGui::SameLine();
+			if (component.MaxParticles != component.PoolSize())
+				if (ImGui::Button("Apply"))
+					component.Resize();
+			ImGui::Columns(1);
 
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Burst Mode", false);
+			ImGui::NextColumn();
+			ImGui::Checkbox("##Burst", &component.BurstMode);
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Rate", false);
+			ImGui::NextColumn();
+			ImGui::DragInt("##Rate", &component.Rate, 0.1f);
+			ImGui::Columns(1);
+
+			ImGuiUtils::AddPadding(0.0f, columnSpacing);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Lifetime", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat("##Lifetime", &component.Lifetime, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			//Speed
+			ImGuiUtils::AddPadding(0.0f, columnSpacing);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Direction", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##Direction", &component.Direction[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Direction Velocity", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##DirectionVelocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			//Size
+			ImGuiUtils::AddPadding(0.0f, columnSpacing);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Start Size", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##StartSize", &component.SizeStart[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("End Size", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##EndSize", &component.SizeEnd[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Size Change Speed", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat("##SizeChangeSpeed", &component.SizeChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			//Color
+			ImGuiUtils::AddPadding(0.0f, columnSpacing);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Start Color", false);
+			ImGui::NextColumn();
+			ImGui::ColorEdit4("##StartColor", &component.ColorStart[0]);
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("End Color", false);
+			ImGui::NextColumn();
+			ImGui::ColorEdit4("##EndColor", &component.ColorEnd[0]);
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Color Change Speed", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat("##ColorChangeSpeed", &component.ColorChangeSpeed, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			//Texture
 			float cellMultp = 3.0f;
 			float cellSize = 25.0f;
 			float cellPadding = 2.0f;
 
-			ImGui::Text("Image:"); ImGui::SameLine();
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Texture", false);
+			ImGui::NextColumn();
 			auto& imagePos = ImGui::GetCursorPos();
 			ImGui::Image((ImTextureID)m_NoSpriteTexture->GetID(), { cellSize * cellMultp, cellSize * cellMultp });
 			Ref<Texture> componentTexture = component.Texture;
@@ -349,21 +458,25 @@ namespace MoonEngine
 				ImGuiUtils::AddPadding(0.0f, cellSize / cellPadding);
 				ImGui::PopStyleColor(2);
 			}
+			ImGui::Columns(1);
 		});
+
+
 
 		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
 		{
 			float winWidth = 100.0f;
+
 			ImGui::Columns(2);
 			ImGui::SetColumnWidth(0, winWidth);
-			ImGuiUtils::TextCentered("Is Main", false);
+			ImGuiUtils::Label("Is Main", false);
 			ImGui::NextColumn();
-			ImGui::Checkbox("##IsMain", &component.isMain);
+			ImGui::Checkbox("##IsMain", &component.IsMain);
 			ImGui::Columns(1);
 
 			ImGui::Columns(2);
 			ImGui::SetColumnWidth(0, winWidth);
-			ImGuiUtils::TextCentered("Distance", true);
+			ImGuiUtils::Label("Distance", true);
 			ImGui::NextColumn();
 			ImGui::DragFloat("##Distance", &component.Distance, 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
@@ -413,7 +526,7 @@ namespace MoonEngine
 		ImGui::PushID(vecName.c_str());
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, columnWidth);
-		ImGuiUtils::TextCentered(vecName.c_str(), false);
+		ImGuiUtils::Label(vecName.c_str(), false);
 		ImGui::NextColumn();
 
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());

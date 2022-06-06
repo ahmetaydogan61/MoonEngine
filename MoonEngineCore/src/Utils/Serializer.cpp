@@ -136,8 +136,18 @@ namespace MoonEngine
 			out << YAML::BeginMap;
 
 			ParticleComponent& particleComponent = entity.GetComponent<ParticleComponent>();
-			
+
+			//Lifecycle
+			out << YAML::Key << "Play" << YAML::Value << particleComponent.Play;
+			out << YAML::Key << "AutoPlay" << YAML::Value << particleComponent.AutoPlay;
+			out << YAML::Key << "Duration" << YAML::Value << particleComponent.Duration;
+
+			out << YAML::Key << "MaxParticles" << YAML::Value << particleComponent.MaxParticles;
+			out << YAML::Key << "BurstMode" << YAML::Value << particleComponent.BurstMode;
 			out << YAML::Key << "Rate" << YAML::Value << particleComponent.Rate;
+			
+
+			out << YAML::Key << "Lifetime" << YAML::Value << particleComponent.Lifetime;
 
 			//Position
 			out << YAML::Key << "Direction" << YAML::Value << particleComponent.Direction;
@@ -158,10 +168,6 @@ namespace MoonEngine
 			out << YAML::Key << "ColorEnd" << YAML::Value << particleComponent.ColorEnd;
 			out << YAML::Key << "ColorChangeSpeed" << YAML::Value << particleComponent.ColorChangeSpeed;
 
-
-			//Lifecylce
-			out << YAML::Key << "Lifetime" << YAML::Value << particleComponent.Lifetime;
-
 			out << YAML::EndMap;
 		}
 
@@ -172,7 +178,7 @@ namespace MoonEngine
 
 			CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
 
-			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.isMain;
+			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.IsMain;
 			out << YAML::Key << "Distance" << YAML::Value << cameraComponent.Distance;
 
 			out << YAML::EndMap;
@@ -199,6 +205,18 @@ namespace MoonEngine
 
 		std::ofstream fout(filepath);
 		fout << out.c_str();
+	}
+
+	template<typename T>
+	bool GetIf(T* value, const YAML::Node& node, const char* label)
+	{
+		auto& subnode = node[label];
+		if (subnode)
+		{
+			*value = subnode.as<T>();
+			return true;
+		}
+		return false;
 	}
 
 	bool Serializer::Deserialize(const std::string& filepath)
@@ -251,7 +269,7 @@ namespace MoonEngine
 					component.Color = spriteComponent["Color"].as<glm::vec4>();
 					auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
 					if (texturePath != "null")
-						component.Texture = CreateRef<Texture>(spriteComponent["TexturePath"].as<std::string>());
+						component.Texture = CreateRef<Texture>(texturePath);
 				}
 				else
 					deserializedEntity.RemoveComponent<SpriteComponent>();
@@ -260,26 +278,40 @@ namespace MoonEngine
 				if (particleComponent)
 				{
 					ParticleComponent& component = deserializedEntity.AddComponent<ParticleComponent>();
-					component.Rate = particleComponent["Rate"].as<int>();
-					component.Direction = particleComponent["Direction"].as<glm::vec3>();
-					component.DirectionVelocity = particleComponent["DirectionVelocity"].as<glm::vec3>();
-					component.SizeStart = particleComponent["SizeStart"].as<glm::vec3>();
-					component.SizeEnd = particleComponent["SizeEnd"].as<glm::vec3>();
-					component.SizeChangeSpeed = particleComponent["SizeChangeSpeed"].as<float>();
-					auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
-					if (texturePath != "null")
-						component.Texture = CreateRef<Texture>(spriteComponent["TexturePath"].as<std::string>());
-					component.ColorStart= particleComponent["ColorStart"].as<glm::vec4>();
-					component.ColorEnd= particleComponent["ColorEnd"].as<glm::vec4>();
-					component.ColorChangeSpeed= particleComponent["ColorChangeSpeed"].as<float>();
-					component.Lifetime = particleComponent["Lifetime"].as<float>();
+					
+					GetIf<bool>(&component.Play, particleComponent, "Play");
+					GetIf<bool>(&component.AutoPlay,particleComponent, "AutoPlay");
+					GetIf<float>(&component.Duration, particleComponent, "Duration");
+
+					GetIf<int>(&component.MaxParticles, particleComponent, "MaxParticles");
+					GetIf<bool>(&component.BurstMode, particleComponent, "BurstMode");
+					GetIf<int>(&component.Rate, particleComponent, "Rate");
+					
+					GetIf<float>(&component.Lifetime, particleComponent, "Lifetime");
+					GetIf<glm::vec3>(&component.Direction, particleComponent, "Direction");
+					GetIf<glm::vec3>(&component.DirectionVelocity, particleComponent, "DirectionVelocity");
+					
+					GetIf<glm::vec3>(&component.SizeStart, particleComponent, "SizeStart");
+					GetIf<glm::vec3>(&component.SizeEnd, particleComponent, "SizeEnd");
+					GetIf<float>(&component.SizeChangeSpeed, particleComponent, "SizeChangeSpeed");
+
+					GetIf<glm::vec4>(&component.ColorStart, particleComponent, "ColorStart");
+					GetIf<glm::vec4>(&component.ColorEnd, particleComponent, "ColorEnd");
+					GetIf<float>(&component.ColorChangeSpeed, particleComponent, "ColorChangeSpeed");
+				
+					std::string texturePath;
+					if(GetIf<std::string>(&texturePath, particleComponent, "TexturePath"))
+						if (texturePath != "null")
+							component.Texture = CreateRef<Texture>(texturePath);
+
+					component.Resize();
 				}
 
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
 					CameraComponent& component = deserializedEntity.AddComponent<CameraComponent>();
-					component.isMain = cameraComponent["IsMain"].as<bool>();
+					component.IsMain = cameraComponent["IsMain"].as<bool>();
 					component.Distance = cameraComponent["Distance"].as<float>();
 				}
 			}

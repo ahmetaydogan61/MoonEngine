@@ -11,7 +11,11 @@ Entities:
       Color: [1, 1, 1, 1]
       TexturePath: res/Assets\Images\Pong\Ball.png
     ParticleComponent:
+      Play: true
+      AutoPlay: true
+      MaxParticles: 2500
       Rate: 1
+      Lifetime: 2
       Direction: [2.5999999, -1, 0]
       DirectionVelocity: [0, 1, 0]
       SizeStart: [0.5, 0.5, 0]
@@ -21,7 +25,6 @@ Entities:
       ColorStart: [0, 0.400000006, 1, 1]
       ColorEnd: [0, 0.400000006, 1, 1]
       ColorChangeSpeed: 2
-      Lifetime: 2
   - Entity: c40e71f7-9a17-459f-ae7b-f81f2359f771
     IdentityComponent:
       Name: RedCube
