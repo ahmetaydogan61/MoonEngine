@@ -24,7 +24,7 @@ namespace MoonEngine
 		void OnPlay();
 		void OnReset();
 		void UpdateRuntime();
-		void UpdateEditor(const EditorCamera* camera);
+		void UpdateEditor(const EditorCamera* camera, Entity& entity);
 		void ResizeViewport(float width, float height);
 		Entity CreateEntity();
 	};

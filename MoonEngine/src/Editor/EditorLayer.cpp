@@ -18,7 +18,7 @@
 namespace MoonEngine
 {
 	bool demoWindow = false;
-	
+
 	ImGui::FileBrowser saveDialog{ ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir };
 	ImGui::FileBrowser loadDialog{ ImGuiFileBrowserFlags_EnterNewFilename };
 
@@ -144,7 +144,7 @@ namespace MoonEngine
 
 		m_ViewportFramebuffer->Bind();
 
-		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera);
+		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera, m_HierarchyView.GetSelectedEntity());
 
 		m_ViewportFramebuffer->Unbind();
 	}
@@ -166,6 +166,24 @@ namespace MoonEngine
 			m_ViewportFocused = ImGui::IsWindowFocused();
 
 			ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path scenePath = std::filesystem::path("res/Assets") / path;
+					if (Serializer::IsValid(scenePath.string(), "moon"))
+					{
+						m_Scene = CreateRef<Scene>();
+						m_IsPlaying = false;
+						OnStop();
+						m_HierarchyView.SetScene(m_Scene);
+						Serializer serializer{ m_Scene };
+						serializer.Deserialize(scenePath.string());
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
 
 			Entity entity = m_HierarchyView.GetSelectedEntity();
 			if (entity && !m_IsPlaying)
@@ -254,13 +272,16 @@ namespace MoonEngine
 		if (loadDialog.HasSelected())
 		{
 			//Load Scene
-			m_Scene = CreateRef<Scene>();
-			m_IsPlaying = false;
-			OnStop();
-			m_HierarchyView.SetScene(m_Scene);
-			Serializer serializer{ m_Scene };
-			serializer.Deserialize(loadDialog.GetSelected().string());
-			loadDialog.ClearSelected();
+			if (Serializer::IsValid(loadDialog.GetSelected().string(), "moon"))
+			{
+				m_Scene = CreateRef<Scene>();
+				m_IsPlaying = false;
+				OnStop();
+				m_HierarchyView.SetScene(m_Scene);
+				Serializer serializer{ m_Scene };
+				serializer.Deserialize(loadDialog.GetSelected().string());
+				loadDialog.ClearSelected();
+			}
 		}
 
 		ImGui::BeginMainMenuBar();
@@ -347,7 +368,7 @@ namespace MoonEngine
 
 				float sceneNameTextSize = 200.0f;
 				static char sceneName[255];
-				ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - sceneNameTextSize , 0.0f);
+				ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - sceneNameTextSize, 0.0f);
 				if (ImGui::InputTextWithHint("##SceneName", "Scene Name", sceneName, 255, ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					m_Scene->SceneName = sceneName;

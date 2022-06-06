@@ -25,12 +25,11 @@ namespace MoonEngine
 	void Scene::OnReset()
 	{}
 
-	void Scene::UpdateEditor(const EditorCamera* camera)
+	void Scene::UpdateEditor(const EditorCamera* camera, Entity& entity)
 	{
 		if (camera)
 		{
 			Renderer::Begin(camera->GetViewProjection());
-
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group)
 			{
@@ -39,6 +38,16 @@ namespace MoonEngine
 			}
 
 			Renderer::End();
+
+			if (entity)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glLineWidth(5.0f);
+				TransformComponent& entityTransform = entity.GetComponent<TransformComponent>();
+				Renderer::DrawQuad(entityTransform.Position, entityTransform.Rotation, entityTransform.Size, glm::vec4(0.0f, 0.58f, 1.0f, 1.0f));
+				Renderer::End();
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
 		}
 	}
 
@@ -75,7 +84,6 @@ namespace MoonEngine
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
 			glm::mat4 m_View = glm::inverse(transform);
 			glm::mat4 viewProjection = sceneCamera->GetProjection() * m_View;
-
 			Renderer::Begin(viewProjection);
 
 			float deltaTime = Time::DeltaTime();

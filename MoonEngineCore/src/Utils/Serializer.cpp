@@ -85,6 +85,20 @@ namespace MoonEngine
 		: m_Scene(scene)
 	{}
 
+	bool Serializer::IsValid(const std::string& filepath, const char* fileFormat)
+	{
+		if (filepath.substr(filepath.find_last_of(".") + 1) == fileFormat)
+		{
+			YAML::Node data;
+			data = YAML::LoadFile(filepath);
+			if (!data["Scene"])
+				return false;
+			return true;
+		}
+		return false;
+	}
+
+
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;
