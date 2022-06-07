@@ -20,7 +20,8 @@ namespace MoonEngine
 	}
 
 	void Scene::OnPlay()
-	{}
+	{
+	}
 
 	void Scene::OnReset()
 	{}

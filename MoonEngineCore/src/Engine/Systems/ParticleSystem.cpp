@@ -27,13 +27,24 @@ namespace MoonEngine
 				particle.Active = false;
 				continue;
 			}
-			
+
 			particle.Position += particle.Direction * deltaTime;
-			
+			if (particle.UsePhysics)
+			{
+				glm::vec3 force(0.0);
+				force.y = particle.gravity * particle.mass;
+
+				particle.velocity.x += ((force.x * deltaTime) / particle.mass);
+				particle.velocity.y += ((force.y * deltaTime) / particle.mass);
+
+				particle.Position.x += particle.velocity.x * deltaTime;
+				particle.Position.y += particle.velocity.y * deltaTime;
+			}
+
 			float life = particle.LifeElapsed / particle.Lifetime;
 			glm::vec3 size;
 			glm::vec4 color;
-			
+
 			if (particle.LifeElapsed < particle.Lifetime)
 			{
 				size = Maths::Lerp(particle.SizeStart, particle.SizeEnd, Maths::Clamp(life * particle.SizeChangeSpeed, 0.0f, 1.0f));
@@ -49,7 +60,7 @@ namespace MoonEngine
 				glm::translate(glm::mat4(1.0f), particle.Position)
 				* glm::scale(glm::mat4(1.0f), size);
 
-			if(particle.Texture == nullptr)
+			if (particle.Texture == nullptr)
 				Renderer::DrawQuad(transform, color);
 			else
 				Renderer::DrawQuad(transform, color, particle.Texture);
@@ -67,7 +78,7 @@ namespace MoonEngine
 		}
 
 		Particle& particle = m_ParticlePool[m_PoolIndex];
-		
+
 		//Lifecycle
 		particle.Active = true;
 		particle.Lifetime = component.Lifetime;
@@ -90,7 +101,13 @@ namespace MoonEngine
 		particle.ColorStart = component.ColorStart;
 		particle.ColorEnd = component.ColorEnd;
 		particle.ColorChangeSpeed = component.ColorChangeSpeed;
-		
+
+		//Physics
+		particle.UsePhysics = component.UsePhysics;
+		particle.velocity = glm::vec3(0.0f);
+		particle.mass = component.Mass;
+		particle.gravity = component.Gravity;
+
 		m_PoolIndex--;
 		if (m_PoolIndex == 0)
 			m_PoolIndex = m_ParticlePool.size() - 1;

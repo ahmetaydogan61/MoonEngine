@@ -459,6 +459,32 @@ namespace MoonEngine
 				ImGui::PopStyleColor(2);
 			}
 			ImGui::Columns(1);
+
+			//Physics
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Use Physics", false);
+			ImGui::NextColumn();
+			ImGui::Checkbox("##UsePhysics", &component.UsePhysics);
+			ImGui::Columns(1);
+
+			if (component.UsePhysics)
+			{
+				ImGui::Columns(2);
+				ImGui::SetColumnWidth(0, columnWidth);
+				ImGuiUtils::Label("Gravity", false);
+				ImGui::NextColumn();
+				ImGui::DragFloat("##Gravity", &component.Gravity, 0.1f, 0.0f, 0.0f, "%.2f");
+				ImGui::Columns(1);
+
+				ImGui::Columns(2);
+				ImGui::SetColumnWidth(0, columnWidth);
+				ImGuiUtils::Label("Mass", false);
+				ImGui::NextColumn();
+				ImGui::DragFloat("##Mass", &component.Mass, 0.1f, 0.0f, 0.0f, "%.2f");
+				ImGui::Columns(1);
+			}
+
 		});
 
 

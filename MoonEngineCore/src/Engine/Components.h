@@ -123,6 +123,11 @@ namespace MoonEngine
 		glm::vec4 ColorStart = { 1.0f, 0.0f, 0.0f, 1.0f }, ColorEnd = { 0.0f, 0.4f, 1.0f, 1.0f };
 		float ColorChangeSpeed = 1.0f;
 
+		//Physics
+		bool UsePhysics = false;
+		float Gravity = -9.8f;
+		float Mass = 1.0f;
+
 		int PoolSize()
 		{
 			return m_ParticleSystem.PoolSize();

@@ -182,6 +182,11 @@ namespace MoonEngine
 			out << YAML::Key << "ColorEnd" << YAML::Value << particleComponent.ColorEnd;
 			out << YAML::Key << "ColorChangeSpeed" << YAML::Value << particleComponent.ColorChangeSpeed;
 
+			//Physics
+			out << YAML::Key << "UsePhysics" << YAML::Value << particleComponent.UsePhysics;
+			out << YAML::Key << "Gravity" << YAML::Value << particleComponent.Gravity;
+			out << YAML::Key << "Mass" << YAML::Value << particleComponent.Mass;
+
 			out << YAML::EndMap;
 		}
 
@@ -312,6 +317,10 @@ namespace MoonEngine
 					GetIf<glm::vec4>(&component.ColorStart, particleComponent, "ColorStart");
 					GetIf<glm::vec4>(&component.ColorEnd, particleComponent, "ColorEnd");
 					GetIf<float>(&component.ColorChangeSpeed, particleComponent, "ColorChangeSpeed");
+					
+					GetIf<bool>(&component.UsePhysics, particleComponent, "UsePhysics");
+					GetIf<float>(&component.Gravity, particleComponent, "Gravity");
+					GetIf<float>(&component.Mass, particleComponent, "Mass");
 				
 					std::string texturePath;
 					if(GetIf<std::string>(&texturePath, particleComponent, "TexturePath"))

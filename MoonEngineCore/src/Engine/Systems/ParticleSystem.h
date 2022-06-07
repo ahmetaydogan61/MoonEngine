@@ -25,6 +25,12 @@ namespace MoonEngine
 			Ref<Texture> Texture;
 			glm::vec4 ColorStart, ColorEnd;
 			float ColorChangeSpeed;
+
+			bool UsePhysics;
+			float mass;
+			float gravity;
+			glm::vec3 velocity;
+
 		};
 		std::vector<Particle> m_ParticlePool;
 		uint32_t m_PoolIndex;
