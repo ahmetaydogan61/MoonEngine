@@ -32,6 +32,7 @@ namespace MoonEngine
 			if (particle.UsePhysics)
 			{
 				glm::vec3 force(0.0);
+
 				force.y = particle.gravity * particle.mass;
 
 				particle.velocity.x += ((force.x * deltaTime) / particle.mass);

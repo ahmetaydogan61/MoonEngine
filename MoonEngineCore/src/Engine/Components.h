@@ -103,13 +103,10 @@ namespace MoonEngine
 		ParticleComponent(const ParticleComponent& particle) = default;
 		~ParticleComponent() = default;
 
-		int Rate = 3;
-		int MaxParticles = 5000;
-		
-		bool BurstMode = false;
-		bool AutoPlay = true, Play = true;
-		float Duration = 0.5f;
-		float Lifetime = 1.5f;
+		//General
+		int Rate = 5, MaxParticles = 5000;
+		bool BurstMode = false, AutoPlay = true, Play = true;
+		float Duration = 0.75f, Lifetime = 1.5f;
 
 		//Position
 		glm::vec3 Direction{}, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
@@ -125,8 +122,7 @@ namespace MoonEngine
 
 		//Physics
 		bool UsePhysics = false;
-		float Gravity = -9.8f;
-		float Mass = 1.0f;
+		float Gravity = -9.8f, Mass = 1.0f;
 
 		int PoolSize()
 		{

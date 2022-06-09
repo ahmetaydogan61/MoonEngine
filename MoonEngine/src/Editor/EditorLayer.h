@@ -21,7 +21,7 @@ namespace MoonEngine
 	{
 	private:
 		Ref<Scene> m_Scene;
-		EditorCamera* m_EditorCamera;
+		Ref<EditorCamera> m_EditorCamera;
 		Ref<Texture> m_PlayTexture;
 		Ref<Texture> m_StopTexture;
 		Ref<Texture> m_SelectTexture;
@@ -50,7 +50,7 @@ namespace MoonEngine
 		void ViewportView(bool& state);
 		void DebugView(bool& state);
 
-		Framebuffer* m_ViewportFramebuffer = nullptr;
+		Ref<Framebuffer> m_ViewportFramebuffer = nullptr;
 		glm::vec2 m_ViewportPosition;
 		glm::vec2 m_ViewportSize;
 		bool m_ViewportHovered = false;
@@ -65,6 +65,5 @@ namespace MoonEngine
 		void Update();
 		void OnEvent(Event& event);
 		void DrawGUI();
-		void Destroy();
 	};
 }

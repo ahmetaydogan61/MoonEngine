@@ -62,7 +62,7 @@ namespace MoonEngine
 
 		if (ImGui::BeginMenuBar())
 		{
-			auto& contentRegion = ImGui::GetContentRegionAvail();
+			 auto& contentRegion = ImGui::GetContentRegionAvail();
 			float buttonSize = 25.0f;
 			ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
 			if (ImGui::Button(":", { 25.0f, 25.0f }))
@@ -115,10 +115,7 @@ namespace MoonEngine
 
 		if (createCamera)
 		{
-			Entity& entity = m_Scene->CreateEntity();
-			entity.GetComponent<IdentityComponent>().Name = "Camera";
-			entity.AddComponent<CameraComponent>();
-			entity.RemoveComponent<SpriteComponent>();
+			Entity& entity = m_Scene->CreateCameraEntity();
 			m_SelectedEntity = entity;
 		}
 

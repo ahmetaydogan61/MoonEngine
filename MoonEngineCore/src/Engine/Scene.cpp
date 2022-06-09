@@ -13,6 +13,8 @@ namespace MoonEngine
 {
 	Scene* Scene::m_ActiveScene;
 
+	Entity entity;
+
 	Scene::Scene()
 	{
 		m_ActiveScene = this;
@@ -20,8 +22,7 @@ namespace MoonEngine
 	}
 
 	void Scene::OnPlay()
-	{
-	}
+	{}
 
 	void Scene::OnReset()
 	{}
@@ -80,15 +81,19 @@ namespace MoonEngine
 			}
 		}
 
+		glm::mat4 viewProjection;
+
+
 		if (sceneCamera)
 		{
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
 			glm::mat4 m_View = glm::inverse(transform);
-			glm::mat4 viewProjection = sceneCamera->GetProjection() * m_View;
-			Renderer::Begin(viewProjection);
+			viewProjection = sceneCamera->GetProjection() * m_View;
+		}
+		Renderer::Begin(viewProjection);
+		float deltaTime = Time::DeltaTime();
 
-			float deltaTime = Time::DeltaTime();
-
+		{//+Particle System
 			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
 			for (auto entity : particleGroup)
 			{
@@ -112,16 +117,17 @@ namespace MoonEngine
 
 				particle.Update();
 			}
+		}//-Particle System
 
+		{//+Sprite Rendering
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 			}
-
-			Renderer::End();
-		}
+		}//-Sprite Rendering
+		Renderer::End();
 	}
 
 	void Scene::ResizeViewport(float width, float height)
@@ -144,6 +150,18 @@ namespace MoonEngine
 		e.AddComponent<SpriteComponent>();
 		return e;
 	}
+
+	Entity Scene::CreateCameraEntity()
+	{
+		Entity e{ m_Registry.create() };
+		e.AddComponent<UUIDComponent>();
+		e.AddComponent<IdentityComponent>();
+		e.GetComponent<IdentityComponent>().Name = "Camera";
+		e.AddComponent<TransformComponent>();
+		e.AddComponent<CameraComponent>();
+		return e;
+	}
+
 
 	Scene::~Scene()
 	{

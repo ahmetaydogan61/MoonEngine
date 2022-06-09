@@ -27,8 +27,8 @@ namespace MoonEngine
 		LayerName = "Editor Layer";
 		m_Scene = CreateRef<Scene>();
 
-		m_EditorCamera = new EditorCamera();
-		m_ViewportFramebuffer = new Framebuffer();
+		m_EditorCamera = CreateRef<EditorCamera>();
+		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
 
 		ImGuiUtils::StyleCustomDark(0);
@@ -144,7 +144,7 @@ namespace MoonEngine
 
 		m_ViewportFramebuffer->Bind();
 
-		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera, m_HierarchyView.GetSelectedEntity());
+		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera.get(), m_HierarchyView.GetSelectedEntity());
 
 		m_ViewportFramebuffer->Unbind();
 	}
@@ -235,7 +235,15 @@ namespace MoonEngine
 					ImGuizmo::SetRect(m_ViewportPosition.x, m_ViewportPosition.y, m_ViewportSize.x, m_ViewportSize.y);
 					ImGuizmo::SetOrthographic(true);
 					ImGuizmo::SetDrawlist();
-					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_IsSnapping ? &m_SnapAmount : NULL);
+
+					float snapAmount = 0;
+
+					if (m_GizmoSelection != GIZMOSELECTION::RORTATE)
+						snapAmount = m_SnapAmount;
+					else
+						snapAmount = 45.0f;
+
+					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)m_GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_IsSnapping ? &snapAmount : NULL);
 
 					if (ImGuizmo::IsUsing())
 					{
@@ -302,7 +310,7 @@ namespace MoonEngine
 
 				ImGui::EndMenu();
 			}
-
+			
 			if (ImGui::BeginMenu("Views", true))
 			{
 				if (ImGui::MenuItem("Viewport", " ", m_IsViewportActive, true))
@@ -464,10 +472,5 @@ namespace MoonEngine
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-	}
-
-	void EditorLayer::Destroy()
-	{
-		delete m_EditorCamera;
 	}
 }
