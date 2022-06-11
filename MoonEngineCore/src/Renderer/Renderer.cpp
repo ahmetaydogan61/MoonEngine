@@ -15,7 +15,7 @@ namespace MoonEngine
 	unsigned int vb;
 	unsigned int ib;
 
-	const uint32_t maxQuads = 2500;
+	const uint32_t maxQuads = 5000;
 	const uint32_t maxVertex = maxQuads * 4;
 	const uint32_t maxIndex = maxQuads * 6;
 	Renderer::RenderData* Renderer::rData;

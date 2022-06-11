@@ -109,7 +109,7 @@ namespace MoonEngine
 		float Duration = 0.75f, Lifetime = 1.5f;
 
 		//Position
-		glm::vec3 Direction{}, DirectionVelocity = { 1.0f, 1.0f, 0.0f };
+		glm::vec3 Direction{}, DirectionVelocity = { 1.0f, 1.0f, 0.0f }, ShapeSize{};
 
 		//Size
 		glm::vec3 SizeStart = { 0.5f, 0.5f, 0.0f }, SizeEnd = { 0.0f, 0.0f, 0.0f };

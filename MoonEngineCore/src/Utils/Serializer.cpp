@@ -166,6 +166,7 @@ namespace MoonEngine
 			//Position
 			out << YAML::Key << "Direction" << YAML::Value << particleComponent.Direction;
 			out << YAML::Key << "DirectionVelocity" << YAML::Value << particleComponent.DirectionVelocity;
+			out << YAML::Key << "ShapeSize" << YAML::Value << particleComponent.ShapeSize;
 
 			//Size
 			out << YAML::Key << "SizeStart" << YAML::Value << particleComponent.SizeStart;
@@ -227,7 +228,7 @@ namespace MoonEngine
 	}
 
 	template<typename T>
-	bool GetIf(T* value, const YAML::Node& node, const char* label)
+	bool GetIfExists(T* value, const YAML::Node& node, const char* label)
 	{
 		auto& subnode = node[label];
 		if (subnode)
@@ -298,32 +299,33 @@ namespace MoonEngine
 				{
 					ParticleComponent& component = deserializedEntity.AddComponent<ParticleComponent>();
 					
-					GetIf<bool>(&component.Play, particleComponent, "Play");
-					GetIf<bool>(&component.AutoPlay,particleComponent, "AutoPlay");
-					GetIf<float>(&component.Duration, particleComponent, "Duration");
+					GetIfExists<bool>(&component.Play, particleComponent, "Play");
+					GetIfExists<bool>(&component.AutoPlay,particleComponent, "AutoPlay");
+					GetIfExists<float>(&component.Duration, particleComponent, "Duration");
 
-					GetIf<int>(&component.MaxParticles, particleComponent, "MaxParticles");
-					GetIf<bool>(&component.BurstMode, particleComponent, "BurstMode");
-					GetIf<int>(&component.Rate, particleComponent, "Rate");
+					GetIfExists<int>(&component.MaxParticles, particleComponent, "MaxParticles");
+					GetIfExists<bool>(&component.BurstMode, particleComponent, "BurstMode");
+					GetIfExists<int>(&component.Rate, particleComponent, "Rate");
 					
-					GetIf<float>(&component.Lifetime, particleComponent, "Lifetime");
-					GetIf<glm::vec3>(&component.Direction, particleComponent, "Direction");
-					GetIf<glm::vec3>(&component.DirectionVelocity, particleComponent, "DirectionVelocity");
+					GetIfExists<float>(&component.Lifetime, particleComponent, "Lifetime");
+					GetIfExists<glm::vec3>(&component.Direction, particleComponent, "Direction");
+					GetIfExists<glm::vec3>(&component.DirectionVelocity, particleComponent, "DirectionVelocity");
+					GetIfExists<glm::vec3>(&component.ShapeSize, particleComponent, "ShapeSize");
 					
-					GetIf<glm::vec3>(&component.SizeStart, particleComponent, "SizeStart");
-					GetIf<glm::vec3>(&component.SizeEnd, particleComponent, "SizeEnd");
-					GetIf<float>(&component.SizeChangeSpeed, particleComponent, "SizeChangeSpeed");
+					GetIfExists<glm::vec3>(&component.SizeStart, particleComponent, "SizeStart");
+					GetIfExists<glm::vec3>(&component.SizeEnd, particleComponent, "SizeEnd");
+					GetIfExists<float>(&component.SizeChangeSpeed, particleComponent, "SizeChangeSpeed");
 
-					GetIf<glm::vec4>(&component.ColorStart, particleComponent, "ColorStart");
-					GetIf<glm::vec4>(&component.ColorEnd, particleComponent, "ColorEnd");
-					GetIf<float>(&component.ColorChangeSpeed, particleComponent, "ColorChangeSpeed");
+					GetIfExists<glm::vec4>(&component.ColorStart, particleComponent, "ColorStart");
+					GetIfExists<glm::vec4>(&component.ColorEnd, particleComponent, "ColorEnd");
+					GetIfExists<float>(&component.ColorChangeSpeed, particleComponent, "ColorChangeSpeed");
 					
-					GetIf<bool>(&component.UsePhysics, particleComponent, "UsePhysics");
-					GetIf<float>(&component.Gravity, particleComponent, "Gravity");
-					GetIf<float>(&component.Mass, particleComponent, "Mass");
+					GetIfExists<bool>(&component.UsePhysics, particleComponent, "UsePhysics");
+					GetIfExists<float>(&component.Gravity, particleComponent, "Gravity");
+					GetIfExists<float>(&component.Mass, particleComponent, "Mass");
 				
 					std::string texturePath;
-					if(GetIf<std::string>(&texturePath, particleComponent, "TexturePath"))
+					if(GetIfExists<std::string>(&texturePath, particleComponent, "TexturePath"))
 						if (texturePath != "null")
 							component.Texture = CreateRef<Texture>(texturePath);
 

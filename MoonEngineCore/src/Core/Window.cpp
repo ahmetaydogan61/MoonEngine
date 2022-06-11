@@ -37,15 +37,18 @@ namespace MoonEngine
 		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
 		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		glfwWindowHint(GLFW_MAXIMIZED, fullscreen);
 
-		m_GLWindow = glfwCreateWindow(width, height, name.c_str(), fullscreen ? monitor : NULL, NULL);
+		m_GLWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
+
+
 		if (!m_GLWindow)
 		{
 			glfwTerminate();
 			return -1;
 		}
 		glfwMakeContextCurrent(m_GLWindow);
-		
+
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (!status)
 		{
@@ -54,8 +57,11 @@ namespace MoonEngine
 		}
 
 		//Center the monitor
-		const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowPos(m_GLWindow, (vidmode->width - m_Width) / 2, (vidmode->height - m_Height) / 2);
+		if (!fullscreen)
+		{
+			const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			glfwSetWindowPos(m_GLWindow, (vidmode->width - m_Width) / 2, (vidmode->height - m_Height) / 2);
+		}
 
 		//Callbacks
 		glfwSetWindowSizeCallback(m_GLWindow, [](GLFWwindow* window, int width, int height)

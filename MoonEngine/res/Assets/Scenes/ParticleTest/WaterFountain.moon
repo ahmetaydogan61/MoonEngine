@@ -1,25 +1,5 @@
 Scene: WaterFountain
 Entities:
-  - Entity: 3b4da177-a326-4189-be85-86868d31691d
-    IdentityComponent:
-      Name: Entity
-    TransformComponent:
-      Position: [0, -4.5, 0]
-      Rotation: [0, 0, 0]
-      Size: [9.60000038, 1, 1]
-    SpriteComponent:
-      Color: [0.65637064, 0.65637064, 0.65637064, 1]
-      TexturePath: "null"
-  - Entity: bd7a851b-2b79-428b-b23f-68c7fe599793
-    IdentityComponent:
-      Name: Camera
-    TransformComponent:
-      Position: [0, -1.10000002, 0]
-      Rotation: [0, 0, 0]
-      Size: [1, 1, 1]
-    CameraComponent:
-      IsMain: true
-      Distance: 3.9000001
   - Entity: d7650c6a-fdd0-4354-9c93-8a7e787c9c4d
     IdentityComponent:
       Name: Particle
@@ -35,8 +15,8 @@ Entities:
       BurstMode: false
       Rate: 3
       Lifetime: 1.5
-      Direction: [0, 5, 0]
-      DirectionVelocity: [7, 1, 0]
+      Direction: [0, 6, 0]
+      DirectionVelocity: [6.5, 1, 0]
       SizeStart: [0.5, 0.5, 0]
       SizeEnd: [0, 0, 0]
       SizeChangeSpeed: 1
@@ -47,3 +27,23 @@ Entities:
       UsePhysics: true
       Gravity: -9.80000019
       Mass: 1
+  - Entity: bd7a851b-2b79-428b-b23f-68c7fe599793
+    IdentityComponent:
+      Name: Camera
+    TransformComponent:
+      Position: [0, -1.10000002, 0]
+      Rotation: [0, 0, 0]
+      Size: [1, 1, 1]
+    CameraComponent:
+      IsMain: true
+      Distance: 3.9000001
+  - Entity: 3b4da177-a326-4189-be85-86868d31691d
+    IdentityComponent:
+      Name: Entity
+    TransformComponent:
+      Position: [0, -4.5, 0]
+      Rotation: [0, 0, 0]
+      Size: [9.60000038, 1, 1]
+    SpriteComponent:
+      Color: [0.65637064, 0.65637064, 0.65637064, 1]
+      TexturePath: "null"

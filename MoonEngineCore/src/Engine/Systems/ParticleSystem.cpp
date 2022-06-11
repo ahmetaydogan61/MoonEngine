@@ -86,7 +86,8 @@ namespace MoonEngine
 		particle.LifeElapsed = 0.0f;
 
 		//Position
-		particle.Position = position;
+		particle.Position.x = position.x + (Maths::RandomFloat(-component.ShapeSize.x, component.ShapeSize.x));
+		particle.Position.y = position.y + (Maths::RandomFloat(-component.ShapeSize.y, component.ShapeSize.y));
 		particle.Direction = component.Direction;
 		particle.Direction.x += component.DirectionVelocity.x * (Maths::RandomFloat(-0.5f, 0.5f));
 		particle.Direction.y += component.DirectionVelocity.y * (Maths::RandomFloat(-0.5f, 0.5f));

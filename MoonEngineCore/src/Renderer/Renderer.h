@@ -37,6 +37,7 @@ namespace MoonEngine
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, const Ref<Texture>& texture);
 		static void Render();
 		static void SetClearColor(glm::vec4& clearColor);
+		static glm::vec4& GetClearColor() { return m_ClearColor; }
 		static void Destroy();
 		static RenderData& GetRenderData() { return *rData; }
 	};

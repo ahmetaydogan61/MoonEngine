@@ -140,6 +140,28 @@ namespace MoonEngine
 		}
 	}
 
+	template<typename T>
+	void CopyIfExists(Entity& copyTo, Entity& copyFrom)
+	{
+		if (copyFrom.HasComponent<T>())
+		{
+			T& component = copyTo.AddComponent<T>(); 
+			component = copyFrom.GetComponent<T>();
+		}
+	}
+
+	Entity Scene::CopyEntity(Entity& entity)
+	{
+		Entity e{ m_Registry.create() };
+		e.AddComponent<UUIDComponent>();
+		CopyIfExists<IdentityComponent>(e, entity);
+		CopyIfExists<TransformComponent>(e, entity);
+		CopyIfExists<SpriteComponent>(e, entity);
+		CopyIfExists<ParticleComponent>(e, entity);
+		CopyIfExists<CameraComponent>(e, entity);
+		return e;
+	}
+
 	Entity Scene::CreateEntity()
 	{
 		Entity e{ m_Registry.create() };

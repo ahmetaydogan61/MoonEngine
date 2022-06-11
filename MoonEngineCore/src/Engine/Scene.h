@@ -28,5 +28,6 @@ namespace MoonEngine
 		void ResizeViewport(float width, float height);
 		Entity CreateEntity();
 		Entity CreateCameraEntity();
+		Entity CopyEntity(Entity& entity);
 	};
 }

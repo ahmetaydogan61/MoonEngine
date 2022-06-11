@@ -24,5 +24,7 @@ namespace MoonEngine
 		void BeginInspectorView(bool& state);
 		void MouseSelect();
 		Entity GetSelectedEntity() const { return m_SelectedEntity; }
+		void CopySelectedEntity();
+		void DeleteSelectedEntity();
 	};
 }

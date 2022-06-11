@@ -50,6 +50,8 @@ namespace MoonEngine
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
 		loadDialog.SetPwd("res/Assets/Scenes");
+
+		m_Scene->CreateCameraEntity();
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -147,6 +149,33 @@ namespace MoonEngine
 		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera.get(), m_HierarchyView.GetSelectedEntity());
 
 		m_ViewportFramebuffer->Unbind();
+
+		static bool keyDown = false;
+
+		if (Input::GetKey(KEY_LEFT_CONTROL))
+		{
+			if (Input::GetKey(KEY_D))
+			{
+				if (!keyDown)
+					m_HierarchyView.CopySelectedEntity();
+				keyDown = true;
+			}
+			else
+				keyDown = false;
+
+			if (keyDown)
+				return;
+
+			if (Input::GetKey(KEY_W))
+			{
+				if (!keyDown)
+					m_HierarchyView.DeleteSelectedEntity();
+
+				keyDown = true;
+			}
+			else
+				keyDown = false;
+		}
 	}
 
 	void EditorLayer::ViewportView(bool& state)
@@ -300,6 +329,7 @@ namespace MoonEngine
 				{
 					m_Scene = CreateRef<Scene>();
 					m_HierarchyView.SetScene(m_Scene);
+					m_Scene->CreateCameraEntity();
 				}
 
 				if (ImGui::MenuItem("Save", " "))
@@ -310,7 +340,7 @@ namespace MoonEngine
 
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("Views", true))
 			{
 				if (ImGui::MenuItem("Viewport", " ", m_IsViewportActive, true))

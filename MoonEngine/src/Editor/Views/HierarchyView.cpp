@@ -146,6 +146,12 @@ namespace MoonEngine
 
 		if (ImGui::BeginPopupContextItem())
 		{
+			if (ImGui::MenuItem("Copy Entity"))
+			{
+				Entity e = m_Scene->CopyEntity(m_SelectedEntity);
+				m_SelectedEntity = e;
+			}
+
 			if (ImGui::MenuItem("Delete Entity"))
 			{
 				entity.Destroy();
@@ -157,6 +163,24 @@ namespace MoonEngine
 
 		if (opened)
 			ImGui::TreePop();
+	}
+
+	void HierarchyView::CopySelectedEntity()
+	{
+		if (m_SelectedEntity)
+		{
+			Entity e = m_Scene->CopyEntity(m_SelectedEntity);
+			m_SelectedEntity = e;
+		}
+	}
+
+	void HierarchyView::DeleteSelectedEntity()
+	{
+		if (m_SelectedEntity)
+		{
+			m_SelectedEntity.Destroy();
+			m_SelectedEntity = {};
+		}
 	}
 
 	//This part contains inspector stuff
@@ -355,6 +379,13 @@ namespace MoonEngine
 			ImGuiUtils::Label("Direction Velocity", false);
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##DirectionVelocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, columnWidth);
+			ImGuiUtils::Label("Shape Size", false);
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##ShapeSize", &component.ShapeSize[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 
 			//Size

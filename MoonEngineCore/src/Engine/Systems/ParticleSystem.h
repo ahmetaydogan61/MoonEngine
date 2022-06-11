@@ -15,7 +15,7 @@ namespace MoonEngine
 			float Lifetime, LifeElapsed;
 
 			//Position
-			glm::vec3 Position, Direction;
+			glm::vec3 Position, Direction, ShapeSize;
 
 			//Size
 			glm::vec3 SizeStart, SizeEnd;
@@ -39,7 +39,7 @@ namespace MoonEngine
 
 		void Spawn(const ParticleComponent& component, glm::vec3 position);
 		void Update();
-		void ResizePool(int size) { m_ParticlePool.resize(size); m_PoolIndex = m_ParticlePool.size() - 1; }
+		void ResizePool(uint32_t size) { m_ParticlePool.resize(size); m_PoolIndex = m_ParticlePool.size() - 1; }
 		int PoolSize() { return m_ParticlePool.size(); }
 	};
 }
