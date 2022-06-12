@@ -157,8 +157,8 @@ namespace MoonEngine
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
 		CopyIfExists<SpriteComponent>(e, entity);
-		CopyIfExists<ParticleComponent>(e, entity);
 		CopyIfExists<CameraComponent>(e, entity);
+		CopyIfExists<ParticleComponent>(e, entity);
 		return e;
 	}
 
@@ -183,7 +183,6 @@ namespace MoonEngine
 		e.AddComponent<CameraComponent>();
 		return e;
 	}
-
 
 	Scene::~Scene()
 	{

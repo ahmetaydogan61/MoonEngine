@@ -81,6 +81,25 @@ namespace MoonEngine
 			m_EventCallback(e);
 		});
 
+		glfwSetKeyCallback(m_GLWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			switch (action)
+			{
+				case GLFW_PRESS:
+				{
+					KeyPressEvent e(key, false);
+					m_EventCallback(e);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyPressEvent e(key, true);
+					m_EventCallback(e);
+					break;
+				}
+			}
+		});
+
 		glfwSwapInterval(m_Vsync);
 		return 1;
 	}

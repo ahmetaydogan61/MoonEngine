@@ -48,7 +48,7 @@ namespace MoonEngine
 
 	void EditorCamera::UpdateHovered()
 	{
-		if (Input::GetKey(KEY_LEFT_CONTROL))
+		if (Input::GetKey(KEY_LEFT_SHIFT))
 		{
 			if (Input::GetKey(KEY_W))
 				m_Position.y += m_MoveSpeed * Time::DeltaTime();
@@ -95,7 +95,7 @@ namespace MoonEngine
 	void EditorCamera::OnEvent(Event& event)
 	{
 		EventHandler handler = { event };
-		handler.HandleEvent(EventType::Mouse_Scroll, EVENT_FN_POINTER(OnMouseScroll));
+		handler.HandleEvent(EventType::MouseScroll, EVENT_FN_POINTER(OnMouseScroll));
 	}
 
 	bool EditorCamera::OnMouseScroll(Event& event)

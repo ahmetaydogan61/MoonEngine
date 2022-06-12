@@ -49,6 +49,24 @@ namespace MoonEngine
 			m_SelectedEntity = {};
 	}
 
+	void HierarchyView::CopySelectedEntity()
+	{
+		if (m_SelectedEntity)
+		{
+			Entity e = m_Scene->CopyEntity(m_SelectedEntity);
+			m_SelectedEntity = e;
+		}
+	}
+
+	void HierarchyView::DeleteSelectedEntity()
+	{
+		if (m_SelectedEntity)
+		{
+			m_SelectedEntity.Destroy();
+			m_SelectedEntity = {};
+		}
+	}
+
 	void HierarchyView::BeginHierarchyView(bool& state)
 	{
 		bool createEntity = false;
@@ -58,16 +76,40 @@ namespace MoonEngine
 		float height = ImGui::GetFrameHeight();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
 
-		ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state, window_flags);
-
-		if (ImGui::BeginMenuBar())
+		if (ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state, window_flags))
 		{
-			 auto& contentRegion = ImGui::GetContentRegionAvail();
-			float buttonSize = 25.0f;
-			ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
-			if (ImGui::Button(":", { 25.0f, 25.0f }))
-				ImGui::OpenPopup("CreateStuff");
-			if (ImGui::BeginPopup("CreateStuff"))
+			if (ImGui::BeginMenuBar())
+			{
+				auto& contentRegion = ImGui::GetContentRegionAvail();
+				float buttonSize = 25.0f;
+				ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
+				if (ImGui::Button(":", { 25.0f, 25.0f }))
+					ImGui::OpenPopup("CreateStuff");
+
+				if (ImGui::BeginPopup("CreateStuff"))
+				{
+					if (ImGui::MenuItem("Create Camera"))
+						createCamera = true;
+
+					if (ImGui::MenuItem("Create Entity"))
+						createEntity = true;
+
+					if (ImGui::MenuItem("Create Particle"))
+						createParticle = true;
+
+					ImGui::EndPopup();
+				}
+				ImGui::EndMenuBar();
+			}
+
+			int id = 0;
+			m_Scene->m_Registry.each([&](auto entityID)
+			{
+				Entity entity{ entityID };
+				EntityTreeNode(entity, id++);
+			});
+
+			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
 				if (ImGui::MenuItem("Create Camera"))
 					createCamera = true;
@@ -80,54 +122,31 @@ namespace MoonEngine
 
 				ImGui::EndPopup();
 			}
-			ImGui::EndMenuBar();
+
+			if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				m_SelectedEntity = {};
+
+			if (createEntity)
+			{
+				Entity entity = m_Scene->CreateEntity();
+				m_SelectedEntity = entity;
+			}
+
+			if (createCamera)
+			{
+				Entity& entity = m_Scene->CreateCameraEntity();
+				m_SelectedEntity = entity;
+			}
+
+			if (createParticle)
+			{
+				Entity& entity = m_Scene->CreateEntity();
+				entity.RemoveComponent<SpriteComponent>();
+				entity.GetComponent<IdentityComponent>().Name = "Particle";
+				entity.AddComponent<ParticleComponent>();
+				m_SelectedEntity = entity;
+			}
 		}
-
-		int id = 0;
-		m_Scene->m_Registry.each([&](auto entityID)
-		{
-			Entity entity{ entityID };
-			EntityTreeNode(entity, id++);
-		});
-
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
-		{
-			if (ImGui::MenuItem("Create Camera"))
-				createCamera = true;
-
-			if (ImGui::MenuItem("Create Entity"))
-				createEntity = true;
-
-			if (ImGui::MenuItem("Create Particle"))
-				createParticle = true;
-
-			ImGui::EndPopup();
-		}
-
-		if (!ImGui::IsAnyItemHovered() && ImGui::IsAnyMouseDown() && ImGui::IsWindowHovered())
-			m_SelectedEntity = {};
-
-		if (createEntity)
-		{
-			Entity entity = m_Scene->CreateEntity();
-			m_SelectedEntity = entity;
-		}
-
-		if (createCamera)
-		{
-			Entity& entity = m_Scene->CreateCameraEntity();
-			m_SelectedEntity = entity;
-		}
-
-		if (createParticle)
-		{
-			Entity& entity = m_Scene->CreateEntity();
-			entity.RemoveComponent<SpriteComponent>();
-			entity.GetComponent<IdentityComponent>().Name = "Particle";
-			entity.AddComponent<ParticleComponent>();
-			m_SelectedEntity = entity;
-		}
-
 		ImGui::End();
 	}
 
@@ -165,24 +184,6 @@ namespace MoonEngine
 			ImGui::TreePop();
 	}
 
-	void HierarchyView::CopySelectedEntity()
-	{
-		if (m_SelectedEntity)
-		{
-			Entity e = m_Scene->CopyEntity(m_SelectedEntity);
-			m_SelectedEntity = e;
-		}
-	}
-
-	void HierarchyView::DeleteSelectedEntity()
-	{
-		if (m_SelectedEntity)
-		{
-			m_SelectedEntity.Destroy();
-			m_SelectedEntity = {};
-		}
-	}
-
 	//This part contains inspector stuff
 	void HierarchyView::BeginInspectorView(bool& state)
 	{
@@ -198,7 +199,7 @@ namespace MoonEngine
 			ImGui::Separator();
 			ImGuiUtils::AddPadding(0, 5);
 
-			//Translation Start
+			//+Translation
 			ImGui::Text("Transform");
 			TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
 			UtilVectorColumn("Position", transform.Position);
@@ -206,7 +207,7 @@ namespace MoonEngine
 			UtilVectorColumn("Rotation", rotation);
 			transform.Rotation = glm::radians(rotation);
 			UtilVectorColumn("Size", transform.Size, 1.0f);
-			//Translation End
+			//-Translation
 
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 			ImGui::Separator();
@@ -514,8 +515,6 @@ namespace MoonEngine
 			}
 
 		});
-
-
 
 		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
 		{

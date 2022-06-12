@@ -16,7 +16,7 @@ namespace MoonEngine
 	glm::vec2 ImGuiLayer::ViewportPosition;
 	glm::vec2 ImGuiLayer::ViewportSize;
 	glm::mat4 ImGuiLayer::CameraProjection;
-	bool ImGuiLayer::m_EventsAllowed;
+	bool ImGuiLayer::m_EventsBlocked;
 
 	void ImGuiLayer::Init()
 	{
@@ -50,7 +50,7 @@ namespace MoonEngine
 		config.GlyphExtraSpacing.x = 5.0f;
 		config.OversampleH = 3;
 		config.OversampleV = 1;
-		static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_16_FK, 0};
+		static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_16_FK, 0 };
 		io.Fonts->AddFontFromFileTTF("res/Fonts/ForkAwesome/forkawesome-webfont.ttf", 14.0f, &config, icon_ranges);
 	}
 
@@ -78,24 +78,15 @@ namespace MoonEngine
 
 	void ImGuiLayer::OnEvent(Event& event)
 	{
-		if (m_EventsAllowed)
+		if (m_EventsBlocked)
 		{
-			EventHandler handler = { event };
-			handler.HandleEvent(EventType::Mouse_Scroll, EVENT_FN_POINTER(OnMouseScroll));
+			ImGuiIO& io = ImGui::GetIO();
+			event.Handled |= (EventType::MouseScroll == event.GetType()) & io.WantCaptureMouse;
 		}
 	}
 
 	void ImGuiLayer::BlockEvent(bool state)
 	{
-		m_EventsAllowed = state;
-	}
-
-	bool ImGuiLayer::OnMouseScroll(Event& event)
-	{
-		MouseScrollEvent& e = (MouseScrollEvent&)event;
-		ImGuiIO io = ImGui::GetIO();
-		io.MouseWheel = e.ScrollY();
-		io.MouseWheelH = e.ScrollX();
-		return true;
+		m_EventsBlocked = state;
 	}
 }

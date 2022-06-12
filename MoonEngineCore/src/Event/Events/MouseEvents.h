@@ -9,7 +9,7 @@ namespace MoonEngine
 		MouseScrollEvent(float x, float y)
 			:x(x), y(y)
 		{
-			SetType(EventType::Mouse_Scroll);
+			SetType(EventType::MouseScroll);
 		}
 
 		float ScrollX() { return x; }

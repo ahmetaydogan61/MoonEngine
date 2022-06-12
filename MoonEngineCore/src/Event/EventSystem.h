@@ -6,8 +6,9 @@ namespace MoonEngine
 	enum class EventType
 	{
 		NONE = 0,
-		Mouse_Scroll,
-		Window_Resize, 
+		MouseScroll,
+		KeyPress,
+		WindowResize, 
 	};
 
 	class Event

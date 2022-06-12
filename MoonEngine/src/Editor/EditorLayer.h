@@ -21,7 +21,7 @@ namespace MoonEngine
 	{
 	private:
 		Ref<Scene> m_Scene;
-		Ref<EditorCamera> m_EditorCamera;
+		EditorCamera m_EditorCamera;
 		Ref<Texture> m_PlayTexture;
 		Ref<Texture> m_StopTexture;
 		Ref<Texture> m_SelectTexture;
@@ -60,6 +60,8 @@ namespace MoonEngine
 		GIZMOSELECTION m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 		bool m_IsSnapping = false;
 		float m_SnapAmount = 0.25f;
+
+		bool EditorLayer::KeyEvents(Event& event);
 	public:
 		void Create();
 		void Update();

@@ -27,7 +27,6 @@ namespace MoonEngine
 		LayerName = "Editor Layer";
 		m_Scene = CreateRef<Scene>();
 
-		m_EditorCamera = CreateRef<EditorCamera>();
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
 
@@ -56,7 +55,90 @@ namespace MoonEngine
 
 	void EditorLayer::OnEvent(Event& event)
 	{
-		m_EditorCamera->OnEvent(event);
+		m_EditorCamera.OnEvent(event);
+
+		EventHandler handler = { event };
+		handler.HandleEvent(EventType::KeyPress, EVENT_FN_POINTER(KeyEvents));
+	}
+
+	bool EditorLayer::KeyEvents(Event& event)
+	{
+		KeyPressEvent& e = (KeyPressEvent&)event;
+
+		if (e.Repeat())
+			return false;
+
+		m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
+		bool control = Input::GetKey(KEY_LEFT_CONTROL);
+
+		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive();
+
+		switch (e.Key())
+		{
+			case KEY_Q:
+			{
+				if (canPress)
+					m_GizmoSelection = GIZMOSELECTION::NONE;
+				break;
+			}
+			case KEY_W:
+			{
+				if(!control && canPress)
+					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+				else if (control)
+					m_HierarchyView.DeleteSelectedEntity();
+				break;
+			}	
+			case KEY_E:
+			{
+				if (canPress)
+					m_GizmoSelection = GIZMOSELECTION::RORTATE;
+				break;
+			}
+			case KEY_R:
+			{
+				if (canPress)
+					m_GizmoSelection = GIZMOSELECTION::SCALE;
+				break;
+			}
+			case KEY_D:
+			{
+				if (control)
+					m_HierarchyView.CopySelectedEntity();
+				break;
+			}
+			default:
+				break;
+		}
+	}
+
+	void EditorLayer::Update()
+	{
+		if (m_ViewportSize.x != m_ViewportFramebuffer->GetWidth() || m_ViewportSize.y != m_ViewportFramebuffer->GetHeight())
+		{
+			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_EditorCamera.Resize(m_ViewportSize.x, m_ViewportSize.y);
+		}
+
+		if (!m_IsPlaying)
+		{
+			if (Input::MousePressed(0) && m_ViewportHovered && !ImGuizmo::IsUsing())
+				m_HierarchyView.MouseSelect();
+
+			if (m_ViewportFocused && !ImGui::IsAnyItemActive())
+				m_EditorCamera.UpdateFocused();
+
+			if (m_ViewportHovered && !ImGui::IsAnyItemActive())
+				m_EditorCamera.UpdateHovered();
+
+			m_EditorCamera.Update();
+		}
+		else
+			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
+
+		m_ViewportFramebuffer->Bind();
+		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(&m_EditorCamera, m_HierarchyView.GetSelectedEntity());
+		m_ViewportFramebuffer->Unbind();
 	}
 
 	void EditorLayer::OnPlay()
@@ -108,76 +190,6 @@ namespace MoonEngine
 		ImGui::End(); //End Dockspace
 	}
 
-	void EditorLayer::Update()
-	{
-		if (m_ViewportSize.x != m_ViewportFramebuffer->GetWidth() || m_ViewportSize.y != m_ViewportFramebuffer->GetHeight())
-		{
-			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_EditorCamera->Resize(m_ViewportSize.x, m_ViewportSize.y);
-		}
-
-		if (!m_IsPlaying)
-		{
-			if (Input::MousePressed(0) && m_ViewportHovered && !ImGuizmo::IsUsing())
-				m_HierarchyView.MouseSelect();
-
-			if (m_ViewportFocused)
-				m_EditorCamera->UpdateFocused();
-
-			if (m_ViewportHovered)
-				m_EditorCamera->UpdateHovered();
-
-			m_EditorCamera->Update();
-
-			if (!Input::GetKey(KEY_LEFT_CONTROL) && m_ViewportFocused)
-				if (Input::GetKey(KEY_Q))
-					m_GizmoSelection = GIZMOSELECTION::NONE;
-				else if (Input::GetKey(KEY_W))
-					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
-				else if (Input::GetKey(KEY_E))
-					m_GizmoSelection = GIZMOSELECTION::RORTATE;
-				else if (Input::GetKey(KEY_R))
-					m_GizmoSelection = GIZMOSELECTION::SCALE;
-
-			m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
-		}
-		else
-			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
-
-		m_ViewportFramebuffer->Bind();
-
-		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(m_EditorCamera.get(), m_HierarchyView.GetSelectedEntity());
-
-		m_ViewportFramebuffer->Unbind();
-
-		static bool keyDown = false;
-
-		if (Input::GetKey(KEY_LEFT_CONTROL))
-		{
-			if (Input::GetKey(KEY_D))
-			{
-				if (!keyDown)
-					m_HierarchyView.CopySelectedEntity();
-				keyDown = true;
-			}
-			else
-				keyDown = false;
-
-			if (keyDown)
-				return;
-
-			if (Input::GetKey(KEY_W))
-			{
-				if (!keyDown)
-					m_HierarchyView.DeleteSelectedEntity();
-
-				keyDown = true;
-			}
-			else
-				keyDown = false;
-		}
-	}
-
 	void EditorLayer::ViewportView(bool& state)
 	{
 		ImGuiWindowFlags flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
@@ -193,6 +205,11 @@ namespace MoonEngine
 
 			m_ViewportHovered = ImGui::IsWindowHovered();
 			m_ViewportFocused = ImGui::IsWindowFocused();
+
+			if (!m_IsPlaying)
+				ImGuiLayer::BlockEvent(!m_ViewportHovered);
+			else
+				ImGuiLayer::BlockEvent(true);
 
 			ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
 			if (ImGui::BeginDragDropTarget())
@@ -254,8 +271,8 @@ namespace MoonEngine
 
 				if (m_GizmoSelection != GIZMOSELECTION::NONE)
 				{
-					const glm::mat4& view = m_EditorCamera->GetView();
-					const glm::mat4& projection = m_EditorCamera->GetProjection();
+					const glm::mat4& view = m_EditorCamera.GetView();
+					const glm::mat4& projection = m_EditorCamera.GetProjection();
 
 					TransformComponent& component = entity.GetComponent<TransformComponent>();
 					glm::mat4 rotation = glm::toMat4(glm::quat(component.Rotation));
@@ -290,7 +307,7 @@ namespace MoonEngine
 		ImGui::PopStyleVar();
 		ImGuiLayer::ViewportPosition = m_ViewportPosition;
 		ImGuiLayer::ViewportSize = m_ViewportSize;
-		ImGuiLayer::CameraProjection = m_EditorCamera->GetViewProjection();
+		ImGuiLayer::CameraProjection = m_EditorCamera.GetViewProjection();
 	}
 
 	void EditorLayer::Menubar()
@@ -438,19 +455,6 @@ namespace MoonEngine
 		ImGui::End();
 	}
 
-	bool EditorLayer::GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected)
-	{
-		if (selected)
-			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
-
-		bool returnValue = ImGuiUtils::ImageButton((ImTextureID)texture->GetID(), { width, height });
-
-		if (selected)
-			ImGui::PopStyleColor();
-
-		return returnValue;
-	}
-
 	void EditorLayer::DebugView(bool& state)
 	{
 		ImGui::Begin(ICON_FK_CODE "Debug", &state);
@@ -458,6 +462,8 @@ namespace MoonEngine
 		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
 		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
+		ImGui::Text("Viewport Hovered %d", m_ViewportHovered);
+		ImGui::Text("Viewport Focused %d", m_ViewportFocused);
 		ImGui::End();
 	}
 
@@ -502,5 +508,18 @@ namespace MoonEngine
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
+	}
+
+	bool EditorLayer::GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected)
+	{
+		if (selected)
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
+
+		bool returnValue = ImGuiUtils::ImageButton((ImTextureID)texture->GetID(), { width, height });
+
+		if (selected)
+			ImGui::PopStyleColor();
+
+		return returnValue;
 	}
 }

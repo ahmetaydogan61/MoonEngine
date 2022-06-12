@@ -12,7 +12,6 @@ namespace MoonEngine
 		static void EndDrawUI();
 		static void BlockEvent(bool state);
 	private:
-		static bool m_EventsAllowed;
-		static bool OnMouseScroll(Event& event);
+		static bool m_EventsBlocked;
 	};
 }

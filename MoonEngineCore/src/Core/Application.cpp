@@ -15,7 +15,7 @@ namespace MoonEngine
 		if (!m_Instance)
 		{
 			m_Instance = this;
-			if (Window::Create("MoonEngine", 1600, 900, true))
+			if (Window::Create("MoonEngine", 1600, 900, false))
 				DebugSys("Window Creation Successful");
 			else
 				DebugSys("Window Creation Failed!");
@@ -28,6 +28,7 @@ namespace MoonEngine
 
 	void Application::OnEvent(Event& e)
 	{
+		ImGuiLayer::OnEvent(e);
 		for (auto l = m_Layers.end(); l != m_Layers.begin();)
 			(*--l)->OnEvent(e);
 	}

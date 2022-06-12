@@ -9,7 +9,7 @@ namespace MoonEngine
 		WindowResizeEvent(int& width, int& height)
 			:width(width), height(height)
 		{
-			SetType(EventType::Window_Resize);
+			SetType(EventType::WindowResize);
 		}
 
 		int Width()
