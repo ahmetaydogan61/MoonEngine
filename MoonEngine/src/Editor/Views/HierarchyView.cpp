@@ -49,11 +49,11 @@ namespace MoonEngine
 			m_SelectedEntity = {};
 	}
 
-	void HierarchyView::CopySelectedEntity()
+	void HierarchyView::DuplicateSelectedEntity()
 	{
 		if (m_SelectedEntity)
 		{
-			Entity e = m_Scene->CopyEntity(m_SelectedEntity);
+			Entity e = m_Scene->DuplicateEntity(m_SelectedEntity);
 			m_SelectedEntity = e;
 		}
 	}
@@ -67,12 +67,41 @@ namespace MoonEngine
 		}
 	}
 
+	void HierarchyView::CreateOptions()
+	{
+		if (ImGui::MenuItem("Camera"))
+		{
+			Entity& entity = m_Scene->CreateCameraEntity();
+			m_SelectedEntity = entity;
+		}
+
+		if (ImGui::MenuItem("Entity"))
+		{
+			Entity entity = m_Scene->CreateEntity();
+			m_SelectedEntity = entity;
+		}
+		
+		ImGuiUtils::AddPadding(0.0f, 2.5f);
+		ImGui::Separator();
+		ImGuiUtils::AddPadding(0.0f, 2.5f);
+
+		if (ImGui::BeginMenu("Effects"))
+		{
+			if (ImGui::MenuItem("Particle"))
+			{
+				Entity& entity = m_Scene->CreateEntity();
+				entity.RemoveComponent<SpriteComponent>();
+				entity.GetComponent<IdentityComponent>().Name = "Particle";
+				entity.AddComponent<ParticleComponent>();
+				m_SelectedEntity = entity;
+			}
+			ImGui::End();
+		}
+	}
+
 	void HierarchyView::BeginHierarchyView(bool& state)
 	{
-		bool createEntity = false;
-		bool createCamera = false;
-		bool createParticle = false;
-
+		bool openPopup = false;
 		float height = ImGui::GetFrameHeight();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
 
@@ -83,22 +112,9 @@ namespace MoonEngine
 				auto& contentRegion = ImGui::GetContentRegionAvail();
 				float buttonSize = 25.0f;
 				ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
-				if (ImGui::Button(":", { 25.0f, 25.0f }))
-					ImGui::OpenPopup("CreateStuff");
+				if (ImGui::Button(":", { buttonSize, buttonSize }))
+					openPopup = true;
 
-				if (ImGui::BeginPopup("CreateStuff"))
-				{
-					if (ImGui::MenuItem("Create Camera"))
-						createCamera = true;
-
-					if (ImGui::MenuItem("Create Entity"))
-						createEntity = true;
-
-					if (ImGui::MenuItem("Create Particle"))
-						createParticle = true;
-
-					ImGui::EndPopup();
-				}
 				ImGui::EndMenuBar();
 			}
 
@@ -109,43 +125,24 @@ namespace MoonEngine
 				EntityTreeNode(entity, id++);
 			});
 
-			if (ImGui::BeginPopupContextWindow(0, 1, false))
+			if (ImGui::IsMouseClicked(1))
+				openPopup = true;
+
+			ImGui::PushStyleColor(ImGuiCol_Separator, { 0.75f, 0.75f, 0.75f, 1.0f });
+
+			if(openPopup)
+				ImGui::OpenPopup("CreateStuff");
+
+			if (ImGui::BeginPopup("CreateStuff"))
 			{
-				if (ImGui::MenuItem("Create Camera"))
-					createCamera = true;
-
-				if (ImGui::MenuItem("Create Entity"))
-					createEntity = true;
-
-				if (ImGui::MenuItem("Create Particle"))
-					createParticle = true;
-
+				CreateOptions();
 				ImGui::EndPopup();
 			}
 
+			ImGui::PopStyleColor();
+
 			if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				m_SelectedEntity = {};
-
-			if (createEntity)
-			{
-				Entity entity = m_Scene->CreateEntity();
-				m_SelectedEntity = entity;
-			}
-
-			if (createCamera)
-			{
-				Entity& entity = m_Scene->CreateCameraEntity();
-				m_SelectedEntity = entity;
-			}
-
-			if (createParticle)
-			{
-				Entity& entity = m_Scene->CreateEntity();
-				entity.RemoveComponent<SpriteComponent>();
-				entity.GetComponent<IdentityComponent>().Name = "Particle";
-				entity.AddComponent<ParticleComponent>();
-				m_SelectedEntity = entity;
-			}
 		}
 		ImGui::End();
 	}
@@ -165,9 +162,9 @@ namespace MoonEngine
 
 		if (ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Copy Entity"))
+			if (ImGui::MenuItem("Duplicate Entity"))
 			{
-				Entity e = m_Scene->CopyEntity(m_SelectedEntity);
+				Entity e = m_Scene->DuplicateEntity(m_SelectedEntity);
 				m_SelectedEntity = e;
 			}
 

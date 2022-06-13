@@ -83,28 +83,28 @@ namespace MoonEngine
 			}
 			case KEY_W:
 			{
-				if(!control && canPress)
+				if (!control && canPress)
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 				else if (control)
 					m_HierarchyView.DeleteSelectedEntity();
 				break;
-			}	
-			case KEY_E:
-			{
-				if (canPress)
-					m_GizmoSelection = GIZMOSELECTION::RORTATE;
-				break;
 			}
-			case KEY_R:
+			case KEY_E:
 			{
 				if (canPress)
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 				break;
 			}
+			case KEY_R:
+			{
+				if (canPress)
+					m_GizmoSelection = GIZMOSELECTION::RORTATE;
+				break;
+			}
 			case KEY_D:
 			{
 				if (control)
-					m_HierarchyView.CopySelectedEntity();
+					m_HierarchyView.DuplicateSelectedEntity();
 				break;
 			}
 			default:
@@ -212,6 +212,7 @@ namespace MoonEngine
 				ImGuiLayer::BlockEvent(true);
 
 			ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
+
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
@@ -234,7 +235,7 @@ namespace MoonEngine
 			Entity entity = m_HierarchyView.GetSelectedEntity();
 			if (entity && !m_IsPlaying)
 			{
-				//Gizmo Selector Window
+				//+GizmoSelectorWindow
 				ImGuiStyle& style = ImGui::GetStyle();
 				ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 				float buttonSize = 25.0f;
@@ -256,18 +257,18 @@ namespace MoonEngine
 					if (GizmoSelectButton(m_TranslateTexture, buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
-					if (GizmoSelectButton(m_RotateTexture, buttonSize, buttonSize, GIZMOSELECTION::RORTATE == m_GizmoSelection))
-						m_GizmoSelection = GIZMOSELECTION::RORTATE;
-
 					if (GizmoSelectButton(m_ResizeTexture, buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::SCALE;
+
+					if (GizmoSelectButton(m_RotateTexture, buttonSize, buttonSize, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+						m_GizmoSelection = GIZMOSELECTION::RORTATE;
 
 					style.WindowBorderSize = windowBorder;
 
 					ImGui::End();
 				}
 				ImGui::PopStyleColor();
-				//End Gizmo Selector Window
+				//-GizmoSelectorWindow
 
 				if (m_GizmoSelection != GIZMOSELECTION::NONE)
 				{
@@ -404,11 +405,11 @@ namespace MoonEngine
 				if (GizmoSelectButton(m_TranslateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
-				if (GizmoSelectButton(m_RotateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::RORTATE == m_GizmoSelection))
-					m_GizmoSelection = GIZMOSELECTION::RORTATE;
-
 				if (GizmoSelectButton(m_ResizeTexture, buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
+
+				if (GizmoSelectButton(m_RotateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+					m_GizmoSelection = GIZMOSELECTION::RORTATE;
 
 				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0.0f);
 				Ref<Texture> icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;

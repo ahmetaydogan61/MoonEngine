@@ -150,7 +150,7 @@ namespace MoonEngine
 		}
 	}
 
-	Entity Scene::CopyEntity(Entity& entity)
+	Entity Scene::DuplicateEntity(Entity& entity)
 	{
 		Entity e{ m_Registry.create() };
 		e.AddComponent<UUIDComponent>();

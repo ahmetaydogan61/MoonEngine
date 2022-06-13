@@ -11,9 +11,7 @@ namespace MoonEngine
 
 	bool Input::GetKey(int key)
 	{
-		if (glfwGetKey(Window::GetWindow(), key) == GLFW_PRESS)
-			return true;
-		return false;
+		return glfwGetKey(Window::GetWindow(), key);
 	}
 
 	float Input::GetX()

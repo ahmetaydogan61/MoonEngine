@@ -11,8 +11,9 @@ namespace MoonEngine
 		Ref<Scene> m_Scene;
 		Entity m_SelectedEntity;
 
+		void CreateOptions();
 		void EntityTreeNode(Entity entity, int id);
-
+		
 		void ComponentView();
 		template<typename T, typename Function>
 		void ShowComponent(std::string componentName, Function func);
@@ -24,7 +25,7 @@ namespace MoonEngine
 		void BeginInspectorView(bool& state);
 		void MouseSelect();
 		Entity GetSelectedEntity() const { return m_SelectedEntity; }
-		void CopySelectedEntity();
+		void DuplicateSelectedEntity();
 		void DeleteSelectedEntity();
 	};
 }
