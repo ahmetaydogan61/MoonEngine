@@ -12,9 +12,9 @@ namespace MoonEngine
 		friend class HierarchyView;
 		friend class Serializer;
 
-		Entity(entt::entity id)
+		Entity(entt::entity id, Scene* scene)
 		{
-			m_Scene = Scene::m_ActiveScene;
+			m_Scene = scene;
 			m_ID = id;
 		}
 	public:
@@ -27,11 +27,7 @@ namespace MoonEngine
 			m_ID = entity.m_ID;
 			m_Scene = entity.m_Scene;
 		};
-
-		bool operator==(const Entity& other) const { return m_ID == other.m_ID && m_Scene == other.m_Scene; }
-		bool operator!=(const Entity& other) const { return !(*this == other); }
-		operator bool() const { return m_ID != entt::null; }
-
+	
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
@@ -61,6 +57,9 @@ namespace MoonEngine
 		{
 			m_Scene->m_Registry.destroy(m_ID);
 		}
-	};
 
+		bool operator==(const Entity& other) const { return m_ID == other.m_ID && m_Scene == other.m_Scene; }
+		bool operator!=(const Entity& other) const { return !(*this == other); }
+		operator bool() const { return m_ID != entt::null; }
+	};
 }

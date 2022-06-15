@@ -20,7 +20,8 @@ namespace MoonEngine
 	class EditorLayer : public Layer
 	{
 	private:
-		Ref<Scene> m_Scene;
+		std::string m_ScenePath;
+		Ref<Scene> m_Scene, m_EditorScene;
 		EditorCamera m_EditorCamera;
 		Ref<Texture> m_PlayTexture;
 		Ref<Texture> m_StopTexture;
@@ -38,6 +39,10 @@ namespace MoonEngine
 		bool m_IsContentActive = true;
 		bool m_IsEditorSettingsActive = false;
 		bool m_IsDebugActive = false;
+		
+		void NewScene();
+		void SaveScene(const std::string& path);
+		void LoadScene(const std::string& path);
 		
 		bool m_IsPlaying = false;
 		void OnPlay();

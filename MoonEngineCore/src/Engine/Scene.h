@@ -12,20 +12,25 @@ namespace MoonEngine
 	class Scene
 	{
 	private:
-		static Scene* m_ActiveScene;
+		entt::registry m_Registry;
+		float m_ViewportHeight;
+		float m_ViewportWidth;
+
 		friend class Entity;
 		friend class HierarchyView;
 		friend class Serializer;
-		entt::registry m_Registry;
 	public:
 		std::string SceneName = "Untitled";
-		Scene();
-		~Scene();
+		Scene() = default;
+		~Scene() = default;
+		static Ref<Scene> CopyScene(Ref<Scene> scene);
+
 		void OnPlay();
-		void OnReset();
+		void OnStop();
 		void UpdateRuntime();
 		void UpdateEditor(const EditorCamera* camera, Entity& entity);
 		void ResizeViewport(float width, float height);
+		
 		Entity CreateEntity();
 		Entity CreateCameraEntity();
 		Entity DuplicateEntity(Entity& entity);

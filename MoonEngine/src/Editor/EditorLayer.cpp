@@ -25,7 +25,8 @@ namespace MoonEngine
 	void EditorLayer::Create()
 	{
 		LayerName = "Editor Layer";
-		m_Scene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_Scene = m_EditorScene;
 
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
@@ -68,7 +69,6 @@ namespace MoonEngine
 		if (e.Repeat())
 			return false;
 
-		m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
 		bool control = Input::GetKey(KEY_LEFT_CONTROL);
 
 		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive();
@@ -107,6 +107,27 @@ namespace MoonEngine
 					m_HierarchyView.DuplicateSelectedEntity();
 				break;
 			}
+			case KEY_N:
+			{
+				if (control)
+					NewScene();
+				break;
+			}
+			case KEY_S:
+			{
+				if (control)
+					if (m_ScenePath.empty())
+						saveDialog.Open();
+					else
+						SaveScene(m_ScenePath);
+				break;
+			}
+			case KEY_L:
+			{
+				if (control)
+					loadDialog.Open();
+				break;
+			}
 			default:
 				break;
 		}
@@ -132,6 +153,7 @@ namespace MoonEngine
 				m_EditorCamera.UpdateHovered();
 
 			m_EditorCamera.Update();
+			m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
 		}
 		else
 			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
@@ -139,16 +161,54 @@ namespace MoonEngine
 		m_ViewportFramebuffer->Bind();
 		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(&m_EditorCamera, m_HierarchyView.GetSelectedEntity());
 		m_ViewportFramebuffer->Unbind();
+
 	}
 
 	void EditorLayer::OnPlay()
 	{
+		m_IsPlaying = true;
+		m_Scene = Scene::CopyScene(m_EditorScene);
 		m_Scene->OnPlay();
+		m_HierarchyView.SetScene(m_Scene);
 	}
 
 	void EditorLayer::OnStop()
 	{
-		m_Scene->OnReset();
+		m_IsPlaying = false;
+		m_Scene->OnStop();
+		m_Scene = m_EditorScene;
+		m_HierarchyView.SetScene(m_Scene);
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_IsPlaying = false;
+		m_EditorScene = CreateRef<Scene>();
+		m_Scene = m_EditorScene;
+		m_HierarchyView.SetScene(m_Scene);
+		m_Scene->CreateCameraEntity();
+		m_ScenePath.clear();
+	}
+
+	void EditorLayer::SaveScene(const std::string& path)
+	{
+		Serializer serializer{ m_Scene };
+		serializer.Serialize(path);
+		m_ScenePath = path;
+	}
+
+	void EditorLayer::LoadScene(const std::string& path)
+	{
+		if (Serializer::IsValid(path, "moon"))
+		{
+			m_IsPlaying = false;
+			m_EditorScene = CreateRef<Scene>();
+			m_Scene = m_EditorScene;
+			m_HierarchyView.SetScene(m_Scene);
+			Serializer serializer{ m_Scene };
+			serializer.Deserialize(path);
+			m_ScenePath = path;
+		}
 	}
 
 	void EditorLayer::DrawGUI()
@@ -219,15 +279,7 @@ namespace MoonEngine
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
 					std::filesystem::path scenePath = std::filesystem::path("res/Assets") / path;
-					if (Serializer::IsValid(scenePath.string(), "moon"))
-					{
-						m_Scene = CreateRef<Scene>();
-						m_IsPlaying = false;
-						OnStop();
-						m_HierarchyView.SetScene(m_Scene);
-						Serializer serializer{ m_Scene };
-						serializer.Deserialize(scenePath.string());
-					}
+					LoadScene(scenePath.string());
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -239,7 +291,7 @@ namespace MoonEngine
 				ImGuiStyle& style = ImGui::GetStyle();
 				ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 				float buttonSize = 25.0f;
-				const auto& currentWinPos = ImGui::GetWindowPos();
+				auto& currentWinPos = ImGui::GetWindowPos();
 				ImGui::SetNextWindowSize({ buttonSize + style.FramePadding.x * 2.0f, (buttonSize * 2) * 3 });
 
 				float windowBorder = style.WindowBorderSize;
@@ -248,7 +300,6 @@ namespace MoonEngine
 				ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.0f, 0.0f, 0.0f, 0.0f });
 				if (ImGui::Begin("GizmoWindow", &m_IsViewportActive, childFlags))
 				{
-
 					ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x * 2.0f, currentWinPos.y + (buttonSize * 4.0f) / 2.0f });
 
 					if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
@@ -319,41 +370,28 @@ namespace MoonEngine
 		if (saveDialog.HasSelected())
 		{
 			//Save Scene
-			Serializer serializer{ m_Scene };
-			serializer.Serialize(saveDialog.GetSelected().string() + "/" + m_Scene->SceneName.c_str() + ".moon");
+			SaveScene(saveDialog.GetSelected().string() + "/" + m_Scene->SceneName.c_str() + ".moon");
 			saveDialog.ClearSelected();
 		}
 
 		if (loadDialog.HasSelected())
 		{
 			//Load Scene
-			if (Serializer::IsValid(loadDialog.GetSelected().string(), "moon"))
-			{
-				m_Scene = CreateRef<Scene>();
-				m_IsPlaying = false;
-				OnStop();
-				m_HierarchyView.SetScene(m_Scene);
-				Serializer serializer{ m_Scene };
-				serializer.Deserialize(loadDialog.GetSelected().string());
-				loadDialog.ClearSelected();
-			}
+			LoadScene(loadDialog.GetSelected().string());
+			loadDialog.ClearSelected();
 		}
 
 		ImGui::BeginMainMenuBar();
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New Scene", " "))
-				{
-					m_Scene = CreateRef<Scene>();
-					m_HierarchyView.SetScene(m_Scene);
-					m_Scene->CreateCameraEntity();
-				}
+				if (ImGui::MenuItem("New Scene", "Ctrl + N"))
+					NewScene();
 
-				if (ImGui::MenuItem("Save", " "))
+				if (ImGui::MenuItem("Save", "Ctrl + S"))
 					saveDialog.Open();
 
-				if (ImGui::MenuItem("Load", " "))
+				if (ImGui::MenuItem("Load", "Ctrl + L"))
 					loadDialog.Open();
 
 				ImGui::EndMenu();
@@ -415,11 +453,10 @@ namespace MoonEngine
 				Ref<Texture> icon = m_IsPlaying ? m_StopTexture : m_PlayTexture;
 				if (ImGui::ImageButton((ImTextureID)icon->GetID(), { buttonSize, height / 2.0f }))
 				{
-					m_IsPlaying = !m_IsPlaying;
 					if (m_IsPlaying)
-						OnPlay();
-					else
 						OnStop();
+					else
+						OnPlay();
 				}
 
 				float sceneNameTextSize = 200.0f;

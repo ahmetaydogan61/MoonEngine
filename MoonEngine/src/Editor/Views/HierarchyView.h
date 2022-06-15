@@ -20,7 +20,9 @@ namespace MoonEngine
 		void UtilVectorColumn(const std::string& vecName, glm::vec3& vector, float resetValue = 0.0f, float columnWidth = 100.0f);
 
 	public:
-		void SetScene(Ref<Scene>);
+		HierarchyView();
+		~HierarchyView() = default;
+		void SetScene(Ref<Scene> scene);
 		void BeginHierarchyView(bool& state);
 		void BeginInspectorView(bool& state);
 		void MouseSelect();

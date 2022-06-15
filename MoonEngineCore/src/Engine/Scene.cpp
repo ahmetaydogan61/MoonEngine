@@ -11,20 +11,10 @@
 
 namespace MoonEngine
 {
-	Scene* Scene::m_ActiveScene;
-
-	Entity entity;
-
-	Scene::Scene()
-	{
-		m_ActiveScene = this;
-		DebugSys("Scene Created");
-	}
-
 	void Scene::OnPlay()
 	{}
 
-	void Scene::OnReset()
+	void Scene::OnStop()
 	{}
 
 	void Scene::UpdateEditor(const EditorCamera* camera, Entity& entity)
@@ -38,7 +28,6 @@ namespace MoonEngine
 				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Size, sprite.Color, sprite.Texture);
 			}
-
 			Renderer::End();
 
 			if (entity)
@@ -60,7 +49,7 @@ namespace MoonEngine
 			if (!nsc.Instance)
 			{
 				nsc.Instance = nsc.InstantiateScript();
-				nsc.Instance->m_Entity = Entity(entity);
+				nsc.Instance->m_Entity = Entity(entity, this);
 				nsc.Instance->Awake();
 			}
 			nsc.Instance->Update();
@@ -141,18 +130,37 @@ namespace MoonEngine
 	}
 
 	template<typename T>
-	void CopyIfExists(Entity& copyTo, Entity& copyFrom)
+	static void CopyIfExists(Entity copyTo, Entity copyFrom)
 	{
 		if (copyFrom.HasComponent<T>())
 		{
-			T& component = copyTo.AddComponent<T>(); 
-			component = copyFrom.GetComponent<T>();
+			T& component = copyFrom.GetComponent<T>();
+			copyTo.AddComponent<T>() = component;
 		}
+	}
+
+	Ref<Scene> Scene::CopyScene(Ref<Scene> scene)
+	{
+		Ref<Scene> tempScene = CreateRef<Scene>();
+		tempScene->SceneName = scene->SceneName;
+		auto idView = scene->m_Registry.view<UUIDComponent>();
+		for (auto e : idView)
+		{
+			Entity copyFrom{ e, scene.get() };
+			Entity copyTo = { tempScene->m_Registry.create(), tempScene.get() };
+			CopyIfExists<UUIDComponent>(copyTo, copyFrom);
+			CopyIfExists<IdentityComponent>(copyTo, copyFrom);
+			CopyIfExists<TransformComponent>(copyTo, copyFrom);
+			CopyIfExists<SpriteComponent>(copyTo, copyFrom);
+			CopyIfExists<CameraComponent>(copyTo, copyFrom);
+			CopyIfExists<ParticleComponent>(copyTo, copyFrom);
+		}
+		return tempScene;
 	}
 
 	Entity Scene::DuplicateEntity(Entity& entity)
 	{
-		Entity e{ m_Registry.create() };
+		Entity e{ m_Registry.create(), this };
 		e.AddComponent<UUIDComponent>();
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
@@ -164,7 +172,7 @@ namespace MoonEngine
 
 	Entity Scene::CreateEntity()
 	{
-		Entity e{ m_Registry.create() };
+		Entity e{ m_Registry.create(), this };
 		e.AddComponent<UUIDComponent>();
 		e.AddComponent<IdentityComponent>();
 		e.GetComponent<IdentityComponent>().Name = "Entity";
@@ -175,17 +183,12 @@ namespace MoonEngine
 
 	Entity Scene::CreateCameraEntity()
 	{
-		Entity e{ m_Registry.create() };
+		Entity e{ m_Registry.create(), this };
 		e.AddComponent<UUIDComponent>();
 		e.AddComponent<IdentityComponent>();
 		e.GetComponent<IdentityComponent>().Name = "Camera";
 		e.AddComponent<TransformComponent>();
 		e.AddComponent<CameraComponent>();
 		return e;
-	}
-
-	Scene::~Scene()
-	{
-		DebugSys("Scene Destroyed");
 	}
 }

@@ -13,11 +13,15 @@ namespace MoonEngine
 	Ref<Texture> m_NoSpriteTexture;
 	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 
+	HierarchyView::HierarchyView()
+	{
+		m_NoSpriteTexture = CreateRef<Texture>("res/EditorIcons/Frame.png");
+	}
+
 	void HierarchyView::SetScene(Ref<Scene> scene)
 	{
 		m_Scene = scene;
 		m_SelectedEntity = {};
-		m_NoSpriteTexture = CreateRef<Texture>("res/EditorIcons/Frame.png");
 	}
 
 	void HierarchyView::MouseSelect()
@@ -39,7 +43,7 @@ namespace MoonEngine
 				if (y < (pos.y + halfExtendY) && y >(pos.y - halfExtendY))
 				{
 					selected = true;
-					m_SelectedEntity = Entity{ entity };
+					m_SelectedEntity = Entity{ entity, m_Scene.get() };
 					break;
 				}
 			}
@@ -80,7 +84,7 @@ namespace MoonEngine
 			Entity entity = m_Scene->CreateEntity();
 			m_SelectedEntity = entity;
 		}
-		
+
 		ImGuiUtils::AddPadding(0.0f, 2.5f);
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 2.5f);
@@ -107,42 +111,59 @@ namespace MoonEngine
 
 		if (ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state, window_flags))
 		{
-			if (ImGui::BeginMenuBar())
+			if (m_Scene)
 			{
-				auto& contentRegion = ImGui::GetContentRegionAvail();
-				float buttonSize = 25.0f;
-				ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
-				if (ImGui::Button(":", { buttonSize, buttonSize }))
+				if (ImGui::BeginMenuBar())
+				{
+					auto& contentRegion = ImGui::GetContentRegionAvail();
+					float buttonSize = 25.0f;
+					ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
+					if (ImGui::Button(":", { buttonSize, buttonSize }))
+						openPopup = true;
+
+					ImGui::EndMenuBar();
+				}
+				
+				int id = 0;
+				m_Scene->m_Registry.each([&](auto entityID)
+				{
+					Entity entity{ entityID, m_Scene.get() };
+					EntityTreeNode(entity, id++);
+				});
+
+				//std::vector<entt::entity> entites;
+				//m_Scene->m_Registry.each([&](auto entityID)
+				//{
+				//	entites.push_back(entityID);
+				//	
+				//});
+				//
+				//int id = 0;
+				//for (auto e = entites.end(); e != entites.begin();)
+				//{
+				//	Entity entity{ (*--e), m_Scene.get() };
+				//	EntityTreeNode(entity, id++);
+				//}
+
+				if (ImGui::IsMouseClicked(1))
 					openPopup = true;
 
-				ImGui::EndMenuBar();
+				ImGui::PushStyleColor(ImGuiCol_Separator, { 0.75f, 0.75f, 0.75f, 1.0f });
+
+				if (openPopup)
+					ImGui::OpenPopup("CreateStuff");
+
+				if (ImGui::BeginPopup("CreateStuff"))
+				{
+					CreateOptions();
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopStyleColor();
+
+				if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+					m_SelectedEntity = {};
 			}
-
-			int id = 0;
-			m_Scene->m_Registry.each([&](auto entityID)
-			{
-				Entity entity{ entityID };
-				EntityTreeNode(entity, id++);
-			});
-
-			if (ImGui::IsMouseClicked(1))
-				openPopup = true;
-
-			ImGui::PushStyleColor(ImGuiCol_Separator, { 0.75f, 0.75f, 0.75f, 1.0f });
-
-			if(openPopup)
-				ImGui::OpenPopup("CreateStuff");
-
-			if (ImGui::BeginPopup("CreateStuff"))
-			{
-				CreateOptions();
-				ImGui::EndPopup();
-			}
-
-			ImGui::PopStyleColor();
-
-			if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				m_SelectedEntity = {};
 		}
 		ImGui::End();
 	}

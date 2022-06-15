@@ -1,12 +1,22 @@
 Scene: 3DCube
 Entities:
-  - Entity: 0647df0f-4bd9-4e52-9b33-6ddc56248d2c
+  - Entity: 7434116c-c5be-47a9-a983-fc6ecef33572
+    IdentityComponent:
+      Name: Camera
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Size: [1, 1, 1]
+    CameraComponent:
+      IsMain: true
+      Distance: 1.5
+  - Entity: f6d25ab9-ae0e-41aa-9ac2-ad9d02c0f3be
     IdentityComponent:
       Name: Entity
     TransformComponent:
-      Position: [-0.0733781904, -0.376251101, -0.393104225]
-      Rotation: [0.5916664, -0.778416812, -0.452040136]
-      Size: [1.09999979, 0.899999976, 0.999986708]
+      Position: [0.300000012, 0.200000003, 0]
+      Rotation: [-0.944223106, -0.694640994, -0.438077658]
+      Size: [1, 0.999999881, 1]
     SpriteComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "null"
@@ -20,13 +30,13 @@ Entities:
     SpriteComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "null"
-  - Entity: f6d25ab9-ae0e-41aa-9ac2-ad9d02c0f3be
+  - Entity: 0647df0f-4bd9-4e52-9b33-6ddc56248d2c
     IdentityComponent:
       Name: Entity
     TransformComponent:
-      Position: [0.300000012, 0.200000003, 0]
-      Rotation: [-0.944223106, -0.694640994, -0.438077658]
-      Size: [1, 0.999999881, 1]
+      Position: [-0.0733781904, -0.376251101, -0.393104225]
+      Rotation: [0.5916664, -0.778416812, -0.452040136]
+      Size: [1.09999979, 0.899999976, 0.999986708]
     SpriteComponent:
       Color: [1, 1, 1, 1]
       TexturePath: "null"
