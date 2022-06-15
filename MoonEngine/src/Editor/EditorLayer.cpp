@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 #include "Core/ImGuiLayer.h"
+#include "Core/ResourceManager.h"
 #include "ImGuiUtils.h"
 #include "Utils/IconsFontAwesome.h"
 #include "ImGuizmo.h"
@@ -13,8 +14,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "Engine/Systems/ParticleSystem.h"
-
 namespace MoonEngine
 {
 	bool demoWindow = false;
@@ -25,11 +24,20 @@ namespace MoonEngine
 	void EditorLayer::Create()
 	{
 		LayerName = "Editor Layer";
+		
+		ResourceManagerDesc desc
+		{
+			"Assets",
+			"res/Assets"
+		};
+		ResourceManager::SetResourceManager(desc);
+
 		m_EditorScene = CreateRef<Scene>();
 		m_Scene = m_EditorScene;
 
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
+		m_ContentView.SetDirectoryPath(ResourceManager::GetAssetPath());
 
 		ImGuiUtils::StyleCustomDark(0);
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
@@ -212,7 +220,7 @@ namespace MoonEngine
 
 	void EditorLayer::DrawGUI()
 	{
-		Dockspace(); //Start Dockspace
+		Dockspace(); //+Dockspace
 		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 		ImGuiStyle& style = ImGui::GetStyle();
 		float borderSize = style.WindowBorderSize;
@@ -246,7 +254,7 @@ namespace MoonEngine
 			ViewportView(m_IsViewportActive);
 
 		Statusbar();
-		ImGui::End(); //End Dockspace
+		ImGui::End(); //-Dockspace
 	}
 
 	void EditorLayer::ViewportView(bool& state)
@@ -497,10 +505,23 @@ namespace MoonEngine
 		ImGui::Begin(ICON_FK_CODE "Debug", &state);
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
+		
+		ImGuiUtils::SeparatorDistanced(5.0f);
+
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
 		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
 		ImGui::Text("Viewport Hovered %d", m_ViewportHovered);
 		ImGui::Text("Viewport Focused %d", m_ViewportFocused);
+
+		ImGuiUtils::SeparatorDistanced(5.0f);
+
+		ImGui::Text("Texture Assets Count: %d", ResourceManager::TextureCount());
+
+		auto& map = ResourceManager::GetMap();
+		for (auto element : map)
+			ImGui::Text(element.first.c_str());
+
+		ImGuiUtils::SeparatorDistanced(5.0f);
 		ImGui::End();
 	}
 

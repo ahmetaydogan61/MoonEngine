@@ -1,6 +1,8 @@
 #include "mpch.h"
 #include "Serializer.h"
 
+#include "Core/ResourceManager.h"
+
 #include "Engine/Entity.h"
 #include "Engine/Components.h"
 
@@ -298,7 +300,7 @@ namespace MoonEngine
 					component.Color = spriteComponent["Color"].as<glm::vec4>();
 					auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
 					if (texturePath != "null")
-						component.Texture = CreateRef<Texture>(texturePath);
+						component.Texture = ResourceManager::LoadTexture(texturePath);
 				}
 				else
 					deserializedEntity.RemoveComponent<SpriteComponent>();

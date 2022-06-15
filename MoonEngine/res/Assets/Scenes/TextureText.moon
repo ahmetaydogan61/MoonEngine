@@ -1,40 +1,40 @@
-Scene: Untitled
+Scene: TextureText
 Entities:
-  - Entity: 42e14ace-3189-41c6-b9ca-a65cbdd27de3
+  - Entity: 8db23357-a631-426a-8ef0-dc7bbb94212c
     IdentityComponent:
       Name: Camera
     TransformComponent:
-      Position: [-5.79040766, -2.75310779, 0]
+      Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Size: [1, 1, 1]
     CameraComponent:
       IsMain: true
       Distance: 5
-  - Entity: d3d44dac-a8bd-4620-8230-bb9135968df2
+  - Entity: 992f38ca-a574-4e91-b397-26b6e7debe84
     IdentityComponent:
       Name: Entity
     TransformComponent:
-      Position: [-0.763765156, 2.04262877, 0]
+      Position: [2.89156651, 3.87048197, 0]
       Rotation: [0, 0, 0]
       Size: [1, 1, 1]
     SpriteComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "null"
-  - Entity: 63931fb4-388f-47f5-a7ab-e2b189daffd8
+      TexturePath: res/Assets/Images\Star.png
+  - Entity: a6b209aa-428a-43c8-b803-9ac8d856c659
     IdentityComponent:
       Name: Entity
     TransformComponent:
-      Position: [6.46536303, 3.07282352, 0]
+      Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Size: [1, 1, 1]
     SpriteComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: "null"
-  - Entity: abaf62ca-4531-4e6b-8dbe-3907fde04677
+      TexturePath: res/Assets/Images\Pong\Ball.png
+  - Entity: d1bec9c2-0207-40c0-bf2f-fed352e51db4
     IdentityComponent:
       Name: Particle
     TransformComponent:
-      Position: [0, 0, 0]
+      Position: [-8.23795223, -4.33734894, 0]
       Rotation: [0, 0, 0]
       Size: [1, 1, 1]
     ParticleComponent:
@@ -45,13 +45,13 @@ Entities:
       BurstMode: false
       Rate: 5
       Lifetime: 1.5
-      Direction: [0, 0, 0]
+      Direction: [5, 5, 0]
       DirectionVelocity: [1, 1, 0]
       ShapeSize: [0, 0, 0]
       SizeStart: [0.5, 0.5, 0]
       SizeEnd: [0, 0, 0]
       SizeChangeSpeed: 1
-      TexturePath: "null"
+      TexturePath: res/Assets/Images\Pong\Player.png
       ColorStart: [1, 0, 0, 1]
       ColorEnd: [0, 0.400000006, 1, 1]
       ColorChangeSpeed: 1

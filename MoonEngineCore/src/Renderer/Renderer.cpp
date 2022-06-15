@@ -59,8 +59,10 @@ namespace MoonEngine
 	{
 		if (m_TextureIndex > 32)
 			return 0;
+
 		if (m_TextureCache.find(texture) != m_TextureCache.end())
-			return m_TextureCache[texture];
+			return m_TextureCache.at(texture);
+		
 		m_TextureIndex++;
 		texture->Bind(m_TextureIndex);
 		m_TextureCache[texture] = m_TextureIndex;

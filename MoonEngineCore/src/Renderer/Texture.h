@@ -12,9 +12,6 @@ namespace MoonEngine
 		Texture(unsigned int width, unsigned int height);
 		Texture(const std::string& filepath);
 		std::string Filepath;
-		//static Ref<Texture> Create();
-		//static Ref<Texture> Create(const std::string& filepath);
-		//static Ref<Texture> Create(unsigned int width, unsigned int height);
 		~Texture();
 	
 		void Bind(unsigned int slot = 0) const;

@@ -1,15 +1,17 @@
 #include "mpch.h"
 #include "ContentView.h"
+#include "Core/ResourceManager.h"
+#include "Renderer/Texture.h"
+
 #include "../ImGuiUtils.h"
 
 #include <imgui/imgui.h>
 
+#include <filesystem>
+
 namespace MoonEngine
 {
-	extern const std::filesystem::path resourcesPath = "res/Assets";
-
 	ContentView::ContentView()
-		: m_CurrentDirectory(resourcesPath)
 	{
 		m_FolderIcon = CreateRef<Texture>("res/EditorIcons/Folder.png");
 		m_FileIcon = CreateRef<Texture>("res/EditorIcons/File.png");
@@ -22,7 +24,7 @@ namespace MoonEngine
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (m_CurrentDirectory != std::filesystem::path(resourcesPath))
+			if (m_CurrentDirectory != std::filesystem::path(m_StartDirectory))
 				if (ImGui::Button(" < "))
 					m_CurrentDirectory = m_CurrentDirectory.parent_path();
 
@@ -50,11 +52,21 @@ namespace MoonEngine
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{
 			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, resourcesPath);
-			std::string filenameString = relativePath.filename().string();
+			auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
 
+			std::string filenameString = relativePath.filename().string();
 			ImGui::PushID(filenameString.c_str());
-			Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+
+			Ref<Texture> icon;
+			if (directoryEntry.path().extension().string() == ".png")
+			{
+				icon = ResourceManager::LoadTexture(relativePath.string());
+				if(!icon)
+					icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+			}
+			else
+				icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
 			if (ImGui::BeginDragDropSource())

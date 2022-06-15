@@ -22,7 +22,7 @@ namespace MoonEngine
 			}
 
 			glm::vec4& clearColor = Renderer::GetClearColor();
-			ImGui::ColorEdit4("Clear Color:", &clearColor[0]);
+			ImGui::ColorEdit4("Clear Color", &clearColor[0]);
 			Renderer::SetClearColor(clearColor);
 		}
 		ImGui::End();

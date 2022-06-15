@@ -43,6 +43,13 @@ namespace ImGuiUtils
 		return ImGui::ImageButton(textID, size, { 0, 1 }, { 1, 0 });
 	}
 
+	static void SeparatorDistanced(float distance)
+	{
+		AddPadding(0.0f, distance);
+		ImGui::Separator();
+		AddPadding(0.0f, distance);
+	}
+
 	static void StyleCustomDark(int cartoony)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();

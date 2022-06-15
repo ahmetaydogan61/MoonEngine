@@ -2,10 +2,12 @@
 #include "Engine/Components.h"
 #include "../ImGuiUtils.h"
 #include "Utils/IconsFontAwesome.h"
+#include "Core/ResourceManager.h"
 
 #include <imgui/imgui.cpp>
 #include "imgui/misc/cpp/imgui_stdlib.h"
 #include "imgui/misc/cpp/imgui_stdlib.cpp"
+
 #include <filesystem>
 
 namespace MoonEngine
@@ -125,9 +127,9 @@ namespace MoonEngine
 
 	void HierarchyView::BeginHierarchyView(bool& state)
 	{
-		bool openPopup = false;
 		float height = ImGui::GetFrameHeight();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+		bool openPopup = false;
 
 		if (ImGui::Begin(ICON_FK_LIST_UL "Hierarchy", &state, window_flags))
 		{
@@ -140,7 +142,6 @@ namespace MoonEngine
 					ImGuiUtils::AddPadding(contentRegion.x - (buttonSize / 2.0f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
 					if (ImGui::Button(":", { buttonSize, buttonSize }))
 						openPopup = true;
-
 					ImGui::EndMenuBar();
 				}
 				
@@ -158,12 +159,9 @@ namespace MoonEngine
 					EntityTreeNode(entity, id++);
 				}
 
-				if (ImGui::IsMouseClicked(1))
-					openPopup = true;
-
 				ImGui::PushStyleColor(ImGuiCol_Separator, { 0.75f, 0.75f, 0.75f, 1.0f });
 
-				if (openPopup)
+				if(openPopup)
 					ImGui::OpenPopup("CreateStuff");
 
 				if (ImGui::BeginPopup("CreateStuff"))
@@ -172,6 +170,11 @@ namespace MoonEngine
 					ImGui::EndPopup();
 				}
 
+				if (ImGui::BeginPopupContextWindow(0, 1, false))
+				{
+					CreateOptions();
+					ImGui::EndPopup();
+				}
 				ImGui::PopStyleColor();
 
 				if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
@@ -308,9 +311,9 @@ namespace MoonEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path texturePath = std::filesystem::path("res/Assets") / path;
-					Ref<Texture> texture = CreateRef<Texture>(texturePath.string());
-					if (texture->IsValid())
+					std::filesystem::path texturePath = path;
+					Ref<Texture> texture = ResourceManager::LoadTexture(texturePath.string());
+					if (texture)
 						component.Texture = texture;
 					else
 						DebugErr(texturePath.string());
@@ -492,8 +495,8 @@ namespace MoonEngine
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MNE_AssetItem"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path texturePath = std::filesystem::path("res/Assets") / path;
-					Ref<Texture> texture = CreateRef<Texture>(texturePath.string());
+					std::filesystem::path texturePath = path;
+					Ref<Texture> texture = ResourceManager::LoadTexture(texturePath.string());
 					if (texture->IsValid())
 						component.Texture = texture;
 					else
