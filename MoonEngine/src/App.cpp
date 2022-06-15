@@ -1,5 +1,4 @@
 #include "Editor/EditorLayer.h"
-#include <wtypes.h>
 using namespace MoonEngine;
 
 #ifdef ENGINE_DEBUG
@@ -13,6 +12,7 @@ int main()
 #endif // ENGINE_DEBUG
 
 #ifdef  ENGINE_RELEASE
+#include <wtypes.h>
 int main()
 {
 	Application* app = new Application();

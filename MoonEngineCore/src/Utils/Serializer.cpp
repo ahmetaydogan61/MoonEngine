@@ -213,13 +213,22 @@ namespace MoonEngine
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << m_Scene->SceneName;
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+
+		std::vector<entt::entity> entites;
 		m_Scene->m_Registry.each([&](auto entityID)
 		{
-			Entity entity = { entityID, m_Scene.get()};
+			entites.push_back(entityID);
+
+		});
+
+		for (auto e = entites.end(); e != entites.begin();)
+		{
+			Entity entity{ (*--e), m_Scene.get() };
 			if (!entity)
 				return;
 			SerializeEntity(out, entity);
-		});
+		}
+		
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 

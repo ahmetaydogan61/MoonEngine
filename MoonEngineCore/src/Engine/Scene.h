@@ -34,5 +34,7 @@ namespace MoonEngine
 		Entity CreateEntity();
 		Entity CreateCameraEntity();
 		Entity DuplicateEntity(Entity& entity);
+		template<typename T>
+		void CopyComponent(Entity& copyTo, Entity& copyFrom);
 	};
 }

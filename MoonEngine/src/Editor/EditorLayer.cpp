@@ -33,7 +33,6 @@ namespace MoonEngine
 
 		ImGuiUtils::StyleCustomDark(0);
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
-
 		m_PlayTexture = CreateRef<Texture>("res/EditorIcons/Play.png");
 		m_StopTexture = CreateRef<Texture>("res/EditorIcons/Stop.png");
 		m_SelectTexture = CreateRef<Texture>("res/EditorIcons/Select.png");
@@ -388,10 +387,10 @@ namespace MoonEngine
 				if (ImGui::MenuItem("New Scene", "Ctrl + N"))
 					NewScene();
 
-				if (ImGui::MenuItem("Save", "Ctrl + S"))
+				if (ImGui::MenuItem("Save Scene", "Ctrl + S"))
 					saveDialog.Open();
 
-				if (ImGui::MenuItem("Load", "Ctrl + L"))
+				if (ImGui::MenuItem("Load Scene", "Ctrl + L"))
 					loadDialog.Open();
 
 				ImGui::EndMenu();

@@ -44,7 +44,7 @@ namespace MoonEngine
 
 	void Scene::UpdateRuntime()
 	{
-		m_Registry.view<Script>().each([=](auto entity, auto& nsc)
+		m_Registry.view<ScriptComponent>().each([=](auto entity, auto& nsc)
 		{
 			if (!nsc.Instance)
 			{
@@ -71,8 +71,6 @@ namespace MoonEngine
 		}
 
 		glm::mat4 viewProjection;
-
-
 		if (sceneCamera)
 		{
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
@@ -143,10 +141,16 @@ namespace MoonEngine
 	{
 		Ref<Scene> tempScene = CreateRef<Scene>();
 		tempScene->SceneName = scene->SceneName;
-		auto idView = scene->m_Registry.view<UUIDComponent>();
-		for (auto e : idView)
+
+		std::vector<entt::entity> entites;
+		scene->m_Registry.each([&](auto entityID)
 		{
-			Entity copyFrom{ e, scene.get() };
+			entites.push_back(entityID);
+		});
+
+		for (auto e = entites.end(); e != entites.begin();)
+		{
+			Entity copyFrom{ (*--e), scene.get() };
 			Entity copyTo = { tempScene->m_Registry.create(), tempScene.get() };
 			CopyIfExists<UUIDComponent>(copyTo, copyFrom);
 			CopyIfExists<IdentityComponent>(copyTo, copyFrom);
@@ -179,6 +183,16 @@ namespace MoonEngine
 		e.AddComponent<TransformComponent>();
 		e.AddComponent<SpriteComponent>();
 		return e;
+	}
+
+	template<typename T>
+	void Scene::CopyComponent(Entity& copyTo, Entity& copyFrom)
+	{
+		if (copyTo.HasComponent<T>() && copyFrom.HasComponent<T>())
+		{
+			T component = copyFrom.GetComponent<T>();
+			copyFrom.GetComponent<T>() = component;
+		}
 	}
 
 	Entity Scene::CreateCameraEntity()

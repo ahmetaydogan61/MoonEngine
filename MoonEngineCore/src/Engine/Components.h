@@ -74,18 +74,18 @@ namespace MoonEngine
 		CameraComponent(const CameraComponent& camera) = default;
 	};
 
-	struct Script
+	struct ScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
 
 		ScriptableEntity* (*InstantiateScript)();
-		void (*DestroyScript)(Script*);
+		void (*DestroyScript)(ScriptComponent*);
 
 		template<typename T>
 		void Bind()
 		{
 			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](Script* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+			DestroyScript = [](ScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 		}
 	};
 

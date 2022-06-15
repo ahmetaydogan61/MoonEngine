@@ -13,6 +13,26 @@ namespace MoonEngine
 	Ref<Texture> m_NoSpriteTexture;
 	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 
+	template<typename T>
+	struct ComponentCopier
+	{
+		static T Component;
+		static void ApplyCopy(Entity& copyTo)
+		{
+			if (copyTo.HasComponent<T>())
+			{
+				copyTo.GetComponent<T>() = Component;
+			}
+		}
+	};
+
+	IdentityComponent ComponentCopier<IdentityComponent>::Component;
+	TransformComponent ComponentCopier<TransformComponent>::Component;
+	SpriteComponent ComponentCopier<SpriteComponent>::Component;
+	CameraComponent ComponentCopier<CameraComponent>::Component;
+	ScriptComponent ComponentCopier<ScriptComponent>::Component;
+	ParticleComponent ComponentCopier<ParticleComponent>::Component;
+
 	HierarchyView::HierarchyView()
 	{
 		m_NoSpriteTexture = CreateRef<Texture>("res/EditorIcons/Frame.png");
@@ -124,26 +144,19 @@ namespace MoonEngine
 					ImGui::EndMenuBar();
 				}
 				
-				int id = 0;
+				std::vector<entt::entity> entites;
 				m_Scene->m_Registry.each([&](auto entityID)
 				{
-					Entity entity{ entityID, m_Scene.get() };
-					EntityTreeNode(entity, id++);
+					entites.push_back(entityID);
+					
 				});
-
-				//std::vector<entt::entity> entites;
-				//m_Scene->m_Registry.each([&](auto entityID)
-				//{
-				//	entites.push_back(entityID);
-				//	
-				//});
-				//
-				//int id = 0;
-				//for (auto e = entites.end(); e != entites.begin();)
-				//{
-				//	Entity entity{ (*--e), m_Scene.get() };
-				//	EntityTreeNode(entity, id++);
-				//}
+				
+				int id = 0;
+				for (auto e = entites.end(); e != entites.begin();)
+				{
+					Entity entity{ (*--e), m_Scene.get() };
+					EntityTreeNode(entity, id++);
+				}
 
 				if (ImGui::IsMouseClicked(1))
 					openPopup = true;
@@ -575,6 +588,16 @@ namespace MoonEngine
 
 			if (ImGui::BeginPopup("SettingList"))
 			{
+				if (ImGui::MenuItem("Copy"))
+				{
+					ComponentCopier<T>::Component = m_SelectedEntity.GetComponent<T>();
+				}
+
+				if (ImGui::MenuItem("Paste"))
+				{
+					ComponentCopier<T>::ApplyCopy(m_SelectedEntity);
+				}
+
 				if (ImGui::MenuItem("Remove"))
 				{
 					m_SelectedEntity.RemoveComponent<T>();
