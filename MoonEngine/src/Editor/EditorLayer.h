@@ -38,7 +38,7 @@ namespace MoonEngine
 		bool m_IsViewportActive = true;
 		bool m_IsContentActive = true;
 		bool m_IsEditorSettingsActive = false;
-		bool m_IsDebugActive = false;
+		bool m_IsDebugActive = true;
 		
 		void NewScene();
 		void SaveScene(const std::string& path);

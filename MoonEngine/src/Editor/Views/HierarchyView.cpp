@@ -229,19 +229,50 @@ namespace MoonEngine
 			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x);
 			ImGui::InputText("##Name", &m_SelectedEntity.GetComponent<IdentityComponent>().Name);
 
-			ImGuiUtils::AddPadding(0, 5);
-			ImGui::Separator();
-			ImGuiUtils::AddPadding(0, 5);
+			ImGuiUtils::AddPadding(0, 5.0f);
 
-			//+Translation
-			ImGui::Text("Transform");
-			TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
-			UtilVectorColumn("Position", transform.Position);
-			glm::vec3 rotation = glm::degrees(transform.Rotation);
-			UtilVectorColumn("Rotation", rotation);
-			transform.Rotation = glm::radians(rotation);
-			UtilVectorColumn("Size", transform.Size, 1.0f);
-			//-Translation
+			float color = Maths::Normalize(75.0f, 0.0f, 255.0f);
+			float alpha = Maths::Normalize(150.0f, 0.0f, 255.0f);
+			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(color, color, color, alpha));
+			alpha = Maths::Normalize(175.0f, 0.0f, 255.0f);
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
+
+			//+Transform Component
+			ImGui::PushID("Transform");
+			float buttonSize = 25.0f;
+			ImVec2 contentRegion = ImGui::GetContentRegionAvail();
+			TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
+
+			ImGui::AlignTextToFramePadding();
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed;
+			bool treeopen = ImGui::TreeNodeEx("Transform", flags);
+			ImGui::SameLine(contentRegion.x - (buttonSize / 2.0f) - ImGui::GetStyle().FramePadding.x);
+			if (ImGui::Button(":", { buttonSize, ImGui::GetFrameHeight() }))
+				ImGui::OpenPopup("SettingList");
+
+			if (ImGui::BeginPopup("SettingList"))
+			{
+				if (ImGui::MenuItem("Copy"))
+					ComponentCopier<TransformComponent>::Component = m_SelectedEntity.GetComponent<TransformComponent>();
+				if (ImGui::MenuItem("Paste"))
+					ComponentCopier<TransformComponent>::ApplyCopy(m_SelectedEntity);
+				ImGui::EndPopup();
+			}
+
+			if (treeopen)
+			{
+				ImGuiUtils::AddPadding(0, 5.0f);
+				TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
+				UtilVectorColumn("Position", transform.Position);
+				glm::vec3 rotation = glm::degrees(transform.Rotation);
+				UtilVectorColumn("Rotation", rotation);
+				transform.Rotation = glm::radians(rotation);
+				UtilVectorColumn("Size", transform.Size, 1.0f);
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+			//-Transform Component
 
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 			ImGui::Separator();
@@ -276,13 +307,6 @@ namespace MoonEngine
 
 	void HierarchyView::ComponentView()
 	{
-		float color = Maths::Normalize(75.0f, 0.0f, 255.0f);
-		float alpha = Maths::Normalize(150.0f, 0.0f, 255.0f);
-		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(color, color, color, alpha));
-		alpha = Maths::Normalize(175.0f, 0.0f, 255.0f);
-		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
-
 		ShowComponent<SpriteComponent>("Sprite", [](SpriteComponent& component)
 		{
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
@@ -338,6 +362,25 @@ namespace MoonEngine
 				ImGui::PopStyleColor(2);
 			}
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
+		});
+
+		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
+		{
+			float winWidth = 100.0f;
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, winWidth);
+			ImGuiUtils::Label("Is Main", false);
+			ImGui::NextColumn();
+			ImGui::Checkbox("##IsMain", &component.IsMain);
+			ImGui::Columns(1);
+
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, winWidth);
+			ImGuiUtils::Label("Distance", true);
+			ImGui::NextColumn();
+			ImGui::DragFloat("##Distance", &component.Distance, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::Columns(1);
 		});
 
 		ShowComponent<ParticleComponent>("Particle", [](ParticleComponent& component)
@@ -549,25 +592,6 @@ namespace MoonEngine
 			}
 
 		});
-
-		ShowComponent<CameraComponent>("Camera", [](CameraComponent& component)
-		{
-			float winWidth = 100.0f;
-
-			ImGui::Columns(2);
-			ImGui::SetColumnWidth(0, winWidth);
-			ImGuiUtils::Label("Is Main", false);
-			ImGui::NextColumn();
-			ImGui::Checkbox("##IsMain", &component.IsMain);
-			ImGui::Columns(1);
-
-			ImGui::Columns(2);
-			ImGui::SetColumnWidth(0, winWidth);
-			ImGuiUtils::Label("Distance", true);
-			ImGui::NextColumn();
-			ImGui::DragFloat("##Distance", &component.Distance, 0.1f, 0.0f, 0.0f, "%.2f");
-			ImGui::Columns(1);
-		});
 		ImGui::PopStyleColor(3);
 	}
 
@@ -612,6 +636,7 @@ namespace MoonEngine
 			{
 				function(component);
 				ImGui::TreePop();
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
 			}
 			ImGui::PopID();
 		}

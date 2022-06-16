@@ -48,6 +48,8 @@ namespace MoonEngine
 		if (columnCount < 1)
 			columnCount = 1;
 
+		bool itemPopup = false;
+		
 		ImGui::Columns(columnCount, 0, false);
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{
@@ -55,13 +57,14 @@ namespace MoonEngine
 			auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
 
 			std::string filenameString = relativePath.filename().string();
+
 			ImGui::PushID(filenameString.c_str());
 
 			Ref<Texture> icon;
 			if (directoryEntry.path().extension().string() == ".png")
 			{
 				icon = ResourceManager::LoadTexture(relativePath.string());
-				if(!icon)
+				if (!icon)
 					icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
 			}
 			else
@@ -82,13 +85,36 @@ namespace MoonEngine
 				if (directoryEntry.is_directory())
 					m_CurrentDirectory /= path.filename();
 			}
-			ImGui::TextWrapped(filenameString.c_str());
 
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+			{
+				ImGui::OpenPopup("ContentItemPopup");
+				itemPopup = true;
+			}
+
+			if (ImGui::BeginPopup("ContentItemPopup"))
+			{
+				if (directoryEntry.is_directory())
+				{
+					if (ImGui::MenuItem("Delete Folder"))
+						std::filesystem::remove_all(path);
+				}
+				else
+				{
+					if (ImGui::MenuItem("Delete File"))
+						std::filesystem::remove(path);
+				}
+				ImGui::EndPopup();
+			}
+
+			ImGui::TextWrapped(filenameString.c_str());
+			
 			ImGui::NextColumn();
 			ImGui::PopID();
 		}
 
 		ImGui::Columns(1);
+
 		ImGui::End();
 		ImGui::PopStyleColor();
 	}

@@ -19,7 +19,7 @@ namespace MoonEngine
 	bool demoWindow = false;
 
 	ImGui::FileBrowser saveDialog{ ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir };
-	ImGui::FileBrowser loadDialog{ ImGuiFileBrowserFlags_EnterNewFilename };
+	ImGui::FileBrowser loadDialog{};
 
 	void EditorLayer::Create()
 	{
@@ -52,11 +52,11 @@ namespace MoonEngine
 
 		saveDialog.SetTitle("Save Scene");
 		saveDialog.SetTypeFilters({ ".moon" });
-		saveDialog.SetPwd("res/Assets/Scenes");
+		saveDialog.SetPwd(ResourceManager::GetAssetPath());
 
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
-		loadDialog.SetPwd("res/Assets/Scenes");
+		loadDialog.SetPwd(ResourceManager::GetAssetPath());
 
 		m_Scene->CreateCameraEntity();
 	}
@@ -77,8 +77,9 @@ namespace MoonEngine
 			return false;
 
 		bool control = Input::GetKey(KEY_LEFT_CONTROL);
+		bool shift = Input::GetKey(KEY_LEFT_SHIFT);
 
-		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive();
+		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive() && !shift ;
 
 		switch (e.Key())
 		{
