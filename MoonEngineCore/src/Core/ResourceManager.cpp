@@ -42,8 +42,8 @@ namespace MoonEngine
 		if (m_TextureCache.find(newPath) != m_TextureCache.end())
 		{
 			auto& texture = m_TextureCache.at(newPath);
-			m_TextureCache.erase(newPath);
 			texture = nullptr;
+			m_TextureCache.erase(newPath);
 		}
 	}
 }
