@@ -25,15 +25,16 @@ namespace MoonEngine
 	{
 		LayerName = "Editor Layer";
 		
+		m_EditorScene = CreateRef<Scene>();
+		m_Scene = m_EditorScene;
+
 		ResourceManagerDesc desc
 		{
+			m_EditorScene,
 			"Assets",
 			"res/Assets"
 		};
 		ResourceManager::SetResourceManager(desc);
-
-		m_EditorScene = CreateRef<Scene>();
-		m_Scene = m_EditorScene;
 
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
@@ -196,6 +197,7 @@ namespace MoonEngine
 		m_HierarchyView.SetScene(m_Scene);
 		m_Scene->CreateCameraEntity();
 		m_ScenePath.clear();
+		ResourceManager::OnSceneChange(m_EditorScene);
 	}
 
 	void EditorLayer::SaveScene(const std::string& path)
@@ -213,6 +215,7 @@ namespace MoonEngine
 			m_EditorScene = CreateRef<Scene>();
 			m_Scene = m_EditorScene;
 			m_HierarchyView.SetScene(m_Scene);
+			ResourceManager::OnSceneChange(m_EditorScene);
 			Serializer serializer{ m_Scene };
 			serializer.Deserialize(path);
 			m_ScenePath = path;

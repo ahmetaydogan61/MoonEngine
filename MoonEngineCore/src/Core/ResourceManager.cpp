@@ -1,23 +1,25 @@
 #include "mpch.h"
 #include "ResourceManager.h"
+#include "Engine/Scene.h"
+#include "Engine/Components.h"
 #include "Renderer/Texture.h"
-
-#include "uuid_v4.h"
 
 namespace MoonEngine
 {
-	ResourceManagerDesc ResourceManager::m_Paths;
+	ResourceManagerDesc ResourceManager::m_Desc;
 	std::unordered_map<std::string, Ref<Texture>> ResourceManager::m_TextureCache;
 
-	void ResourceManager::SetResourceManager(ResourceManagerDesc desc) { m_Paths = desc; }
+	void ResourceManager::SetResourceManager(ResourceManagerDesc desc) { m_Desc = desc; }
+
+	std::vector<std::string> garbage;
 
 	Ref<Texture> ResourceManager::LoadTexture(const std::string& path)
 	{
 		std::string newPath(path);
-		size_t directorySize = m_Paths.AssetFolder.size() - 1;
+		size_t directorySize = m_Desc.AssetFolder.size() - 1;
 
-		if (newPath.substr(0, directorySize) != m_Paths.AssetFolder.substr(0, directorySize))
-			newPath = m_Paths.AssetFolder + "/" + path;
+		if (newPath.substr(0, directorySize) != m_Desc.AssetFolder.substr(0, directorySize))
+			newPath = m_Desc.AssetFolder + "/" + path;
 
 		if (m_TextureCache.find(newPath) != m_TextureCache.end())
 			return m_TextureCache.at(newPath);
@@ -34,16 +36,46 @@ namespace MoonEngine
 	void ResourceManager::UnloadTexture(const std::string& path)
 	{
 		std::string newPath(path);
-		size_t directorySize = m_Paths.AssetFolder.size() - 1;
+		size_t directorySize = m_Desc.AssetFolder.size() - 1;
 
-		if (newPath.substr(0, directorySize) != m_Paths.AssetFolder.substr(0, directorySize))
-			newPath = m_Paths.AssetFolder + "/" + path;
+		if (newPath.substr(0, directorySize) != m_Desc.AssetFolder.substr(0, directorySize))
+			newPath = m_Desc.AssetFolder + "/" + path;
 
 		if (m_TextureCache.find(newPath) != m_TextureCache.end())
 		{
-			auto& texture = m_TextureCache.at(newPath);
-			texture = nullptr;
-			m_TextureCache.erase(newPath);
+			garbage.push_back(newPath);
+			auto spriteView = m_Desc.Scene->m_Registry.view<SpriteComponent>();
+			for (auto e : spriteView)
+			{
+				SpriteComponent& component = spriteView.get<SpriteComponent>(e);
+				if (component.Texture->Filepath == newPath)
+					component.Texture = nullptr;
+			}
+
+			auto particleView = m_Desc.Scene->m_Registry.view<ParticleComponent>();
+			for (auto e : particleView)
+			{
+				ParticleComponent& component = particleView.get<ParticleComponent>(e);
+				if (component.Texture->Filepath == newPath)
+					component.Texture = nullptr;
+			}
 		}
+	}
+
+	void ResourceManager::CollectGarbage()
+	{
+		for (auto& it : m_TextureCache)
+			if (it.second.use_count() == 1)
+				garbage.push_back(it.first);
+
+		bool collected = false;
+		for (auto& it : garbage)
+		{
+			m_TextureCache.erase(it);
+			collected = true;
+		}
+
+		if (collected)
+			garbage.clear();
 	}
 }

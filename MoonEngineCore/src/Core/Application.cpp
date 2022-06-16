@@ -1,5 +1,6 @@
 #include "mpch.h"
 #include "Application.h"
+#include "ResourceManager.h"
 #include "Window.h"
 #include "Time.h"
 #include "Input.h"
@@ -65,6 +66,8 @@ namespace MoonEngine
 
 			Input::Update(ImGuiLayer::ViewportPosition, ImGuiLayer::ViewportSize, ImGuiLayer::CameraProjection);
 			Window::Update();
+
+			ResourceManager::CollectGarbage();
 		}
 	}
 

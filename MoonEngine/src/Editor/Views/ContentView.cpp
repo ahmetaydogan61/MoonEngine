@@ -60,15 +60,7 @@ namespace MoonEngine
 
 			ImGui::PushID(filenameString.c_str());
 
-			Ref<Texture> icon;
-			if (directoryEntry.path().extension().string() == ".png")
-			{
-				icon = ResourceManager::LoadTexture(relativePath.string());
-				if (!icon)
-					icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
-			}
-			else
-				icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+			Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });

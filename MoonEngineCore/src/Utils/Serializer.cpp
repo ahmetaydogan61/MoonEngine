@@ -338,7 +338,7 @@ namespace MoonEngine
 					std::string texturePath;
 					if(GetIfExists<std::string>(&texturePath, particleComponent, "TexturePath"))
 						if (texturePath != "null")
-							component.Texture = CreateRef<Texture>(texturePath);
+							component.Texture = ResourceManager::LoadTexture(texturePath);
 
 					component.Resize();
 				}

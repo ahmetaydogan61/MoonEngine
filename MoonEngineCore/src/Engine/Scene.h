@@ -19,6 +19,7 @@ namespace MoonEngine
 		friend class Entity;
 		friend class HierarchyView;
 		friend class Serializer;
+		friend class ResourceManager;
 	public:
 		std::string SceneName = "Untitled";
 		Scene() = default;

@@ -15,7 +15,11 @@ namespace MoonEngine
 	{}
 
 	void Scene::OnStop()
-	{}
+	{
+		auto particleView = m_Registry.view<ParticleComponent>();
+		for (auto e : particleView)
+			particleView.get<ParticleComponent>(e).Resize();
+	}
 
 	void Scene::UpdateEditor(const EditorCamera* camera, Entity& entity)
 	{
