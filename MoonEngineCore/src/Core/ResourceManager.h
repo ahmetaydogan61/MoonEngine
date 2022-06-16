@@ -17,7 +17,7 @@ namespace MoonEngine
 	public:
 		static void SetResourceManager(ResourceManagerDesc desc);
 		static const std::string& GetAssetPath() { return m_Paths.AssetFolder; }
-		
+
 		static Ref<Texture> LoadTexture(const std::string& path);
 		static void UnloadTexture(const std::string& path);
 		static int TextureCount() { return m_TextureCache.size(); }

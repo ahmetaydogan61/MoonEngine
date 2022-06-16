@@ -102,7 +102,10 @@ namespace MoonEngine
 				else
 				{
 					if (ImGui::MenuItem("Delete File"))
+					{
 						std::filesystem::remove(path);
+						ResourceManager::UnloadTexture(relativePath.string());
+					}
 				}
 				ImGui::EndPopup();
 			}

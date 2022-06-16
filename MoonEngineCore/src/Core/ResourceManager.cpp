@@ -1,7 +1,8 @@
 #include "mpch.h"
 #include "ResourceManager.h"
-
 #include "Renderer/Texture.h"
+
+#include "uuid_v4.h"
 
 namespace MoonEngine
 {
@@ -36,9 +37,13 @@ namespace MoonEngine
 		size_t directorySize = m_Paths.AssetFolder.size() - 1;
 
 		if (newPath.substr(0, directorySize) != m_Paths.AssetFolder.substr(0, directorySize))
-			newPath = m_Paths.AssetFolder + path;
+			newPath = m_Paths.AssetFolder + "/" + path;
 
 		if (m_TextureCache.find(newPath) != m_TextureCache.end())
+		{
+			auto& texture = m_TextureCache.at(newPath);
 			m_TextureCache.erase(newPath);
+			texture = nullptr;
+		}
 	}
 }
