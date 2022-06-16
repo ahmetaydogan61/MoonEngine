@@ -44,19 +44,21 @@ namespace MoonEngine
 		if (m_TextureCache.find(newPath) != m_TextureCache.end())
 		{
 			garbage.push_back(newPath);
+
 			auto spriteView = m_Desc.Scene->m_Registry.view<SpriteComponent>();
 			for (auto e : spriteView)
 			{
 				SpriteComponent& component = spriteView.get<SpriteComponent>(e);
-				if (component.Texture->Filepath == newPath)
-					component.Texture = nullptr;
+				if(component.Texture && !component.Texture->Filepath.empty())
+					if (component.Texture->Filepath == newPath)
+						component.Texture = nullptr;
 			}
 
 			auto particleView = m_Desc.Scene->m_Registry.view<ParticleComponent>();
 			for (auto e : particleView)
 			{
 				ParticleComponent& component = particleView.get<ParticleComponent>(e);
-				if (component.Texture->Filepath == newPath)
+				if (component.Texture && !component.Texture->Filepath.empty())
 					component.Texture = nullptr;
 			}
 		}
