@@ -1,14 +1,10 @@
 #include "HierarchyView.h"
-#include "Engine/Components.h"
 #include "../ImGuiUtils.h"
 #include "Utils/IconsFontAwesome.h"
-#include "Core/ResourceManager.h"
 
 #include <imgui/imgui.cpp>
 #include "imgui/misc/cpp/imgui_stdlib.h"
 #include "imgui/misc/cpp/imgui_stdlib.cpp"
-
-#include <filesystem>
 
 namespace MoonEngine
 {
@@ -22,9 +18,7 @@ namespace MoonEngine
 		static void ApplyCopy(Entity& copyTo)
 		{
 			if (copyTo.HasComponent<T>())
-			{
 				copyTo.GetComponent<T>() = Component;
-			}
 		}
 	};
 
@@ -149,7 +143,6 @@ namespace MoonEngine
 				m_Scene->m_Registry.each([&](auto entityID)
 				{
 					entites.push_back(entityID);
-					
 				});
 				
 				int id = 0;

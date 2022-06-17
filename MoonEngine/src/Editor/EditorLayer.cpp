@@ -1,12 +1,7 @@
 #include "EditorLayer.h"
-#include "Core/ImGuiLayer.h"
-#include "Core/ResourceManager.h"
 #include "ImGuiUtils.h"
 #include "Utils/IconsFontAwesome.h"
 #include "ImGuizmo.h"
-#include "Engine/Components.h"
-
-#include "Utils/Serializer.h"
 
 #include <imgui/imgui_internal.h>
 #include "imfilebrowser.h"
@@ -84,6 +79,10 @@ namespace MoonEngine
 
 		switch (e.Key())
 		{
+			case KEY_DELETE:
+			{
+				m_HierarchyView.DeleteSelectedEntity();
+			}
 			case KEY_Q:
 			{
 				if (canPress)

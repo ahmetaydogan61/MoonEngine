@@ -3,7 +3,9 @@
 
 #include "Core/ResourceManager.h"
 
-#include "Engine/Entity.h"
+#include "Renderer/Texture.h"
+
+#include "Engine/Scene.h"
 #include "Engine/Components.h"
 
 #include <fstream>

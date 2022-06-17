@@ -1,12 +1,10 @@
 #pragma once
 #include "entt/entt.hpp"
-#include "Core.h"
 #include "Utils/EditorCamera.h"
 
 namespace MoonEngine
 {
 	class Entity;
-	class Framebuffer;
 	class ParticleSystem;
 
 	class Scene

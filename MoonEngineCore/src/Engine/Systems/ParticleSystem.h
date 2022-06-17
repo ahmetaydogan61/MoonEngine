@@ -1,5 +1,4 @@
 #pragma once
-
 namespace MoonEngine
 {
 	struct ParticleComponent;

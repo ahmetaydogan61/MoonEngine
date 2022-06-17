@@ -8,7 +8,7 @@ namespace MoonEngine
 	private:
 		static Application* m_Instance;
 		std::list<Layer*> m_Layers;
-		void OnEvent(Event& event);
+		void OnEvent(Event& e);
 	public:
 		Application();
 		~Application();
@@ -16,5 +16,4 @@ namespace MoonEngine
 		void PushLayer(Layer* layer);
 		void PopLayer(Layer* layer);
 	};
-
 }

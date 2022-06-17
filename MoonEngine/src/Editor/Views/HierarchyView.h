@@ -1,10 +1,8 @@
 #pragma once
-#include "Engine/Entity.h"
+#include "Core.h"
 
 namespace MoonEngine
 {
-	class Entity;
-
 	class HierarchyView
 	{
 	private:

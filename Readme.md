@@ -55,7 +55,7 @@ The editor can be used to create/delete entities, add/remove components, play/st
 <h3><b>Shortcuts</b></h3>
 <ul>
   <li>LeftCtrl+D: Duplicate selected entity.</li>
-  <li>LeftCtrl+W: Delete selected entity.</li>
+  <li>LeftCtrl+W or Delete: Delete selected entity.</li>
   <li>LeftCtrl+N: New Scene.</li>
   <li>LeftCtrl+S: Save Scene.</li>
   <li>LeftCtrl+L: Load Scene.</li>

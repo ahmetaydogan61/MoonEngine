@@ -6,24 +6,6 @@
 
 namespace MoonEngine
 {
-	//Ref<Texture> Texture::Create()
-	//{
-	//	Ref<Texture> texture = CreateRef<Texture>();
-	//	return texture->valid ? texture : nullptr;
-	//}
-	//
-	//Ref<Texture> Texture::Create(const std::string& filepath)
-	//{
-	//	Ref<Texture> texture = CreateRef<Texture>(filepath);
-	//	return texture->valid ? texture : nullptr;
-	//}
-	//
-	//Ref<Texture> Texture::Create(unsigned int width, unsigned int height)
-	//{
-	//	Ref<Texture> texture = CreateRef<Texture>(width, height);
-	//	return texture->valid ? texture : nullptr;
-	//}
-
 	Texture::Texture()
 		:m_TexBuffer(0), m_LocalBuffer(nullptr), m_Width(1), m_Height(1), m_BPP(4)
 	{

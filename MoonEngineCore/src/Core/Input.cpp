@@ -1,6 +1,7 @@
 #include "mpch.h"
 #include "Input.h"
 #include "Core/Window.h"
+
 #include "GLFW/glfw3.h"
 
 namespace MoonEngine
@@ -28,6 +29,16 @@ namespace MoonEngine
 		return (float)y;
 	}
 
+	float Input::OrthoX()
+	{
+		return m_MouseOrthoPos.x;
+	}
+
+	float Input::OrthoY()
+	{
+		return m_MouseOrthoPos.y;
+	}
+
 	bool Input::MouseDown(int button)
 	{
 		return m_MouseButtons[button];
@@ -51,16 +62,6 @@ namespace MoonEngine
 	bool Input::Dragging(int button)
 	{
 		return MouseDown(button);
-	}
-
-	float Input::OrthoX()
-	{
-		return m_MouseOrthoPos.x;
-	}
-
-	float Input::OrthoY()
-	{
-		return m_MouseOrthoPos.y;
 	}
 
 	void Input::UpdateMouseKeys()

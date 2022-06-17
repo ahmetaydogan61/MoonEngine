@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #define KEY_SPACE              32
 #define KEY_APOSTROPHE         39  

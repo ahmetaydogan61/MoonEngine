@@ -54,7 +54,7 @@ namespace MoonEngine
 		io.Fonts->AddFontFromFileTTF("res/Fonts/ForkAwesome/forkawesome-webfont.ttf", 14.0f, &config, icon_ranges);
 	}
 
-	void ImGuiLayer::BeginDrawUI()
+	void ImGuiLayer::BeginDrawGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -62,7 +62,7 @@ namespace MoonEngine
 		ImGuizmo::BeginFrame();
 	}
 
-	void ImGuiLayer::EndDrawUI()
+	void ImGuiLayer::EndDrawGUI()
 	{
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -3,8 +3,6 @@
 #include "Views/HierarchyView.h"
 #include "Views/EditorSettingsView.h"
 #include "Views/ContentView.h"
-#include "Renderer/Frambuffer.h"
-#include "Renderer/Texture.h"
 
 namespace MoonEngine
 {

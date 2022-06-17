@@ -1,7 +1,6 @@
 #pragma once
 #include "ScriptableEntity.h"
 #include "SceneCamera.h"
-#include "Renderer/Texture.h"
 
 #include "endianness.h"
 #include "uuid_v4.h"
@@ -10,8 +9,6 @@
 
 namespace MoonEngine
 {
-	class Scene;
-
 	struct UUIDComponent
 	{
 		UUIDv4::UUID ID;

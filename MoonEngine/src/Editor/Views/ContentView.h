@@ -1,10 +1,7 @@
 #pragma once
-#include <filesystem>
-
+#include "Core.h"
 namespace MoonEngine
 {
-	class Texture;
-
 	class ContentView
 	{
 	public:

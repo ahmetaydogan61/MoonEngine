@@ -1,7 +1,5 @@
 #include "mpch.h"
 #include "ContentView.h"
-#include "Core/ResourceManager.h"
-#include "Renderer/Texture.h"
 
 #include "../ImGuiUtils.h"
 
@@ -28,14 +26,14 @@ namespace MoonEngine
 				if (ImGui::Button(" < "))
 					m_CurrentDirectory = m_CurrentDirectory.parent_path();
 
-			//TODO: Search file
+			//+Search file TODO:Get it working 
 			float searchBarWidth = 200.0f;
 			static char searchPath[255];
 			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - searchBarWidth, 0.0f);
 			ImGui::SetNextItemWidth(searchBarWidth);
 			if (ImGui::InputTextWithHint("##SearchFile", "Search...", searchPath, 255, ImGuiInputTextFlags_EnterReturnsTrue))
 				memset(searchPath, 0, 255);
-			//file search
+			//-file search
 			ImGui::EndMenuBar();
 		}
 

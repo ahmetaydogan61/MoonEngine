@@ -1,10 +1,12 @@
 #include "mpch.h"
+
 #include "Application.h"
 #include "ResourceManager.h"
 #include "Window.h"
 #include "Time.h"
 #include "Input.h"
 #include "ImGuiLayer.h"
+
 #include "Renderer/Renderer.h"
 
 namespace MoonEngine
@@ -30,8 +32,8 @@ namespace MoonEngine
 	void Application::OnEvent(Event& e)
 	{
 		ImGuiLayer::OnEvent(e);
-		for (auto l = m_Layers.end(); l != m_Layers.begin();)
-			(*--l)->OnEvent(e);
+		for (auto layer = m_Layers.end(); layer != m_Layers.begin();)
+			(*--layer)->OnEvent(e);
 	}
 
 	void Application::Run()
@@ -59,10 +61,10 @@ namespace MoonEngine
 			for (Layer* layer : m_Layers)
 				layer->Update();
 			
-			ImGuiLayer::BeginDrawUI();
+			ImGuiLayer::BeginDrawGUI();
 			for (Layer* layer : m_Layers)
 				layer->DrawGUI();
-			ImGuiLayer::EndDrawUI();
+			ImGuiLayer::EndDrawGUI();
 
 			Input::Update(ImGuiLayer::ViewportPosition, ImGuiLayer::ViewportSize, ImGuiLayer::CameraProjection);
 			Window::Update();

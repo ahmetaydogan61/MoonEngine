@@ -4,6 +4,7 @@ namespace MoonEngine
 {
 	class Texture;
 	class Scene;
+
 	struct ResourceManagerDesc
 	{
 		Ref<Scene> Scene;

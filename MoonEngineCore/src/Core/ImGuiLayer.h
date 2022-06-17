@@ -8,8 +8,8 @@ namespace MoonEngine
 		static glm::mat4 CameraProjection;
 		static void Init();
 		static void OnEvent(Event& event);
-		static void BeginDrawUI();
-		static void EndDrawUI();
+		static void BeginDrawGUI();
+		static void EndDrawGUI();
 		static void BlockEvent(bool state);
 	private:
 		static bool m_EventsBlocked;
