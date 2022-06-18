@@ -74,7 +74,7 @@ namespace ImGuiUtils
 
 		colors[ImGuiCol_WindowBg] = ImColor(40, 40, 40, 255);
 		colors[ImGuiCol_ChildBg] = ImColor(40, 40, 40, 255);
-		colors[ImGuiCol_PopupBg] = ImColor(15, 15, 15, 255);
+		colors[ImGuiCol_PopupBg] = ImColor(60, 75, 90, 255);
 
 		colors[ImGuiCol_Border] = ImColor(0, 0, 0, 155);
 		colors[ImGuiCol_BorderShadow] = ImColor(0, 0, 0, 255);

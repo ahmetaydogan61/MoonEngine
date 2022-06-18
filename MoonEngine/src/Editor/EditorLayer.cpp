@@ -174,14 +174,16 @@ namespace MoonEngine
 	{
 		m_IsPlaying = true;
 		m_Scene = Scene::CopyScene(m_EditorScene);
-		m_Scene->OnPlay();
+		m_Scene->OnEditorStop();
+		m_Scene->OnRuntimeStart();
 		m_HierarchyView.SetScene(m_Scene);
 	}
 
 	void EditorLayer::OnStop()
 	{
 		m_IsPlaying = false;
-		m_Scene->OnStop();
+		m_Scene->OnRuntimeStop();
+		m_Scene->OnEditorStart();
 		m_Scene = m_EditorScene;
 		m_HierarchyView.SetScene(m_Scene);
 	}

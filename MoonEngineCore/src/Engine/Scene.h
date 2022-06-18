@@ -24,8 +24,10 @@ namespace MoonEngine
 		~Scene() = default;
 		static Ref<Scene> CopyScene(Ref<Scene> scene);
 
-		void OnPlay();
-		void OnStop();
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+		void OnEditorStart();
+		void OnEditorStop();
 		void UpdateRuntime();
 		void UpdateEditor(const EditorCamera* camera, Entity& entity);
 		void ResizeViewport(float width, float height);

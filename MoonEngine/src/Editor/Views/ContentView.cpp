@@ -47,7 +47,7 @@ namespace MoonEngine
 					m_CurrentDirectory = m_CurrentDirectory.parent_path();
 
 			//+Search file
-			
+
 			float searchBarWidth = 200.0f;
 			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - searchBarWidth, 0.0f);
 			ImGui::SetNextItemWidth(searchBarWidth);
@@ -145,11 +145,47 @@ namespace MoonEngine
 				{
 					if (directoryEntry.is_directory())
 					{
+						if (ImGui::MenuItem("Open Explorer"))
+						{
+							std::string explorerPath = "explorer ";
+							explorerPath += std::filesystem::canonical(directoryEntry.path()).string();
+							system(explorerPath.c_str());
+						}
+
+						ImGuiUtils::SeparatorDistanced(2.5f);
+
 						if (ImGui::MenuItem("Delete Folder"))
+						{
+							for (auto deletionEntry : std::filesystem::directory_iterator(path))
+							{
+								if (deletionEntry.is_directory())
+								{
+									for (auto entry : std::filesystem::recursive_directory_iterator(deletionEntry.path()))
+									{
+										auto entryRelatives = std::filesystem::relative(entry.path(), ResourceManager::GetAssetPath());
+										ResourceManager::UnloadTexture(entryRelatives.string());
+									}
+								}
+								else
+								{
+									auto entryRelatives = std::filesystem::relative(deletionEntry.path(), ResourceManager::GetAssetPath());
+									ResourceManager::UnloadTexture(entryRelatives.string());
+								}
+							}
 							std::filesystem::remove_all(path);
+						}
 					}
 					else
 					{
+						if (ImGui::MenuItem("Open Explorer"))
+						{
+							std::string explorerPath = "explorer ";
+							explorerPath += std::filesystem::canonical(directoryEntry.path().parent_path()).string();
+							system(explorerPath.c_str());
+						}
+
+						ImGuiUtils::SeparatorDistanced(2.5f);
+
 						if (ImGui::MenuItem("Delete File"))
 						{
 							std::filesystem::remove(path);

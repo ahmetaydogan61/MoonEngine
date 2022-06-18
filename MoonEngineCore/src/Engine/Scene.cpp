@@ -11,15 +11,18 @@
 
 namespace MoonEngine
 {
-	void Scene::OnPlay()
+	void Scene::OnEditorStart()
+	{
+	}
+
+	void Scene::OnEditorStop()
 	{}
 
-	void Scene::OnStop()
-	{
-		auto particleView = m_Registry.view<ParticleComponent>();
-		for (auto e : particleView)
-			particleView.get<ParticleComponent>(e).Resize();
-	}
+	void Scene::OnRuntimeStart()
+	{}
+
+	void Scene::OnRuntimeStop()
+	{}
 
 	void Scene::UpdateEditor(const EditorCamera* camera, Entity& entity)
 	{
