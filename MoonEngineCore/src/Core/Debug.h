@@ -3,3 +3,5 @@
 #define DebugSys(message) std::cout << "[System]: " << message << '\n'
 #define DebugWar(message) std::cout << "[Warning]: " << message << '\n'
 #define DebugErr(message) std::cout << "[Error]: " << message << '\n'
+
+#define DebugBrk(condition, message) if(condition) { DebugWar(message); __debugbreak(); }

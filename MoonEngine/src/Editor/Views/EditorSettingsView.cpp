@@ -5,22 +5,28 @@
 
 namespace MoonEngine
 {
+	void EditorSettingsView::SetStyle(EditorStyle style)
+	{
+		switch (style)
+		{
+			case EditorStyle::Dark: ImGuiUtils::StyleCustomDark(0); break;
+			case EditorStyle::DarkCartoon: ImGuiUtils::StyleCustomDark(1); break;
+			case EditorStyle::Gray:   ImGuiUtils::StyleCustomGray(0); break;
+			case EditorStyle::Gray3D: ImGuiUtils::StyleCustomGray(1); break;
+			default: break;
+		}
+	}
+
 	void EditorSettingsView::BeginEditorSettings(bool& open)
 	{
 		if (ImGui::Begin(ICON_FK_COG "Editor Settings", &open))
 		{
-			static int style_idx = 0;
-			if (ImGui::Combo("Style", &style_idx, "Dark\0DarkCartoon\0Gray\0Gray3D\0"))
+			int currentStyle = (int)m_CurrentStyle;
+			if (ImGui::Combo("Style", &currentStyle, "Dark\0DarkCartoon\0Gray\0Gray3D\0"))
 			{
-				switch (style_idx)
-				{
-					case 0: ImGuiUtils::StyleCustomDark(0); break;
-					case 1: ImGuiUtils::StyleCustomDark(1); break;
-					case 2: ImGuiUtils::StyleCustomGray(0); break;
-					case 3: ImGuiUtils::StyleCustomGray(1); break;
-				}
+				m_CurrentStyle = (EditorStyle)currentStyle;
+				SetStyle(m_CurrentStyle);
 			}
-
 			glm::vec4& clearColor = Renderer::GetClearColor();
 			ImGui::ColorEdit4("Clear Color", &clearColor[0]);
 			Renderer::SetClearColor(clearColor);

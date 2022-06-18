@@ -18,7 +18,7 @@ namespace ImGuiUtils
 		ImGui::SetCursorScreenPos(p0);
 	}
 
-	static void Label(const char* text, bool sameLine)
+	static void Label(const char* text, bool sameLine = true)
 	{
 		ImVec4 buttonColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
@@ -48,6 +48,19 @@ namespace ImGuiUtils
 		AddPadding(0.0f, distance);
 		ImGui::Separator();
 		AddPadding(0.0f, distance);
+	}
+
+	static bool ButtonSelectable(ImTextureID texture, float width, float height, bool selected, ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered])
+	{
+		if (selected)
+			ImGui::PushStyleColor(ImGuiCol_Button, color);
+
+		bool returnValue = ImGuiUtils::ImageButton(texture, { width, height });
+
+		if (selected)
+			ImGui::PopStyleColor();
+
+		return returnValue;
 	}
 
 	static void StyleCustomDark(int cartoony)

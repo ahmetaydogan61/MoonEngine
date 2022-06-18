@@ -12,8 +12,6 @@
 #include "Renderer/Frambuffer.h"
 #include "Renderer/Renderer.h"
 
-#include "imgui/imgui.h"
-
 #include "Engine/Scene.h"
 #include "Engine/Entity.h"
 #include "Engine/ScriptableEntity.h"
@@ -22,3 +20,5 @@
 
 #include "Utils/Serializer.h"
 #include "Utils/EditorCamera.h"
+
+#include "imgui/imgui.h"

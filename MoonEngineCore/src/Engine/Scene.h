@@ -11,8 +11,8 @@ namespace MoonEngine
 	{
 	private:
 		entt::registry m_Registry;
-		float m_ViewportHeight;
-		float m_ViewportWidth;
+		float m_ViewportHeight = 0;
+		float m_ViewportWidth = 0;
 
 		friend class Entity;
 		friend class HierarchyView;

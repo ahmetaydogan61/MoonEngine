@@ -28,17 +28,20 @@ namespace MoonEngine
 		static int CreateTextureCache(const Ref<Texture>& texture);
 	public:
 		static void Init();
-		static void Begin(const glm::mat4& viewProjection);
-		static void End();
+		static void Destroy();
 		static void Clear();
+		static void Begin(const glm::mat4& viewProjection);
+		static void Render();
+		static void End();
+		
+		static RenderData& GetRenderData() { return *rData; }
+
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture>& texture);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, const Ref<Texture>& texture);
-		static void Render();
+		
 		static void SetClearColor(glm::vec4& clearColor);
 		static glm::vec4& GetClearColor() { return m_ClearColor; }
-		static void Destroy();
-		static RenderData& GetRenderData() { return *rData; }
 	};
 }

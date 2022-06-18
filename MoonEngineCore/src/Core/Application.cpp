@@ -66,7 +66,7 @@ namespace MoonEngine
 				layer->DrawGUI();
 			ImGuiLayer::EndDrawGUI();
 
-			Input::Update(ImGuiLayer::ViewportPosition, ImGuiLayer::ViewportSize, ImGuiLayer::CameraProjection);
+			Input::Update(ImGuiLayer::ViewportPosition, ImGuiLayer::ViewportSize, Renderer::GetRenderData().ViewProjection);
 			Window::Update();
 
 			ResourceManager::CollectGarbage();

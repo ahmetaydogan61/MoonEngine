@@ -1,10 +1,20 @@
 Scene: TextureTest
 Entities:
+  - Entity: 41224ad1-114a-4843-8a40-a8e3f33524a2
+    IdentityComponent:
+      Name: Camera
+    TransformComponent:
+      Position: [-5.0999999, -2.29999995, 0]
+      Rotation: [0, 0, 0]
+      Size: [1, 1, 1]
+    CameraComponent:
+      IsMain: false
+      Distance: 2.20000005
   - Entity: 9db73a48-3a55-40e4-8118-55e7a8445f05
     IdentityComponent:
       Name: Camera
     TransformComponent:
-      Position: [1.19005287, 4.67523932e-07, 0]
+      Position: [1, 4.67523932e-07, 0]
       Rotation: [0, 0, 0]
       Size: [1, 1, 1]
     CameraComponent:

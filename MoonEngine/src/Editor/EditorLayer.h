@@ -18,17 +18,21 @@ namespace MoonEngine
 	class EditorLayer : public Layer
 	{
 	private:
-		std::string m_ScenePath;
 		Ref<Scene> m_Scene, m_EditorScene;
-		EditorCamera m_EditorCamera;
-		Ref<Texture> m_PlayTexture;
-		Ref<Texture> m_StopTexture;
-		Ref<Texture> m_SelectTexture;
-		Ref<Texture> m_TranslateTexture;
-		Ref<Texture> m_RotateTexture;
-		Ref<Texture> m_ResizeTexture;
+		std::string m_ScenePath;
+		
+		bool EditorLayer::KeyEvents(Event& event);
 
-		HierarchyView m_HierarchyView; 
+		bool m_IsPlaying = false;
+		void OnPlay();
+		void OnStop();
+
+		void NewScene();
+		void SaveScene(const std::string& path);
+		void LoadScene(const std::string& path);
+
+		EditorCamera m_EditorCamera;
+		HierarchyView m_HierarchyView;
 		EditorSettingsView m_EditorSettingsView;
 		ContentView m_ContentView;
 		bool m_IsHierarchyActive = true;
@@ -37,14 +41,6 @@ namespace MoonEngine
 		bool m_IsContentActive = true;
 		bool m_IsEditorSettingsActive = false;
 		bool m_IsDebugActive = true;
-		
-		void NewScene();
-		void SaveScene(const std::string& path);
-		void LoadScene(const std::string& path);
-		
-		bool m_IsPlaying = false;
-		void OnPlay();
-		void OnStop();
 
 		void Dockspace();
 		void Menubar();
@@ -52,19 +48,23 @@ namespace MoonEngine
 		void Statusbar();
 		void ViewportView(bool& state);
 		void DebugView(bool& state);
-
+		
 		Ref<Framebuffer> m_ViewportFramebuffer = nullptr;
 		glm::vec2 m_ViewportPosition;
 		glm::vec2 m_ViewportSize;
 		bool m_ViewportHovered = false;
 		bool m_ViewportFocused = false;
 
-		bool GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected);
 		GIZMOSELECTION m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 		bool m_IsSnapping = false;
 		float m_SnapAmount = 0.25f;
 
-		bool EditorLayer::KeyEvents(Event& event);
+		Ref<Texture> m_PlayTexture;
+		Ref<Texture> m_StopTexture;
+		Ref<Texture> m_SelectTexture;
+		Ref<Texture> m_TranslateTexture;
+		Ref<Texture> m_RotateTexture;
+		Ref<Texture> m_ResizeTexture;
 	public:
 		void Create();
 		void Update();

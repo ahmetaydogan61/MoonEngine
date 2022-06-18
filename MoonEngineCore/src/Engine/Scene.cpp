@@ -34,7 +34,7 @@ namespace MoonEngine
 			}
 			Renderer::End();
 
-			if (entity)
+			if (entity) //GizmoRendering
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glLineWidth(5.0f);

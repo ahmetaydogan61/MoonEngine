@@ -135,7 +135,10 @@ namespace MoonEngine
     
         int location = glGetUniformLocation(m_ShaderBuffer, name.c_str());
         if (location == -1)
+        {
             DebugWar("Uniform: " << name << " does not exist");
+            return 0;
+        }
     
         m_UniformLocationCache[name] = location;
         return location;

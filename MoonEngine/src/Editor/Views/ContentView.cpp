@@ -15,24 +15,81 @@ namespace MoonEngine
 		m_FileIcon = CreateRef<Texture>("res/EditorIcons/File.png");
 	}
 
+	std::string searchPath;
+	std::string searchFormat;
+	static bool FilterSearch(const std::string& fileName, const std::string& searchedFile, const std::string& fileFormat = "")
+	{
+		if (!fileFormat.empty())
+			if (fileName.substr(fileName.find_last_of(".") + 1) != fileFormat)
+			{
+				return 0;
+			}
+
+		auto it = std::search(
+			fileName.begin(), fileName.end(),
+			searchedFile.begin(), searchedFile.end(),
+			[](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
+		);
+		return (it != fileName.end());
+	}
+
 	void ContentView::BeginContentView(bool& state)
 	{
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
 		ImGui::Begin("Content Browser", &state, ImGuiWindowFlags_MenuBar);
 
+		static bool isSearching = false;
+
 		if (ImGui::BeginMenuBar())
 		{
-			if (m_CurrentDirectory != std::filesystem::path(m_StartDirectory))
+			if (m_CurrentDirectory != std::filesystem::path(m_StartDirectory) && !isSearching)
 				if (ImGui::Button(" < "))
 					m_CurrentDirectory = m_CurrentDirectory.parent_path();
 
-			//+Search file TODO:Get it working 
+			//+Search file
+			
 			float searchBarWidth = 200.0f;
-			static char searchPath[255];
 			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - searchBarWidth, 0.0f);
 			ImGui::SetNextItemWidth(searchBarWidth);
-			if (ImGui::InputTextWithHint("##SearchFile", "Search...", searchPath, 255, ImGuiInputTextFlags_EnterReturnsTrue))
-				memset(searchPath, 0, 255);
+			if (ImGui::InputTextWithHint("##SearchFile", "Search...", searchPath.data(), 255))
+			{
+				searchPath = searchPath.data();
+				isSearching = !searchPath.empty();
+			}
+
+			float offsetToSearchbar = 10.0f;
+			auto& textSize = ImGui::CalcTextSize("Filter:");
+			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - (textSize.x + searchBarWidth) * 2.0f, 0.0f);
+			ImGuiUtils::Label("Filter:", false);
+			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - offsetToSearchbar - searchBarWidth * 2.0f, 0.0f);
+			static int currentSearchFormat = 0;
+			ImGui::SetNextItemWidth(searchBarWidth);
+			if (ImGui::Combo("##Filter", &currentSearchFormat, "All\0Images\0Scenes\0"))
+			{
+				switch (currentSearchFormat)
+				{
+					case 0:
+					{
+						searchFormat.clear();
+						break;
+					}
+					case 1:
+					{
+						searchFormat = "png";
+						break;
+					}
+					case 2:
+					{
+						searchFormat = "moon";
+						break;
+					}
+					default:
+					{
+						searchFormat.clear();
+						break;
+					}
+				}
+			}
 			//-file search
 			ImGui::EndMenuBar();
 		}
@@ -47,66 +104,137 @@ namespace MoonEngine
 			columnCount = 1;
 
 		bool itemPopup = false;
-		
-		ImGui::Columns(columnCount, 0, false);
-		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
+
+		if (!isSearching)
 		{
-			const auto& path = directoryEntry.path();
-			auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
-
-			std::string filenameString = relativePath.filename().string();
-
-			ImGui::PushID(filenameString.c_str());
-
-			Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
-			if (ImGui::BeginDragDropSource())
+			ImGui::Columns(columnCount, 0, false);
+			for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 			{
-				const wchar_t* itemPath = relativePath.c_str();
-				ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
-				ImGui::EndDragDropSource();
-			}
+				const auto& path = directoryEntry.path();
+				auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
 
-			ImGui::PopStyleColor();
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-			{
-				if (directoryEntry.is_directory())
-					m_CurrentDirectory /= path.filename();
-			}
+				std::string filenameString = relativePath.filename().string();
 
-			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-			{
-				ImGui::OpenPopup("ContentItemPopup");
-				itemPopup = true;
-			}
+				ImGui::PushID(filenameString.c_str());
 
-			if (ImGui::BeginPopup("ContentItemPopup"))
-			{
-				if (directoryEntry.is_directory())
+				Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+				ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
+				if (ImGui::BeginDragDropSource())
 				{
-					if (ImGui::MenuItem("Delete Folder"))
-						std::filesystem::remove_all(path);
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					ImGui::EndDragDropSource();
 				}
-				else
+
+				ImGui::PopStyleColor();
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					if (ImGui::MenuItem("Delete File"))
+					if (directoryEntry.is_directory())
+						m_CurrentDirectory /= path.filename();
+				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				{
+					ImGui::OpenPopup("ContentItemPopup");
+					itemPopup = true;
+				}
+
+				if (ImGui::BeginPopup("ContentItemPopup"))
+				{
+					if (directoryEntry.is_directory())
 					{
-						std::filesystem::remove(path);
-						ResourceManager::UnloadTexture(relativePath.string());
+						if (ImGui::MenuItem("Delete Folder"))
+							std::filesystem::remove_all(path);
+					}
+					else
+					{
+						if (ImGui::MenuItem("Delete File"))
+						{
+							std::filesystem::remove(path);
+							ResourceManager::UnloadTexture(relativePath.string());
+						}
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::TextWrapped(filenameString.c_str());
+
+				ImGui::NextColumn();
+				ImGui::PopID();
+			}
+			ImGui::Columns(1);
+		}
+		else //ContentBrowser while searching a directory
+		{
+			ImGui::Columns(columnCount, 0, false);
+			for (auto& directoryEntry : std::filesystem::recursive_directory_iterator(m_StartDirectory))
+			{
+				if (!FilterSearch(directoryEntry.path().filename().string(), searchPath, searchFormat))
+					continue;
+				const auto& path = directoryEntry.path();
+				auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
+
+				std::string filenameString = relativePath.filename().string();
+
+				ImGui::PushID(filenameString.c_str());
+
+				Ref<Texture> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+				ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
+				if (ImGui::BeginDragDropSource())
+				{
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					ImGui::EndDragDropSource();
+				}
+
+				ImGui::PopStyleColor();
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					if (directoryEntry.is_directory())
+						m_CurrentDirectory /= path.filename();
+					else
+					{
+						searchPath.clear();
+						isSearching = false;
+						m_CurrentDirectory = directoryEntry.path().parent_path();
 					}
 				}
-				ImGui::EndPopup();
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				{
+					ImGui::OpenPopup("ContentItemPopup");
+					itemPopup = true;
+				}
+
+				if (ImGui::BeginPopup("ContentItemPopup"))
+				{
+					if (directoryEntry.is_directory())
+					{
+						if (ImGui::MenuItem("Delete Folder"))
+							std::filesystem::remove_all(path);
+					}
+					else
+					{
+						if (ImGui::MenuItem("Delete File"))
+						{
+							std::filesystem::remove(path);
+							ResourceManager::UnloadTexture(relativePath.string());
+						}
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::TextWrapped(filenameString.c_str());
+
+				ImGui::NextColumn();
+				ImGui::PopID();
 			}
-
-			ImGui::TextWrapped(filenameString.c_str());
-			
-			ImGui::NextColumn();
-			ImGui::PopID();
+			ImGui::Columns(1);
 		}
-
-		ImGui::Columns(1);
 
 		ImGui::End();
 		ImGui::PopStyleColor();

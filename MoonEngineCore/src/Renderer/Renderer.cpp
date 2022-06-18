@@ -22,10 +22,10 @@ namespace MoonEngine
 
 	glm::vec4 vertexPosition[] =
 	{
-		{ -0.5f, -0.5f, 0.0f, 1.0f},
-		{  0.5f, -0.5f, 0.0f, 1.0f},
-		{  0.5f,  0.5f, 0.0f, 1.0f},
-		{ -0.5f,  0.5f, 0.0f, 1.0f}
+		{ -0.5f, -0.5f, 0.0f, 1.0f },
+		{  0.5f, -0.5f, 0.0f, 1.0f },
+		{  0.5f,  0.5f, 0.0f, 1.0f },
+		{ -0.5f,  0.5f, 0.0f, 1.0f }
 	};
 
 	glm::vec2 texCoords[] =
@@ -43,7 +43,7 @@ namespace MoonEngine
 		glm::vec2 texCoords;
 		float texID;
 	};
-	int strideLenght = 10;
+	int strideLength = 0;
 
 	Vertex* vertices;
 	int index = 0;
@@ -81,17 +81,18 @@ namespace MoonEngine
 		glBindBuffer(GL_ARRAY_BUFFER, vb);
 		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
 
+		strideLength = sizeof(Vertex) / sizeof(float);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideLength * sizeof(float), 0);
 
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, color)));
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, strideLength * sizeof(float), (void*)(offsetof(Vertex, color)));
 
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, texCoords)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, strideLength * sizeof(float), (void*)(offsetof(Vertex, texCoords)));
 
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, strideLenght * sizeof(float), (void*)(offsetof(Vertex, texID)));
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, strideLength * sizeof(float), (void*)(offsetof(Vertex, texID)));
 
 		unsigned int* quadIndices = new unsigned int[maxIndex];
 		int indicesOffset = 0;
@@ -147,6 +148,26 @@ namespace MoonEngine
 		m_TextureIndex = 0;
 	}
 
+	void Renderer::Render()
+	{
+		if (quadCount <= 0)
+			return;
+
+		m_WhiteTexture->Bind(0);
+
+		m_DefaultShader->Bind();
+		m_DefaultShader->SetUniformMat4("uVP", rData->ViewProjection);
+		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
+
+		glBindVertexArray(va);
+		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
+
+		rData->DrawCalls++;
+	}
+
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
 	{
 		if (quadCount >= maxQuads)
@@ -161,7 +182,7 @@ namespace MoonEngine
 			vertices[i + (quadCount * 4)].color = color;
 			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
 			vertices[i + (quadCount * 4)].texID = 0;
-			index += strideLenght;
+			index += strideLength;
 		}
 		quadCount++;
 	}
@@ -183,7 +204,7 @@ namespace MoonEngine
 				vertices[i + (quadCount * 4)].texID = 0;
 			else	
 				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
-			index += strideLenght;
+			index += strideLength;
 		}
 		quadCount++;
 	}
@@ -202,7 +223,7 @@ namespace MoonEngine
 				vertices[i + (quadCount * 4)].texID = 0;
 			else
 				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
-			index += strideLenght;
+			index += strideLength;
 		}
 		quadCount++;
 	}
@@ -218,34 +239,9 @@ namespace MoonEngine
 			vertices[i + (quadCount * 4)].color = color;
 			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
 			vertices[i + (quadCount * 4)].texID = 0;
-			index += strideLenght;
+			index += strideLength;
 		}
 		quadCount++;
-	}
-
-	void Renderer::Render()
-	{
-		if (quadCount <= 0)
-			return;
-
-		m_WhiteTexture->Bind(0);
-
-		m_DefaultShader->Bind();
-		m_DefaultShader->SetUniformMat4("uVP", rData->ViewProjection);
-		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
-	
-		glBindVertexArray(va);
-		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
-		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
-
-		rData->DrawCalls++;
-	}
-
-	void Renderer::Destroy()
-	{
-		DebugSys("Renderer Destroyed");
 	}
 
 	void Renderer::SetClearColor(glm::vec4& color)
@@ -253,4 +249,11 @@ namespace MoonEngine
 		m_ClearColor = color;
 		glClearColor(m_ClearColor.x, m_ClearColor.y, m_ClearColor.z, m_ClearColor.w);
 	};
+
+	void Renderer::Destroy()
+	{
+		delete rData;
+		delete vertices;
+		DebugSys("Renderer Destroyed");
+	}
 }

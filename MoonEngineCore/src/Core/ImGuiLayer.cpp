@@ -15,7 +15,6 @@ namespace MoonEngine
 {
 	glm::vec2 ImGuiLayer::ViewportPosition;
 	glm::vec2 ImGuiLayer::ViewportSize;
-	glm::mat4 ImGuiLayer::CameraProjection;
 	bool ImGuiLayer::m_EventsBlocked;
 
 	void ImGuiLayer::Init()

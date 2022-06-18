@@ -9,7 +9,6 @@
 namespace MoonEngine
 {
 	Ref<Texture> m_NoSpriteTexture;
-	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 
 	template<typename T>
 	struct ComponentCopier
@@ -101,9 +100,7 @@ namespace MoonEngine
 			m_SelectedEntity = entity;
 		}
 
-		ImGuiUtils::AddPadding(0.0f, 2.5f);
-		ImGui::Separator();
-		ImGuiUtils::AddPadding(0.0f, 2.5f);
+		ImGuiUtils::SeparatorDistanced(2.5f);
 
 		if (ImGui::BeginMenu("Effects"))
 		{
@@ -211,7 +208,8 @@ namespace MoonEngine
 			ImGui::TreePop();
 	}
 
-	//This part contains inspector stuff
+//------------------------------------INSPECTOR---------------------------------------------------------
+
 	void HierarchyView::BeginInspectorView(bool& state)
 	{
 		ImGui::Begin(ICON_FK_SEARCH "Inspector", &state);
@@ -224,10 +222,10 @@ namespace MoonEngine
 
 			ImGuiUtils::AddPadding(0, 5.0f);
 
-			float color = Maths::Normalize(75.0f, 0.0f, 255.0f);
-			float alpha = Maths::Normalize(150.0f, 0.0f, 255.0f);
+			float color = 75.0f / 255.0f;
+			float alpha = 150.0f / 255.0f;
 			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(color, color, color, alpha));
-			alpha = Maths::Normalize(175.0f, 0.0f, 255.0f);
+			alpha = 175.0f / 255.0f;
 			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
 			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
 

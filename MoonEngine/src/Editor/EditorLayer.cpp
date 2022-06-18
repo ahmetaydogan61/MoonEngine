@@ -34,16 +34,16 @@ namespace MoonEngine
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
 		m_ContentView.SetDirectoryPath(ResourceManager::GetAssetPath());
-
-		ImGuiUtils::StyleCustomDark(0);
+		m_EditorSettingsView.SetStyle(EditorStyle::Dark);
+		
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
+		
 		m_PlayTexture = CreateRef<Texture>("res/EditorIcons/Play.png");
 		m_StopTexture = CreateRef<Texture>("res/EditorIcons/Stop.png");
 		m_SelectTexture = CreateRef<Texture>("res/EditorIcons/Select.png");
 		m_TranslateTexture = CreateRef<Texture>("res/EditorIcons/Translate.png");
 		m_RotateTexture = CreateRef<Texture>("res/EditorIcons/Rotate.png");
 		m_ResizeTexture = CreateRef<Texture>("res/EditorIcons/Resize.png");
-
 		Window::SetIcon("res/EditorIcons/Logo.png");
 
 		saveDialog.SetTitle("Save Scene");
@@ -53,8 +53,6 @@ namespace MoonEngine
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
 		loadDialog.SetPwd(ResourceManager::GetAssetPath());
-
-		m_Scene->CreateCameraEntity();
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -82,6 +80,7 @@ namespace MoonEngine
 			case KEY_DELETE:
 			{
 				m_HierarchyView.DeleteSelectedEntity();
+				break;
 			}
 			case KEY_Q:
 			{
@@ -169,7 +168,6 @@ namespace MoonEngine
 		m_ViewportFramebuffer->Bind();
 		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(&m_EditorCamera, m_HierarchyView.GetSelectedEntity());
 		m_ViewportFramebuffer->Unbind();
-
 	}
 
 	void EditorLayer::OnPlay()
@@ -194,7 +192,6 @@ namespace MoonEngine
 		m_EditorScene = CreateRef<Scene>();
 		m_Scene = m_EditorScene;
 		m_HierarchyView.SetScene(m_Scene);
-		m_Scene->CreateCameraEntity();
 		m_ScenePath.clear();
 		ResourceManager::OnSceneChange(m_EditorScene);
 	}
@@ -210,11 +207,7 @@ namespace MoonEngine
 	{
 		if (Serializer::IsValid(path, "moon"))
 		{
-			m_IsPlaying = false;
-			m_EditorScene = CreateRef<Scene>();
-			m_Scene = m_EditorScene;
-			m_HierarchyView.SetScene(m_Scene);
-			ResourceManager::OnSceneChange(m_EditorScene);
+			NewScene();
 			Serializer serializer{ m_Scene };
 			serializer.Deserialize(path);
 			m_ScenePath = path;
@@ -224,18 +217,20 @@ namespace MoonEngine
 	void EditorLayer::DrawGUI()
 	{
 		Dockspace(); //+Dockspace
+
 		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+		
 		ImGuiStyle& style = ImGui::GetStyle();
 		float borderSize = style.WindowBorderSize;
 		style.WindowBorderSize = 0;
 		Menubar();
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
 		Sidemenubar();
-		style.WindowBorderSize = borderSize;
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
+		style.WindowBorderSize = borderSize;
 
-		if (demoWindow)
+		if (demoWindow) //Debug Only
 			ImGui::ShowDemoWindow();
 
 		if (m_IsDebugActive)
@@ -263,13 +258,14 @@ namespace MoonEngine
 	void EditorLayer::ViewportView(bool& state)
 	{
 		ImGuiWindowFlags flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
-		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGuiIO& io = ImGui::GetIO();
 
 		if (ImGui::Begin(ICON_FK_GAMEPAD "Viewport", &state, flags))
 		{
 			m_ViewportPosition.x = ImGui::GetCursorScreenPos().x;
 			m_ViewportPosition.y = ImGui::GetCursorScreenPos().y;
+			
 			m_ViewportSize.x = ImGui::GetContentRegionAvail().x;
 			m_ViewportSize.y = ImGui::GetContentRegionAvail().y;
 
@@ -312,16 +308,16 @@ namespace MoonEngine
 				{
 					ImGui::SetWindowPos({ currentWinPos.x + ImGui::GetStyle().FramePadding.x * 2.0f, currentWinPos.y + (buttonSize * 4.0f) / 2.0f });
 
-					if (GizmoSelectButton(m_SelectTexture, buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
+					if (ImGuiUtils::ButtonSelectable((ImTextureID)m_SelectTexture->GetID(), buttonSize, buttonSize, GIZMOSELECTION::NONE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::NONE;
 
-					if (GizmoSelectButton(m_TranslateTexture, buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
+					if (ImGuiUtils::ButtonSelectable((ImTextureID)m_TranslateTexture->GetID(), buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
-					if (GizmoSelectButton(m_ResizeTexture, buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
+					if (ImGuiUtils::ButtonSelectable((ImTextureID)m_ResizeTexture->GetID(), buttonSize, buttonSize, GIZMOSELECTION::SCALE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::SCALE;
 
-					if (GizmoSelectButton(m_RotateTexture, buttonSize, buttonSize, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+					if (ImGuiUtils::ButtonSelectable((ImTextureID)m_RotateTexture->GetID(), buttonSize, buttonSize, GIZMOSELECTION::RORTATE == m_GizmoSelection))
 						m_GizmoSelection = GIZMOSELECTION::RORTATE;
 
 					style.WindowBorderSize = windowBorder;
@@ -331,6 +327,7 @@ namespace MoonEngine
 				ImGui::PopStyleColor();
 				//-GizmoSelectorWindow
 
+				//+ImGuizmo
 				if (m_GizmoSelection != GIZMOSELECTION::NONE)
 				{
 					const glm::mat4& view = m_EditorCamera.GetView();
@@ -362,14 +359,13 @@ namespace MoonEngine
 						component.Rotation += deltaRotation;
 						component.Size = finalSiz;
 					}
-				}
+				}//-ImGuizmo
 			}
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGuiLayer::ViewportPosition = m_ViewportPosition;
 		ImGuiLayer::ViewportSize = m_ViewportSize;
-		ImGuiLayer::CameraProjection = m_EditorCamera.GetViewProjection();
 	}
 
 	void EditorLayer::Menubar()
@@ -447,16 +443,16 @@ namespace MoonEngine
 			{
 				float buttonSize = height / 2.0f;
 
-				if (GizmoSelectButton(m_SelectTexture, buttonSize, height / 2.0f, GIZMOSELECTION::NONE == m_GizmoSelection))
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_SelectTexture->GetID(), buttonSize, height / 2.0f, GIZMOSELECTION::NONE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::NONE;
 
-				if (GizmoSelectButton(m_TranslateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_TranslateTexture->GetID(), buttonSize, height / 2.0f, GIZMOSELECTION::TRANSLATE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
 
-				if (GizmoSelectButton(m_ResizeTexture, buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_ResizeTexture->GetID(), buttonSize, height / 2.0f, GIZMOSELECTION::SCALE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 
-				if (GizmoSelectButton(m_RotateTexture, buttonSize, height / 2.0f, GIZMOSELECTION::RORTATE == m_GizmoSelection))
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_RotateTexture->GetID(), buttonSize, height / 2.0f, GIZMOSELECTION::RORTATE == m_GizmoSelection))
 					m_GizmoSelection = GIZMOSELECTION::RORTATE;
 
 				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x / 2.0f) - (buttonSize / 2.0f), 0.0f);
@@ -569,18 +565,5 @@ namespace MoonEngine
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-	}
-
-	bool EditorLayer::GizmoSelectButton(Ref<Texture> texture, float width, float height, bool selected)
-	{
-		if (selected)
-			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
-
-		bool returnValue = ImGuiUtils::ImageButton((ImTextureID)texture->GetID(), { width, height });
-
-		if (selected)
-			ImGui::PopStyleColor();
-
-		return returnValue;
 	}
 }
