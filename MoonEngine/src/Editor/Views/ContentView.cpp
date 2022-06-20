@@ -33,6 +33,74 @@ namespace MoonEngine
 		return (it != fileName.end());
 	}
 
+	static void ContentItemPopup(const std::filesystem::directory_entry& directoryEntry)
+	{
+		bool itemPopup = false;
+
+		const auto& path = directoryEntry.path();
+		auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("ContentItemPopup");
+			itemPopup = true;
+		}
+
+		if (ImGui::BeginPopup("ContentItemPopup"))
+		{
+			if (directoryEntry.is_directory())
+			{
+				if (ImGui::MenuItem("Open Explorer"))
+				{
+					std::string explorerPath = "explorer ";
+					explorerPath += std::filesystem::canonical(directoryEntry.path()).string();
+					system(explorerPath.c_str());
+				}
+
+				ImGuiUtils::SeparatorDistanced(2.5f);
+
+				if (ImGui::MenuItem("Delete Folder"))
+				{
+					for (auto deletionEntry : std::filesystem::directory_iterator(path))
+					{
+						if (deletionEntry.is_directory())
+						{
+							for (auto entry : std::filesystem::recursive_directory_iterator(deletionEntry.path()))
+							{
+								auto entryRelatives = std::filesystem::relative(entry.path(), ResourceManager::GetAssetPath());
+								ResourceManager::UnloadTexture(entryRelatives.string());
+							}
+						}
+						else
+						{
+							auto entryRelatives = std::filesystem::relative(deletionEntry.path(), ResourceManager::GetAssetPath());
+							ResourceManager::UnloadTexture(entryRelatives.string());
+						}
+					}
+					std::filesystem::remove_all(path);
+				}
+			}
+			else
+			{
+				if (ImGui::MenuItem("Open Explorer"))
+				{
+					std::string explorerPath = "explorer ";
+					explorerPath += std::filesystem::canonical(directoryEntry.path().parent_path()).string();
+					system(explorerPath.c_str());
+				}
+
+				ImGuiUtils::SeparatorDistanced(2.5f);
+
+				if (ImGui::MenuItem("Delete File"))
+				{
+					std::filesystem::remove(path);
+					ResourceManager::UnloadTexture(relativePath.string());
+				}
+			}
+			ImGui::EndPopup();
+		}
+	}
+
 	void ContentView::BeginContentView(bool& state)
 	{
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
@@ -103,8 +171,6 @@ namespace MoonEngine
 		if (columnCount < 1)
 			columnCount = 1;
 
-		bool itemPopup = false;
-
 		if (!isSearching)
 		{
 			ImGui::Columns(columnCount, 0, false);
@@ -112,7 +178,6 @@ namespace MoonEngine
 			{
 				const auto& path = directoryEntry.path();
 				auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
-
 				std::string filenameString = relativePath.filename().string();
 
 				ImGui::PushID(filenameString.c_str());
@@ -135,65 +200,7 @@ namespace MoonEngine
 						m_CurrentDirectory /= path.filename();
 				}
 
-				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-				{
-					ImGui::OpenPopup("ContentItemPopup");
-					itemPopup = true;
-				}
-
-				if (ImGui::BeginPopup("ContentItemPopup"))
-				{
-					if (directoryEntry.is_directory())
-					{
-						if (ImGui::MenuItem("Open Explorer"))
-						{
-							std::string explorerPath = "explorer ";
-							explorerPath += std::filesystem::canonical(directoryEntry.path()).string();
-							system(explorerPath.c_str());
-						}
-
-						ImGuiUtils::SeparatorDistanced(2.5f);
-
-						if (ImGui::MenuItem("Delete Folder"))
-						{
-							for (auto deletionEntry : std::filesystem::directory_iterator(path))
-							{
-								if (deletionEntry.is_directory())
-								{
-									for (auto entry : std::filesystem::recursive_directory_iterator(deletionEntry.path()))
-									{
-										auto entryRelatives = std::filesystem::relative(entry.path(), ResourceManager::GetAssetPath());
-										ResourceManager::UnloadTexture(entryRelatives.string());
-									}
-								}
-								else
-								{
-									auto entryRelatives = std::filesystem::relative(deletionEntry.path(), ResourceManager::GetAssetPath());
-									ResourceManager::UnloadTexture(entryRelatives.string());
-								}
-							}
-							std::filesystem::remove_all(path);
-						}
-					}
-					else
-					{
-						if (ImGui::MenuItem("Open Explorer"))
-						{
-							std::string explorerPath = "explorer ";
-							explorerPath += std::filesystem::canonical(directoryEntry.path().parent_path()).string();
-							system(explorerPath.c_str());
-						}
-
-						ImGuiUtils::SeparatorDistanced(2.5f);
-
-						if (ImGui::MenuItem("Delete File"))
-						{
-							std::filesystem::remove(path);
-							ResourceManager::UnloadTexture(relativePath.string());
-						}
-					}
-					ImGui::EndPopup();
-				}
+				ContentItemPopup(directoryEntry);
 
 				ImGui::TextWrapped(filenameString.c_str());
 
@@ -240,29 +247,7 @@ namespace MoonEngine
 					}
 				}
 
-				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-				{
-					ImGui::OpenPopup("ContentItemPopup");
-					itemPopup = true;
-				}
-
-				if (ImGui::BeginPopup("ContentItemPopup"))
-				{
-					if (directoryEntry.is_directory())
-					{
-						if (ImGui::MenuItem("Delete Folder"))
-							std::filesystem::remove_all(path);
-					}
-					else
-					{
-						if (ImGui::MenuItem("Delete File"))
-						{
-							std::filesystem::remove(path);
-							ResourceManager::UnloadTexture(relativePath.string());
-						}
-					}
-					ImGui::EndPopup();
-				}
+				ContentItemPopup(directoryEntry);
 
 				ImGui::TextWrapped(filenameString.c_str());
 
