@@ -1,3 +1,5 @@
+MoonEngine is a 2D rendering real-time application which is currently in a development state.
+
 <h2><b>Setup</b></h2>
 <ol>
   <li>Download the repository.</li>
