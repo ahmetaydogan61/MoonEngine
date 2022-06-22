@@ -29,7 +29,7 @@ Entities:
       Size: [1, 1, 1]
     SpriteComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: res/Assets/Images\Star.png
+      TexturePath: res/Assets/Images/Star.png
   - Entity: 5b695ec4-50ca-4095-90ea-e68a09a5581c
     IdentityComponent:
       Name: Entity
@@ -39,7 +39,7 @@ Entities:
       Size: [1, 1, 1]
     SpriteComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: res/Assets/Images\Pong\Ball.png
+      TexturePath: res/Assets/Images/Pong/Ball.png
   - Entity: bf8eda01-32f3-499e-abeb-a79a347011f9
     IdentityComponent:
       Name: Particle
@@ -61,7 +61,7 @@ Entities:
       SizeStart: [0.5, 0.5, 0]
       SizeEnd: [0, 0, 0]
       SizeChangeSpeed: 1
-      TexturePath: res/Assets/Images\Pong\Goal.png
+      TexturePath: res/Assets/Images/Pong/Goal.png
       ColorStart: [1, 0, 0, 1]
       ColorEnd: [0, 0.400000006, 1, 1]
       ColorChangeSpeed: 1

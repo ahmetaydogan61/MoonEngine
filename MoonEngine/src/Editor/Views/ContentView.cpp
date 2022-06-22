@@ -21,11 +21,10 @@ namespace MoonEngine
 	{
 		if (!fileFormat.empty())
 			if (fileName.substr(fileName.find_last_of(".") + 1) != fileFormat)
-			{
 				return 0;
-			}
 
-		auto it = std::search(
+		auto it = std::search
+		(
 			fileName.begin(), fileName.end(),
 			searchedFile.begin(), searchedFile.end(),
 			[](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
@@ -38,7 +37,6 @@ namespace MoonEngine
 		bool itemPopup = false;
 
 		const auto& path = directoryEntry.path();
-		auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
 		{
@@ -53,7 +51,7 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Open Explorer"))
 				{
 					std::string explorerPath = "explorer ";
-					explorerPath += std::filesystem::canonical(directoryEntry.path()).string();
+					explorerPath += std::filesystem::canonical(path).string();
 					system(explorerPath.c_str());
 				}
 
@@ -61,22 +59,8 @@ namespace MoonEngine
 
 				if (ImGui::MenuItem("Delete Folder"))
 				{
-					for (auto deletionEntry : std::filesystem::directory_iterator(path))
-					{
-						if (deletionEntry.is_directory())
-						{
-							for (auto entry : std::filesystem::recursive_directory_iterator(deletionEntry.path()))
-							{
-								auto entryRelatives = std::filesystem::relative(entry.path(), ResourceManager::GetAssetPath());
-								ResourceManager::UnloadTexture(entryRelatives.string());
-							}
-						}
-						else
-						{
-							auto entryRelatives = std::filesystem::relative(deletionEntry.path(), ResourceManager::GetAssetPath());
-							ResourceManager::UnloadTexture(entryRelatives.string());
-						}
-					}
+					for (auto deletionEntry : std::filesystem::recursive_directory_iterator(path))
+						ResourceManager::UnloadTexture(deletionEntry.path().string());
 					std::filesystem::remove_all(path);
 				}
 			}
@@ -85,7 +69,7 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Open Explorer"))
 				{
 					std::string explorerPath = "explorer ";
-					explorerPath += std::filesystem::canonical(directoryEntry.path().parent_path()).string();
+					explorerPath += std::filesystem::canonical(path.parent_path()).string();
 					system(explorerPath.c_str());
 				}
 
@@ -94,7 +78,7 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Delete File"))
 				{
 					std::filesystem::remove(path);
-					ResourceManager::UnloadTexture(relativePath.string());
+					ResourceManager::UnloadTexture(path.string());
 				}
 			}
 			ImGui::EndPopup();
@@ -111,11 +95,16 @@ namespace MoonEngine
 		if (ImGui::BeginMenuBar())
 		{
 			if (m_CurrentDirectory != std::filesystem::path(m_StartDirectory) && !isSearching)
+			{
 				if (ImGui::Button(" < "))
 					m_CurrentDirectory = m_CurrentDirectory.parent_path();
 
-			//+Search file
+				ImGuiUtils::AddPadding(2.5f, 0.0f);
 
+				std::string relative = std::filesystem::relative(m_CurrentDirectory, ResourceManager::GetAssetPath()).string();
+				ImGui::TextWrapped(relative.c_str());
+			}
+			//+Search file
 			float searchBarWidth = 200.0f;
 			ImGuiUtils::AddPadding(ImGui::GetContentRegionAvail().x - searchBarWidth, 0.0f);
 			ImGui::SetNextItemWidth(searchBarWidth);
@@ -137,30 +126,24 @@ namespace MoonEngine
 				switch (currentSearchFormat)
 				{
 					case 0:
-					{
 						searchFormat.clear();
 						break;
-					}
 					case 1:
-					{
 						searchFormat = "png";
 						break;
-					}
 					case 2:
-					{
 						searchFormat = "moon";
 						break;
-					}
 					default:
-					{
 						searchFormat.clear();
 						break;
-					}
 				}
 			}
 			//-file search
 			ImGui::EndMenuBar();
 		}
+
+		ImGuiUtils::AddPadding(0.0f, 2.5f);
 
 		float padding = 16.0f;
 		float thumbnailSize = 70.0f;
@@ -177,8 +160,7 @@ namespace MoonEngine
 			for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 			{
 				const auto& path = directoryEntry.path();
-				auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
-				std::string filenameString = relativePath.filename().string();
+				std::string filenameString = path.filename().string();
 
 				ImGui::PushID(filenameString.c_str());
 
@@ -188,7 +170,7 @@ namespace MoonEngine
 				ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
 				if (ImGui::BeginDragDropSource())
 				{
-					const wchar_t* itemPath = relativePath.c_str();
+					const wchar_t* itemPath = path.c_str();
 					ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 					ImGui::EndDragDropSource();
 				}
@@ -217,9 +199,8 @@ namespace MoonEngine
 				if (!FilterSearch(directoryEntry.path().filename().string(), searchPath, searchFormat))
 					continue;
 				const auto& path = directoryEntry.path();
-				auto relativePath = std::filesystem::relative(path, ResourceManager::GetAssetPath());
 
-				std::string filenameString = relativePath.filename().string();
+				std::string filenameString = path.filename().string();
 
 				ImGui::PushID(filenameString.c_str());
 
@@ -229,7 +210,7 @@ namespace MoonEngine
 				ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
 				if (ImGui::BeginDragDropSource())
 				{
-					const wchar_t* itemPath = relativePath.c_str();
+					const wchar_t* itemPath = path.c_str();
 					ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 					ImGui::EndDragDropSource();
 				}
@@ -243,7 +224,7 @@ namespace MoonEngine
 					{
 						searchPath.clear();
 						isSearching = false;
-						m_CurrentDirectory = directoryEntry.path().parent_path();
+						m_CurrentDirectory = path.parent_path();
 					}
 				}
 

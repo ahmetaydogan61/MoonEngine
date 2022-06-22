@@ -17,6 +17,7 @@ namespace MoonEngine
 	Ref<Texture> ResourceManager::LoadTexture(const std::string& path)
 	{
 		std::string newPath(path);
+		std::replace(newPath.begin(), newPath.end(), '\\', '/');
 		size_t directorySize = m_Desc.AssetFolder.size() - 1;
 
 		if (newPath.substr(0, directorySize) != m_Desc.AssetFolder.substr(0, directorySize))
@@ -37,6 +38,7 @@ namespace MoonEngine
 	void ResourceManager::UnloadTexture(const std::string& path)
 	{
 		std::string newPath(path);
+		std::replace(newPath.begin(), newPath.end(), '\\', '/');
 		size_t directorySize = m_Desc.AssetFolder.size() - 1;
 
 		if (newPath.substr(0, directorySize) != m_Desc.AssetFolder.substr(0, directorySize))
