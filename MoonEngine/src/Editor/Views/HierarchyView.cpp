@@ -135,13 +135,13 @@ namespace MoonEngine
 						openPopup = true;
 					ImGui::EndMenuBar();
 				}
-				
+
 				std::vector<entt::entity> entites;
 				m_Scene->m_Registry.each([&](auto entityID)
 				{
 					entites.push_back(entityID);
 				});
-				
+
 				int id = 0;
 				for (auto e = entites.end(); e != entites.begin();)
 				{
@@ -151,7 +151,7 @@ namespace MoonEngine
 
 				ImGui::PushStyleColor(ImGuiCol_Separator, { 0.75f, 0.75f, 0.75f, 1.0f });
 
-				if(openPopup)
+				if (openPopup)
 					ImGui::OpenPopup("CreateStuff");
 
 				if (ImGui::BeginPopup("CreateStuff"))
@@ -208,7 +208,7 @@ namespace MoonEngine
 			ImGui::TreePop();
 	}
 
-//------------------------------------INSPECTOR---------------------------------------------------------
+	//------------------------------------INSPECTOR---------------------------------------------------------
 
 	void HierarchyView::BeginInspectorView(bool& state)
 	{
@@ -261,12 +261,13 @@ namespace MoonEngine
 				transform.Rotation = glm::radians(rotation);
 				UtilVectorColumn("Size", transform.Size, 1.0f);
 				ImGui::TreePop();
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+				ImGui::Separator();
 			}
 			ImGui::PopID();
 			//-Transform Component
 
-			ImGuiUtils::AddPadding(0.0f, 5.0f);
-			ImGui::Separator();
 			ImGuiUtils::AddPadding(0.0f, 5.0f);
 
 			ImGuiUtils::Label("Add Component", true);
@@ -379,7 +380,7 @@ namespace MoonEngine
 			float columnWidth = 100.0f;
 			float columnSpacing = 10.0f;
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Play Options", false);
 			ImGui::NextColumn();
@@ -390,7 +391,7 @@ namespace MoonEngine
 			ImGui::Checkbox("##AutoPlay", &component.AutoPlay);
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Duration", false);
 			ImGui::NextColumn();
@@ -399,7 +400,7 @@ namespace MoonEngine
 
 			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Max Particles", false);
 			ImGui::NextColumn();
@@ -410,14 +411,14 @@ namespace MoonEngine
 					component.Resize();
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Burst Mode", false);
 			ImGui::NextColumn();
 			ImGui::Checkbox("##Burst", &component.BurstMode);
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Rate", false);
 			ImGui::NextColumn();
@@ -426,7 +427,7 @@ namespace MoonEngine
 
 			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Lifetime", false);
 			ImGui::NextColumn();
@@ -436,21 +437,21 @@ namespace MoonEngine
 			//Speed
 			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Direction", false);
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##Direction", &component.Direction[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Direction Velocity", false);
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##DirectionVelocity", &component.DirectionVelocity[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Shape Size", false);
 			ImGui::NextColumn();
@@ -460,21 +461,21 @@ namespace MoonEngine
 			//Size
 			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Start Size", false);
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##StartSize", &component.SizeStart[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("End Size", false);
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##EndSize", &component.SizeEnd[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Size Change Speed", false);
 			ImGui::NextColumn();
@@ -484,21 +485,21 @@ namespace MoonEngine
 			//Color
 			ImGuiUtils::AddPadding(0.0f, columnSpacing);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Start Color", false);
 			ImGui::NextColumn();
 			ImGui::ColorEdit4("##StartColor", &component.ColorStart[0]);
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("End Color", false);
 			ImGui::NextColumn();
 			ImGui::ColorEdit4("##EndColor", &component.ColorEnd[0]);
 			ImGui::Columns(1);
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Color Change Speed", false);
 			ImGui::NextColumn();
@@ -510,7 +511,7 @@ namespace MoonEngine
 			float cellSize = 25.0f;
 			float cellPadding = 2.0f;
 
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Texture", false);
 			ImGui::NextColumn();
@@ -558,7 +559,7 @@ namespace MoonEngine
 			ImGui::Columns(1);
 
 			//Physics
-			ImGui::Columns(2);
+			ImGui::Columns(2, 0, false);
 			ImGui::SetColumnWidth(0, columnWidth);
 			ImGuiUtils::Label("Use Physics", false);
 			ImGui::NextColumn();
@@ -567,14 +568,14 @@ namespace MoonEngine
 
 			if (component.UsePhysics)
 			{
-				ImGui::Columns(2);
+				ImGui::Columns(2, 0, false);
 				ImGui::SetColumnWidth(0, columnWidth);
 				ImGuiUtils::Label("Gravity", false);
 				ImGui::NextColumn();
 				ImGui::DragFloat("##Gravity", &component.Gravity, 0.1f, 0.0f, 0.0f, "%.2f");
 				ImGui::Columns(1);
 
-				ImGui::Columns(2);
+				ImGui::Columns(2, 0, false);
 				ImGui::SetColumnWidth(0, columnWidth);
 				ImGuiUtils::Label("Mass", false);
 				ImGui::NextColumn();
@@ -637,7 +638,7 @@ namespace MoonEngine
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::PushID(vecName.c_str());
-		ImGui::Columns(2);
+		ImGui::Columns(2, 0, false);
 		ImGui::SetColumnWidth(0, columnWidth);
 		ImGuiUtils::Label(vecName.c_str(), false);
 		ImGui::NextColumn();

@@ -56,7 +56,7 @@ namespace MoonEngine
 		
 		if (!m_LocalBuffer)
 		{
-			DebugWar("Texture Creation Failed");
+			DebugWar("Texture Creation Failed at: " << filepath);
 			return;
 		}
 

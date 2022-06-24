@@ -5,7 +5,9 @@ project "MoonEngine"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
-
+	
+	defines { "_CRT_SECURE_NO_WARNINGS", "GLFW_INCLUDE_NONE", "YAML_CPP_STATIC_DEFINE" }
+	
 	files
 	{
 		"src/**.h",
@@ -21,6 +23,7 @@ project "MoonEngine"
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.yaml_cpp}",
 		"%{IncludeDirs.imfilebrowser}",
 		"%{IncludeDirs.uuid_v4}"
 	}   

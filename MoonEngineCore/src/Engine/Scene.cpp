@@ -12,8 +12,7 @@
 namespace MoonEngine
 {
 	void Scene::OnEditorStart()
-	{
-	}
+	{}
 
 	void Scene::OnEditorStop()
 	{}

@@ -1,3 +1,6 @@
+Moon Engine is a 2D rendering application which currently in a development state.
+</br>
+
 <h2><b>Setup</b></h2>
 <ol>
   <li>Download the repository.</li>
@@ -8,9 +11,6 @@
 Note that you can create a new solution and use MoonEngineCore features like Scene, Entity System, Renderer etc. Make sure that you link MoonEngineCore to the solution and add the necessary include directories.
 
 <h2><b>Features</b></h2>
-Moon Engine is a 2D rendering application which currently in a development state.
-
-</br>
 <ul>
    <li>Batch Renderer</li>
    <li>Entity Component System</li>
