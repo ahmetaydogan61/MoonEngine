@@ -81,7 +81,7 @@ namespace MoonEngine
 	void Application::PopLayer(Layer* layer)
 	{
 		layer->Destroy();
-		m_Layers.remove(layer);
+		m_Layers.erase(std::find(m_Layers.begin(), m_Layers.end(), layer));
 	}
 
 	Application::~Application()

@@ -168,9 +168,11 @@ namespace MoonEngine
 
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 				ImGuiUtils::ImageButton((ImTextureID)icon->GetID(), { thumbnailSize, thumbnailSize });
+				
 				if (ImGui::BeginDragDropSource())
 				{
-					const wchar_t* itemPath = path.c_str();
+					auto& relative = std::filesystem::relative(path, ResourceManager::GetAssetPath());
+					const wchar_t* itemPath = relative.c_str();
 					ImGui::SetDragDropPayload("MNE_AssetItem", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 					ImGui::EndDragDropSource();
 				}

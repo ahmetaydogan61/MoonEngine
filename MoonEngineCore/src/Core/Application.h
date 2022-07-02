@@ -7,7 +7,7 @@ namespace MoonEngine
 	{
 	private:
 		static Application* m_Instance;
-		std::list<Layer*> m_Layers;
+		std::vector<Layer*> m_Layers;
 		void OnEvent(Event& e);
 	public:
 		Application();
