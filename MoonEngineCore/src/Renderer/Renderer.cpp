@@ -72,14 +72,14 @@ namespace MoonEngine
 	void Renderer::Init()
 	{
 		rData = new RenderData();
-		vertices = new Vertex[maxVertex * sizeof(Vertex)];
+		vertices = new Vertex[maxVertex];
 
 		glGenVertexArrays(1, &va);
 		glBindVertexArray(va);
 
 		glGenBuffers(1, &vb);
 		glBindBuffer(GL_ARRAY_BUFFER, vb);
-		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, maxVertex * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
 
 		strideLength = sizeof(Vertex) / sizeof(float);
 		glEnableVertexAttribArray(0);
@@ -137,6 +137,7 @@ namespace MoonEngine
 		Clear();
 		rData->ViewProjection = viewProjection;
 		rData->DrawCalls = 0;
+		rData->QuadCount = 0;
 	}
 
 	void Renderer::End()
@@ -166,47 +167,15 @@ namespace MoonEngine
 		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
 
 		rData->DrawCalls++;
+		rData->QuadCount += quadCount;
 	}
 
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
+	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotation, const glm::vec4& color, const Ref<Texture>& texture)
 	{
-		if (quadCount >= maxQuads)
-			End();
-
 		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
 
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
-			vertices[i + (quadCount * 4)].color = color;
-			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
-			vertices[i + (quadCount * 4)].texID = 0;
-			index += strideLength;
-		}
-		quadCount++;
-	}
-
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color, const Ref<Texture>& texture)
-	{
-		if (quadCount >= maxQuads || m_TextureIndex >= 32)
-			End();
-
-		glm::mat4 rotationMat = glm::toMat4(glm::quat(rotation));
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), size);
-
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
-			vertices[i + (quadCount * 4)].color = color;
-			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
-			if(texture == nullptr)
-				vertices[i + (quadCount * 4)].texID = 0;
-			else	
-				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
-			index += strideLength;
-		}
-		quadCount++;
+		DrawQuad(transform, color, texture);
 	}
 
 	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color,const Ref<Texture>& texture)
@@ -223,22 +192,6 @@ namespace MoonEngine
 				vertices[i + (quadCount * 4)].texID = 0;
 			else
 				vertices[i + (quadCount * 4)].texID = CreateTextureCache(texture);
-			index += strideLength;
-		}
-		quadCount++;
-	}
-
-	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
-	{
-		if (quadCount >= maxQuads)
-			End();
-
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i + (quadCount * 4)].position = transform * vertexPosition[i];
-			vertices[i + (quadCount * 4)].color = color;
-			vertices[i + (quadCount * 4)].texCoords = texCoords[i];
-			vertices[i + (quadCount * 4)].texID = 0;
 			index += strideLength;
 		}
 		quadCount++;

@@ -506,6 +506,7 @@ namespace MoonEngine
 		ImGui::Begin(ICON_FK_CODE "Debug", &state);
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
+		ImGui::Text("QuadCounts: %d", Renderer::GetRenderData().QuadCount);
 		
 		ImGuiUtils::SeparatorDistanced(5.0f);
 
