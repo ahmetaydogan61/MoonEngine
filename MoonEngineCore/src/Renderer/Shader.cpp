@@ -1,6 +1,7 @@
 #include "mpch.h"
-#include "Shader.h"
-#include "glad/glad.h"
+#include "Renderer/Shader.h"
+
+#include <glad/glad.h>
 
 namespace MoonEngine
 {

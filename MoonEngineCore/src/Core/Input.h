@@ -1,5 +1,6 @@
 #pragma once
-#include "Keycodes.h"
+#include "Core/Keycodes.h"
+
 namespace MoonEngine
 {
 	class Input

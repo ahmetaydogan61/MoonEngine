@@ -1,15 +1,17 @@
 #include "mpch.h"
 #include "Core/Window.h"
-#include "ImGuiLayer.h"
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_glfw.cpp"
-#include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_opengl3.cpp"
-#include "GLFW/glfw3.h"
+#include "Core/ImGuiLayer.h"
 #include "Event/Events.h"
 #include "Utils/IconsFontAwesome.h"
-#include "ImGuizmo.h"	
+
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_glfw.cpp>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_opengl3.cpp>
+
+#include "ImGuizmo.h"
 
 namespace MoonEngine
 {

@@ -1,8 +1,9 @@
 #include "mpch.h"
-#include "Texture.h"
-#include "glad/glad.h"
+#include "Renderer/Texture.h"
+
 #include "stb_image.h"
 #include "stb_image.cpp"
+#include <glad/glad.h>
 
 namespace MoonEngine
 {
@@ -30,8 +31,8 @@ namespace MoonEngine
 		delete[] data;
 	}
 
-	Texture::Texture()
-		:m_TexBuffer(0), m_Width(1), m_Height(1), m_BPP(4)
+	Texture::Texture(uint32_t width, uint32_t height)
+		:m_TexBuffer(0), m_Width(width), m_Height(height), m_BPP(4)
 	{
 		int size = m_Width * m_Height * m_BPP;
 		unsigned char* buffer = new unsigned char[size];
@@ -41,8 +42,8 @@ namespace MoonEngine
 		CreateTexture(buffer);
 	}
 
-	Texture::Texture(unsigned int width, unsigned int height)
-		:m_TexBuffer(0), m_Width(width), m_Height(height), m_BPP(4)
+	Texture::Texture()
+		:m_TexBuffer(0), m_Width(1), m_Height(1), m_BPP(4)
 	{
 		int size = m_Width * m_Height * m_BPP;
 		unsigned char* buffer = new unsigned char[size];

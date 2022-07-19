@@ -4,7 +4,7 @@ project "MoonEngine"
 	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin/obj/" .. outputdir .. "/%{prj.name}")
 	
 	defines { "_CRT_SECURE_NO_WARNINGS", "GLFW_INCLUDE_NONE", "YAML_CPP_STATIC_DEFINE" }
 	

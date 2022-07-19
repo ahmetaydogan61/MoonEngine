@@ -1,11 +1,11 @@
 #include "mpch.h"
 
-#include "Application.h"
-#include "ResourceManager.h"
-#include "Window.h"
-#include "Time.h"
-#include "Input.h"
-#include "ImGuiLayer.h"
+#include "Core/Application.h"
+#include "Core/ImGuiLayer.h"
+#include "Core/Input.h"
+#include "Core/ResourceManager.h"
+#include "Core/Time.h"
+#include "Core/Window.h"
 
 #include "Renderer/Renderer.h"
 

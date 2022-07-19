@@ -1,13 +1,17 @@
 #include "mpch.h"
-#include "Scene.h"
 #include "Core/Window.h"
-#include "Entity.h"
-#include "Components.h"
+
+#include "Engine/Scene.h"
+#include "Engine/Entity.h"
+#include "Engine/Components.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Frambuffer.h"
-#include "glad/glad.h"
+
 #include "Systems/ParticleSystem.h"
+
+#include <glad/glad.h>
 
 namespace MoonEngine
 {

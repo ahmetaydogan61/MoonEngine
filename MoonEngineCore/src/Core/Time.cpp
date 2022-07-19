@@ -1,7 +1,7 @@
 #include "mpch.h"
-#include "Time.h"
+#include "Core/Time.h"
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 namespace MoonEngine
 {

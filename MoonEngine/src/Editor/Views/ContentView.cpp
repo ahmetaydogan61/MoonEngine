@@ -3,8 +3,7 @@
 
 #include "../ImGuiUtils.h"
 
-#include <imgui/imgui.h>
-
+#include <imgui.h>
 #include <filesystem>
 
 namespace MoonEngine

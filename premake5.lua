@@ -19,7 +19,7 @@ IncludeDirs["uuid_v4"] = "%{wks.location}/MoonEngineCore/Includes/uuid_v4"
 
 include "MoonEngineCore/Includes/GLFW"
 include "MoonEngineCore/Includes/Glad"
-include "MoonEngineCore/Includes/ImGui/imgui"
+include "MoonEngineCore/Includes/imgui"
 include "MoonEngineCore/Includes/yaml-cpp"
 include "MoonEngineCore"
 include "MoonEngine"

@@ -10,7 +10,7 @@ namespace MoonEngine
 		void CreateTexture(unsigned char* data);
 	public:
 		Texture();
-		Texture(unsigned int width, unsigned int height);
+		Texture(uint32_t width, uint32_t height);
 		Texture(const std::string& filepath);
 		~Texture();
 

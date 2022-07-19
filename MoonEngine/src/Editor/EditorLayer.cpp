@@ -3,7 +3,7 @@
 #include "Utils/IconsFontAwesome.h"
 #include "ImGuizmo.h"
 
-#include <imgui/imgui_internal.h>
+#include <imgui_internal.h>
 #include "imfilebrowser.h"
 
 #define GLM_ENABLE_EXPERIMENTAL

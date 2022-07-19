@@ -1,11 +1,11 @@
 #pragma once
-#include "ScriptableEntity.h"
-#include "SceneCamera.h"
+#include "Engine/ScriptableEntity.h"
+#include "Engine/SceneCamera.h"
+
+#include "Systems/ParticleSystem.h"
 
 #include "endianness.h"
 #include "uuid_v4.h"
-
-#include "Systems/ParticleSystem.h"
 
 namespace MoonEngine
 {

@@ -1,10 +1,9 @@
 #include "mpch.h"
-#include "EditorCamera.h"
-
 #include "Core/Input.h"
 #include "Core/Time.h"
-
 #include "Core/Window.h"
+
+#include "Utils/EditorCamera.h"
 
 namespace MoonEngine
 {

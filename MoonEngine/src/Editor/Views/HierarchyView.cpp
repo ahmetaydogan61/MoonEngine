@@ -2,9 +2,9 @@
 #include "../ImGuiUtils.h"
 #include "Utils/IconsFontAwesome.h"
 
-#include <imgui/imgui.cpp>
-#include "imgui/misc/cpp/imgui_stdlib.h"
-#include "imgui/misc/cpp/imgui_stdlib.cpp"
+#include <imgui.cpp>
+#include <misc/cpp/imgui_stdlib.h>
+#include <misc/cpp/imgui_stdlib.cpp>
 
 namespace MoonEngine
 {
@@ -13,20 +13,13 @@ namespace MoonEngine
 	template<typename T>
 	struct ComponentCopier
 	{
-		static T Component;
+		inline static T Component;
 		static void ApplyCopy(Entity& copyTo)
 		{
 			if (copyTo.HasComponent<T>())
 				copyTo.GetComponent<T>() = Component;
 		}
 	};
-
-	IdentityComponent ComponentCopier<IdentityComponent>::Component;
-	TransformComponent ComponentCopier<TransformComponent>::Component;
-	SpriteComponent ComponentCopier<SpriteComponent>::Component;
-	CameraComponent ComponentCopier<CameraComponent>::Component;
-	ScriptComponent ComponentCopier<ScriptComponent>::Component;
-	ParticleComponent ComponentCopier<ParticleComponent>::Component;
 
 	HierarchyView::HierarchyView()
 	{

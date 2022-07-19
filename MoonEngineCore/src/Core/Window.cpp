@@ -1,11 +1,10 @@
 #include "mpch.h"
-#include "Window.h"
+#include "Core/Window.h"
 #include "Event/Events.h"
 
 #include "stb_image.h"
-
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace MoonEngine
 {

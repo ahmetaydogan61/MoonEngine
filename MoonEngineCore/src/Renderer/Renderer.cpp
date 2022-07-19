@@ -1,19 +1,19 @@
 #include "mpch.h"
-#include "Renderer.h"
-#include "glad/glad.h"
-#include "Texture.h"
-#include "Shader.h"
+#include "Renderer/Renderer.h"
+#include "Renderer/Shader.h"
+#include "Renderer/Texture.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glad/glad.h>
 
 namespace MoonEngine
 {
 	glm::vec4 Renderer::m_ClearColor;
 
-	unsigned int va;
-	unsigned int vb;
-	unsigned int ib;
+	uint32_t VertexArray;
+	uint32_t VertexBuffer;
+	uint32_t IndexBuffer;
 
 	const uint32_t maxQuads = 5000;
 	const uint32_t maxVertex = maxQuads * 4;
@@ -62,7 +62,7 @@ namespace MoonEngine
 
 		if (m_TextureCache.find(texture) != m_TextureCache.end())
 			return m_TextureCache.at(texture);
-		
+
 		m_TextureIndex++;
 		texture->Bind(m_TextureIndex);
 		m_TextureCache[texture] = m_TextureIndex;
@@ -74,11 +74,11 @@ namespace MoonEngine
 		rData = new RenderData();
 		vertices = new Vertex[maxVertex];
 
-		glGenVertexArrays(1, &va);
-		glBindVertexArray(va);
+		glGenVertexArrays(1, &VertexArray);
+		glBindVertexArray(VertexArray);
 
-		glGenBuffers(1, &vb);
-		glBindBuffer(GL_ARRAY_BUFFER, vb);
+		glGenBuffers(1, &VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, maxVertex * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
 
 		strideLength = sizeof(Vertex) / sizeof(float);
@@ -109,13 +109,13 @@ namespace MoonEngine
 			indicesOffset += 4;
 		}
 
-		glGenBuffers(1, &ib);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glGenBuffers(1, &IndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxIndex * sizeof(unsigned int), &quadIndices[0], GL_STATIC_DRAW);
 
 		m_DefaultShader = CreateRef<Shader>("res/Shaders/Default.shader");
 		m_WhiteTexture = CreateRef<Texture>(1, 1);
-		
+
 		for (int i = 0; i < 32; i++)
 			m_TextureIDs[i] = i;
 
@@ -160,10 +160,10 @@ namespace MoonEngine
 		m_DefaultShader->SetUniformMat4("uVP", rData->ViewProjection);
 		m_DefaultShader->SetUniform1iv("uTexture", 32, m_TextureIDs);
 
-		glBindVertexArray(va);
+		glBindVertexArray(VertexArray);
 		glBufferData(GL_ARRAY_BUFFER, index * sizeof(float), &vertices[0], GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 		glDrawElements(GL_TRIANGLES, 6 * quadCount, GL_UNSIGNED_INT, nullptr);
 
 		rData->DrawCalls++;
@@ -178,7 +178,7 @@ namespace MoonEngine
 		DrawQuad(transform, color, texture);
 	}
 
-	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color,const Ref<Texture>& texture)
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture>& texture)
 	{
 		if (quadCount >= maxQuads || m_TextureIndex >= 32)
 			End();
