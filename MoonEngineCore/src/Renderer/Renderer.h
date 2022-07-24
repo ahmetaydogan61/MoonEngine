@@ -1,6 +1,4 @@
 #pragma once
-#include "Core.h"
-
 namespace MoonEngine
 {
 	class Shader;

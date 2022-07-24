@@ -1,8 +1,12 @@
 #include "mpch.h"
+#include "Core/Time.h"
+
 #include "Engine/Components.h"
 #include "Engine/Systems/ParticleSystem.h"
 
 #include "Renderer/Renderer.h"
+
+#include "Utils/Maths.h"
 
 namespace MoonEngine
 {

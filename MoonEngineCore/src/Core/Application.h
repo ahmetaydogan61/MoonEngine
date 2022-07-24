@@ -3,6 +3,15 @@
 
 namespace MoonEngine
 {
+	struct ApplicationDesc
+	{
+		std::string AppName = "Application";
+		uint32_t Width = 1600;
+		uint32_t Height = 900;
+		bool Fullscreen = false;
+		bool Maximized = false;
+	};
+
 	class Application
 	{
 	private:
@@ -11,6 +20,7 @@ namespace MoonEngine
 		void OnEvent(Event& e);
 	public:
 		Application();
+		Application(ApplicationDesc desc);
 		~Application();
 		void Run();
 		void PushLayer(Layer* layer);

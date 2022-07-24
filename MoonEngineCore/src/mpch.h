@@ -25,11 +25,10 @@
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "Core/Debug.h"
-#include "Utils/Maths.h"
 
 #define EVENT_FN_POINTER(fn) [&](Event& event) { return fn(event); }
 #define BIND_FN(fn) std::bind(&fn, this, std::placeholders::_1)

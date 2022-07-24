@@ -3,7 +3,7 @@ project "yaml-cpp"
 	language "C++"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin/obj/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin/_obj/" .. outputdir .. "/%{prj.name}")
 
 	defines { "YAML_CPP_STATIC_DEFINE" }
 

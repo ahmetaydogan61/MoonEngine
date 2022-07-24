@@ -87,7 +87,7 @@ namespace MoonEngine
 
 		glfwSwapInterval(m_Vsync);
 
-		DebugSys(glGetString(GL_VERSION));
+		DebugSuc("OpenGL Version: " << glGetString(GL_VERSION));
 		return 1;
 	}
 

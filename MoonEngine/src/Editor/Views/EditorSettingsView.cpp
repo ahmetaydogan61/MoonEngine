@@ -1,7 +1,9 @@
-#include "EditorSettingsView.h"
-#include "../ImGuiUtils.h"
+#include "Editor/ImGuiUtils.h"
+#include "Editor/Views/EditorSettingsView.h"
+
 #include "Utils/IconsFontAwesome.h"
-#include "Renderer/Renderer.h"
+
+#include <glm/glm.hpp>
 
 namespace MoonEngine
 {

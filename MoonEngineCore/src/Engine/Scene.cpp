@@ -1,4 +1,5 @@
 #include "mpch.h"
+#include "Core/Time.h"
 #include "Core/Window.h"
 
 #include "Engine/Scene.h"

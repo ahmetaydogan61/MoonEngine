@@ -1,5 +1,5 @@
 #pragma once
-#include "EventSystem.h"
-#include "Events/KeyEvents.h"
-#include "Events/MouseEvents.h"
-#include "Events/WindowEvents.h"
+#include "Event/EventSystem.h"
+#include "Event/Events/KeyEvents.h"
+#include "Event/Events/MouseEvents.h"
+#include "Event/Events/WindowEvents.h"

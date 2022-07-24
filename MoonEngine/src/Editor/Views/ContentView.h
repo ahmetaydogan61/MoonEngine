@@ -1,5 +1,6 @@
 #pragma once
-#include "Core.h"
+#include "MoonEngine.h"
+
 namespace MoonEngine
 {
 	class ContentView

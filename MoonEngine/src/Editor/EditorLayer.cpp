@@ -1,13 +1,14 @@
-#include "EditorLayer.h"
-#include "ImGuiUtils.h"
-#include "Utils/IconsFontAwesome.h"
-#include "ImGuizmo.h"
+#include "Editor/EditorLayer.h"
+#include "Editor/ImGuiUtils.h"
 
-#include <imgui_internal.h>
+#include "Utils/IconsFontAwesome.h"
+
+#include "ImGuizmo.h"
 #include "imfilebrowser.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <imgui_internal.h>
 
 namespace MoonEngine
 {

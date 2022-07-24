@@ -20,6 +20,7 @@
 #include "Renderer/Texture.h"
 
 #include "Utils/EditorCamera.h"
+#include "Utils/Maths.h"
 #include "Utils/Serializer.h"
 
 #include <imgui.h>

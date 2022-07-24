@@ -1,8 +1,9 @@
 #pragma once
-#include "Core.h"
-#include "Views/HierarchyView.h"
-#include "Views/EditorSettingsView.h"
-#include "Views/ContentView.h"
+#include "MoonEngine.h"
+
+#include "Editor/Views/ContentView.h"
+#include "Editor/Views/EditorSettingsView.h"
+#include "Editor/Views/HierarchyView.h"
 
 namespace MoonEngine
 {

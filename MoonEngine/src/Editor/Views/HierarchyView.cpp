@@ -1,5 +1,6 @@
-#include "HierarchyView.h"
-#include "../ImGuiUtils.h"
+#include "Editor/ImGuiUtils.h"
+#include "Editor/Views/HierarchyView.h"
+
 #include "Utils/IconsFontAwesome.h"
 
 #include <imgui.cpp>

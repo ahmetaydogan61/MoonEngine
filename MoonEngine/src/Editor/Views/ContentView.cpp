@@ -1,10 +1,8 @@
-#include "mpch.h"
-#include "ContentView.h"
+#include "Editor/ImGuiUtils.h"
+#include "Editor/Views/ContentView.h"
 
-#include "../ImGuiUtils.h"
-
-#include <imgui.h>
 #include <filesystem>
+#include <imgui.h>
 
 namespace MoonEngine
 {

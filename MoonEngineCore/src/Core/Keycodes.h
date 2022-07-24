@@ -1,11 +1,11 @@
 #pragma once
 
 #define KEY_SPACE              32
-#define KEY_APOSTROPHE         39  
-#define KEY_COMMA              44  
-#define KEY_MINUS              45  
-#define KEY_PERIOD             46  
-#define KEY_SLASH              47  
+#define KEY_APOSTROPHE         39
+#define KEY_COMMA              44
+#define KEY_MINUS              45
+#define KEY_PERIOD             46
+#define KEY_SLASH              47
 #define KEY_0                  48
 #define KEY_1                  49
 #define KEY_2                  50
@@ -16,8 +16,8 @@
 #define KEY_7                  55
 #define KEY_8                  56
 #define KEY_9                  57
-#define KEY_SEMICOLON          59  
-#define KEY_EQUAL              61  
+#define KEY_SEMICOLON          59
+#define KEY_EQUAL              61
 #define KEY_A                  65
 #define KEY_B                  66
 #define KEY_C                  67
@@ -44,12 +44,12 @@
 #define KEY_X                  88
 #define KEY_Y                  89
 #define KEY_Z                  90
-#define KEY_LEFT_BRACKET       91  
-#define KEY_BACKSLASH          92  
-#define KEY_RIGHT_BRACKET      93  
-#define KEY_GRAVE_ACCENT       96  
-#define KEY_WORLD_1            161 
-#define KEY_WORLD_2            162 
+#define KEY_LEFT_BRACKET       91
+#define KEY_BACKSLASH          92
+#define KEY_RIGHT_BRACKET      93
+#define KEY_GRAVE_ACCENT       96
+#define KEY_WORLD_1            161
+#define KEY_WORLD_2            162
 
 #define KEY_ESCAPE             256
 #define KEY_ENTER              257

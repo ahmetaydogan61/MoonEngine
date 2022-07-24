@@ -4,7 +4,7 @@ project "MoonEngineCore"
 	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin/obj/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin/_obj/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "mpch.h"
 	pchsource "src/mpch.cpp"

@@ -19,20 +19,38 @@ namespace MoonEngine
 		{
 			m_Instance = this;
 			if (Window::Create("MoonEngine", 1600, 900, false))
+			{
+				Window::SetEventCallback(BIND_FN(Application::OnEvent));
 				DebugSys("Window Creation Successful");
+			}
 			else
-				DebugSys("Window Creation Failed!");
+				DebugErr("Window Creation Failed!");
 		}
 		else
-			DebugSys("Application Already Exists");
+			DebugWar("Application Already Exists");
+	}
 
-		Window::SetEventCallback(BIND_FN(Application::OnEvent));
+	Application::Application(ApplicationDesc desc)
+	{
+		if (!m_Instance)
+		{
+			m_Instance = this;
+			if (Window::Create(desc.AppName, desc.Width, desc.Height, desc.Fullscreen))
+			{
+				Window::SetEventCallback(BIND_FN(Application::OnEvent));
+				DebugSys("Window Creation Successful");
+			}
+			else
+				DebugErr("Window Creation Failed!");
+		}
+		else
+			DebugWar("Application Already Exists");
 	}
 
 	void Application::OnEvent(Event& e)
 	{
 		ImGuiLayer::OnEvent(e);
-		for (auto layer = m_Layers.end(); layer != m_Layers.begin();)
+		for (auto& layer = m_Layers.end(); layer != m_Layers.begin();)
 			(*--layer)->OnEvent(e);
 	}
 
@@ -60,7 +78,7 @@ namespace MoonEngine
 
 			for (Layer* layer : m_Layers)
 				layer->Update();
-			
+
 			ImGuiLayer::BeginDrawGUI();
 			for (Layer* layer : m_Layers)
 				layer->DrawGUI();
@@ -87,7 +105,7 @@ namespace MoonEngine
 	Application::~Application()
 	{
 		Window::Destroy();
-		
+
 		for (Layer* layer : m_Layers)
 		{
 			DebugSys(layer->LayerName + " Destroyed");
@@ -96,7 +114,7 @@ namespace MoonEngine
 		for (Layer* layer : m_Layers)
 			delete layer;
 		m_Layers.clear();
-		
+
 		Renderer::Destroy();
 
 		DebugSys("Application Closed");
