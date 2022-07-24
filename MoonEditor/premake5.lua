@@ -1,4 +1,4 @@
-project "MoonEngine"
+project "MoonEditor"
 	kind "ConsoleApp"
 	language "C++"
 	staticruntime "on"

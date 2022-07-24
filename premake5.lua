@@ -1,6 +1,6 @@
 workspace "MoonEngine"
 	architecture "x64"
-	startproject "MoonEngine"
+	startproject "MoonEditor"
 	configurations { "Debug", "Release", "Final" }
 
 outputdir = "%{cfg.buildcfg}/%{cfg.system}/%{cfg.architecture}"
@@ -22,4 +22,4 @@ include "MoonEngineCore/Includes/Glad"
 include "MoonEngineCore/Includes/imgui"
 include "MoonEngineCore/Includes/yaml-cpp"
 include "MoonEngineCore"
-include "MoonEngine"
+include "MoonEditor"
