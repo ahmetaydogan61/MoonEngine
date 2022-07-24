@@ -72,13 +72,13 @@ namespace MoonEngine
 			{
 				case GLFW_PRESS:
 				{
-					KeyPressEvent e(key, false);
+					KeyPressEvent e((Keycode)key, false);
 					m_EventCallback(e);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressEvent e(key, true);
+					KeyPressEvent e((Keycode)key, true);
 					m_EventCallback(e);
 					break;
 				}

@@ -6,35 +6,17 @@
 
 namespace MoonEngine
 {
-	glm::vec4 Input::m_MouseOrthoPos;
-	bool Input::m_MouseButtons[3];
-	bool Input::m_LastMouseButtons[3];
-
-	bool Input::GetKey(int key)
+	bool Input::GetKey(Keycode key)
 	{
-		return glfwGetKey(Window::GetWindow(), key);
+		return glfwGetKey(Window::GetWindow(), (int)key);
 	}
 
 	float Input::GetX()
 	{
-		double x, y;
-		glfwGetCursorPos(Window::GetWindow(), &x, &y);
-		return (float)x;
-	}
-
-	float Input::GetY()
-	{
-		double x, y;
-		glfwGetCursorPos(Window::GetWindow(), &x, &y);
-		return (float)y;
-	}
-
-	float Input::OrthoX()
-	{
 		return m_MouseOrthoPos.x;
 	}
 
-	float Input::OrthoY()
+	float Input::GetY()
 	{
 		return m_MouseOrthoPos.y;
 	}
@@ -57,11 +39,6 @@ namespace MoonEngine
 	bool Input::MouseReleased(int button)
 	{
 		return !m_MouseButtons[button] && m_LastMouseButtons[button];
-	}
-
-	bool Input::Dragging(int button)
-	{
-		return MouseDown(button);
 	}
 
 	void Input::UpdateMouseKeys()
@@ -88,10 +65,28 @@ namespace MoonEngine
 	void Input::Update(const glm::vec2& viewPortPos, const  glm::vec2& viewPortSize, const  glm::mat4& viewProjection)
 	{
 		UpdateMouseKeys();
+	
+		double mouseX, mouseY;
+		glfwGetCursorPos(Window::GetWindow(), &mouseX, &mouseY);
 		glm::mat4 inverseMat = glm::inverse(viewProjection);
-		float x = (2.0f * ((float)(GetX() - viewPortPos.x) / (viewPortSize.x - 0))) - 1.0f;
-		float y = (2.0f * (1.0f - ((float)(GetY() - viewPortPos.y) / (viewPortSize.y - 0)))) - 1.0f;
+		float x = (2.0f * ((float)(mouseX - viewPortPos.x) / (viewPortSize.x - 0))) - 1.0f;
+		float y = (2.0f * (1.0f - ((float)(mouseY - viewPortPos.y) / (viewPortSize.y - 0)))) - 1.0f;
 		m_MouseOrthoPos = glm::vec4(x, y, 0.0f, 1.0f);
 		m_MouseOrthoPos = inverseMat * m_MouseOrthoPos;
+	}
+
+	void Input::SetCursorMode(CursorMode mode)
+	{
+		switch (mode)
+		{
+			case CursorMode::NONE:
+				glfwSetInputMode(Window::GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				break;
+			case CursorMode::LOCKED:
+				glfwSetInputMode(Window::GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				break;
+			default:
+				break;
+		}
 	}
 }

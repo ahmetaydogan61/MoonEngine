@@ -36,8 +36,8 @@ namespace MoonEngine
 	void HierarchyView::MouseSelect()
 	{
 		bool selected = false;
-		float x = Input::OrthoX();
-		float y = Input::OrthoY();
+		float x = Input::GetX();
+		float y = Input::GetY();
 
 		auto transforms = m_Scene->m_Registry.view<TransformComponent>();
 		for (auto entity : transforms)

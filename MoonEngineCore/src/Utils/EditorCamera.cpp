@@ -47,16 +47,16 @@ namespace MoonEngine
 
 	void EditorCamera::UpdateHovered()
 	{
-		if (Input::GetKey(KEY_LEFT_SHIFT))
+		if (Input::GetKey(Keycode::LeftShift))
 		{
-			if (Input::GetKey(KEY_W))
+			if (Input::GetKey(Keycode::W))
 				m_Position.y += m_MoveSpeed * Time::DeltaTime();
-			else if (Input::GetKey(KEY_S))
+			else if (Input::GetKey(Keycode::S))
 				m_Position.y -= m_MoveSpeed * Time::DeltaTime();
 
-			if (Input::GetKey(KEY_A))
+			if (Input::GetKey(Keycode::A))
 				m_Position.x -= m_MoveSpeed * Time::DeltaTime();
-			else if (Input::GetKey(KEY_D))
+			else if (Input::GetKey(Keycode::D))
 				m_Position.x += m_MoveSpeed * Time::DeltaTime();
 		}
 	}

@@ -71,25 +71,25 @@ namespace MoonEngine
 		if (e.Repeat())
 			return false;
 
-		bool control = Input::GetKey(KEY_LEFT_CONTROL);
-		bool shift = Input::GetKey(KEY_LEFT_SHIFT);
+		bool control = Input::GetKey(Keycode::LeftControl);
+		bool shift = Input::GetKey(Keycode::LeftShift);
 
 		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive() && !shift ;
 
 		switch (e.Key())
 		{
-			case KEY_DELETE:
+			case Keycode::Delete:
 			{
 				m_HierarchyView.DeleteSelectedEntity();
 				break;
 			}
-			case KEY_Q:
+			case Keycode::Q:
 			{
 				if (canPress)
 					m_GizmoSelection = GIZMOSELECTION::NONE;
 				break;
 			}
-			case KEY_W:
+			case Keycode::W:
 			{
 				if (!control && canPress)
 					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
@@ -97,31 +97,31 @@ namespace MoonEngine
 					m_HierarchyView.DeleteSelectedEntity();
 				break;
 			}
-			case KEY_E:
+			case Keycode::E:
 			{
 				if (canPress)
 					m_GizmoSelection = GIZMOSELECTION::SCALE;
 				break;
 			}
-			case KEY_R:
+			case Keycode::R:
 			{
 				if (canPress)
 					m_GizmoSelection = GIZMOSELECTION::RORTATE;
 				break;
 			}
-			case KEY_D:
+			case Keycode::D:
 			{
 				if (control)
 					m_HierarchyView.DuplicateSelectedEntity();
 				break;
 			}
-			case KEY_N:
+			case Keycode::N:
 			{
 				if (control)
 					NewScene();
 				break;
 			}
-			case KEY_S:
+			case Keycode::S:
 			{
 				if (control)
 					if (m_ScenePath.empty())
@@ -130,7 +130,7 @@ namespace MoonEngine
 						SaveScene(m_ScenePath);
 				break;
 			}
-			case KEY_L:
+			case Keycode::L:
 			{
 				if (control)
 					loadDialog.Open();
@@ -161,7 +161,7 @@ namespace MoonEngine
 				m_EditorCamera.UpdateHovered();
 
 			m_EditorCamera.Update();
-			m_IsSnapping = Input::GetKey(KEY_LEFT_CONTROL);
+			m_IsSnapping = Input::GetKey(Keycode::LeftControl);
 		}
 		else
 			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
@@ -512,7 +512,6 @@ namespace MoonEngine
 		ImGuiUtils::SeparatorDistanced(5.0f);
 
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());
-		ImGui::Text("Ortho X: %.1f, Ortho Y: %.1f", Input::OrthoX(), Input::OrthoY());
 		ImGui::Text("Viewport Hovered %d", m_ViewportHovered);
 		ImGui::Text("Viewport Focused %d", m_ViewportFocused);
 

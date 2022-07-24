@@ -1,19 +1,21 @@
 #pragma once
 namespace MoonEngine
 {
+	enum class Keycode;
+
 	class KeyPressEvent : public Event
 	{
 	private:
-		int m_Key;
+		Keycode m_Key;
 		bool m_Repeat;
 	public:
-		KeyPressEvent(int key, bool repeat)
+		KeyPressEvent(Keycode key, bool repeat)
 			:m_Key(key), m_Repeat(repeat)
 		{
 			SetType(EventType::KeyPress);
 		}
 
-		int Key() { return m_Key; }
+		Keycode Key() { return m_Key; }
 		bool Repeat() { return m_Repeat; }
 	};
 }
