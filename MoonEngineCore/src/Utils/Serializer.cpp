@@ -106,7 +106,7 @@ namespace MoonEngine
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;
-		auto& uuid = entity.GetComponent<UUIDComponent>();
+		const auto& uuid = entity.GetComponent<UUIDComponent>();
 		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.str();
 
 		if (entity.HasComponent<IdentityComponent>())
@@ -114,7 +114,7 @@ namespace MoonEngine
 			out << YAML::Key << "IdentityComponent";
 			out << YAML::BeginMap;
 
-			auto& name = entity.GetComponent<IdentityComponent>().Name;
+			const auto& name = entity.GetComponent<IdentityComponent>().Name;
 			out << YAML::Key << "Name" << YAML::Value << name;
 
 			out << YAML::EndMap;
@@ -125,7 +125,7 @@ namespace MoonEngine
 			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap;
 
-			TransformComponent& component = entity.GetComponent<TransformComponent>();
+			const TransformComponent& component = entity.GetComponent<TransformComponent>();
 			out << YAML::Key << "Position" << YAML::Value << component.Position;
 			out << YAML::Key << "Rotation" << YAML::Value << component.Rotation;
 			out << YAML::Key << "Size" << YAML::Value << component.Size;
@@ -138,8 +138,9 @@ namespace MoonEngine
 			out << YAML::Key << "SpriteComponent";
 			out << YAML::BeginMap;
 
-			SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
+			const SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
+			
 			if (spriteComponent.Texture)
 				out << YAML::Key << "TexturePath" << YAML::Value << spriteComponent.Texture->Filepath;
 			else
@@ -153,7 +154,7 @@ namespace MoonEngine
 			out << YAML::Key << "ParticleComponent";
 			out << YAML::BeginMap;
 
-			ParticleComponent& particleComponent = entity.GetComponent<ParticleComponent>();
+			const ParticleComponent& particleComponent = entity.GetComponent<ParticleComponent>();
 
 			//Lifecycle
 			out << YAML::Key << "Play" << YAML::Value << particleComponent.Play;
@@ -200,7 +201,7 @@ namespace MoonEngine
 			out << YAML::Key << "CameraComponent";
 			out << YAML::BeginMap;
 
-			CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
+			const CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
 
 			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.IsMain;
 			out << YAML::Key << "Distance" << YAML::Value << cameraComponent.Distance;
@@ -222,7 +223,6 @@ namespace MoonEngine
 		m_Scene->m_Registry.each([&](auto entityID)
 		{
 			entites.push_back(entityID);
-
 		});
 
 		for (auto e = entites.end(); e != entites.begin();)
