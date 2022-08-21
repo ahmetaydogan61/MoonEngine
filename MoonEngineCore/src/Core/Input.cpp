@@ -11,6 +11,22 @@ namespace MoonEngine
 		return glfwGetKey(Window::GetWindow(), (int)key);
 	}
 
+	float Input::ScreenX()
+	{
+		double mouseX;
+		glfwGetCursorPos(Window::GetWindow(), &mouseX, nullptr);
+		m_ScreenPos.x = (float)mouseX;
+		return m_ScreenPos.x;
+	}
+
+	float Input::ScreenY()
+	{
+		double mouseY;
+		glfwGetCursorPos(Window::GetWindow(), nullptr, &mouseY);
+		m_ScreenPos.y = (float)mouseY;
+		return m_ScreenPos.y;
+	}
+
 	float Input::GetX()
 	{
 		return m_MouseOrthoPos.x;
@@ -66,11 +82,9 @@ namespace MoonEngine
 	{
 		UpdateMouseKeys();
 	
-		double mouseX, mouseY;
-		glfwGetCursorPos(Window::GetWindow(), &mouseX, &mouseY);
 		glm::mat4 inverseMat = glm::inverse(viewProjection);
-		float x = (2.0f * ((float)(mouseX - viewPortPos.x) / (viewPortSize.x - 0))) - 1.0f;
-		float y = (2.0f * (1.0f - ((float)(mouseY - viewPortPos.y) / (viewPortSize.y - 0)))) - 1.0f;
+		float x = (2.0f * ((m_ScreenPos.x - viewPortPos.x) / (viewPortSize.x - 0))) - 1.0f;
+		float y = (2.0f * (1.0f - ((m_ScreenPos.y - viewPortPos.y) / (viewPortSize.y - 0)))) - 1.0f;
 		m_MouseOrthoPos = glm::vec4(x, y, 0.0f, 1.0f);
 		m_MouseOrthoPos = inverseMat * m_MouseOrthoPos;
 	}

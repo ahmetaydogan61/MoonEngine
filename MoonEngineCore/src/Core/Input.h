@@ -139,6 +139,7 @@ namespace MoonEngine
 		Input() = delete;
 		~Input() = delete;
 		static inline glm::vec4 m_MouseOrthoPos;
+		static inline glm::vec2 m_ScreenPos;
 		static inline bool m_MouseButtons[3];
 		static inline bool m_LastMouseButtons[3];
 
@@ -156,6 +157,8 @@ namespace MoonEngine
 
 		static float GetX();
 		static float GetY();
+		static float ScreenX();
+		static float ScreenY();
 
 		static void SetCursorMode(CursorMode mode);
 	};

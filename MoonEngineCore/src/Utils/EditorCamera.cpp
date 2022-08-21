@@ -64,10 +64,10 @@ namespace MoonEngine
 	void EditorCamera::Update()
 	{
 		//MousePan
-		float deltaX = Input::GetX() - m_MouseLastX;
-		float deltaY = Input::GetY() - m_MouseLastY;
-		m_MouseLastX = Input::GetX();
-		m_MouseLastY = Input::GetY();
+		float deltaX = Input::ScreenX() - m_MouseLastX;
+		float deltaY = Input::ScreenY() - m_MouseLastY;
+		m_MouseLastX = Input::ScreenX();
+		m_MouseLastY = Input::ScreenY();
 
 		float normal_x = deltaX * 2.0f / Window::GetWidth();
 		float normal_y = deltaY * 2.0f / Window::GetHeight();
