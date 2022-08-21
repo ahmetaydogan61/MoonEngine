@@ -29,7 +29,7 @@ namespace MoonEngine
 		void OnRuntimeStop();
 		void OnEditorStart();
 		void OnEditorStop();
-		void UpdateRuntime();
+		void UpdateRuntime(bool isPlaying);
 		void UpdateEditor(const EditorCamera* camera, Entity& entity);
 		void ResizeViewport(float width, float height);
 		

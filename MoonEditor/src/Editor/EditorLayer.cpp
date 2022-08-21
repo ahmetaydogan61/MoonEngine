@@ -20,7 +20,7 @@ namespace MoonEngine
 	void EditorLayer::Create()
 	{
 		LayerName = "Editor Layer";
-		
+
 		m_EditorScene = CreateRef<Scene>();
 		m_Scene = m_EditorScene;
 
@@ -33,12 +33,13 @@ namespace MoonEngine
 		ResourceManager::SetResourceManager(desc);
 
 		m_ViewportFramebuffer = CreateRef<Framebuffer>();
+		m_GameViewFramebuffer = CreateRef<Framebuffer>();
 		m_HierarchyView.SetScene(m_Scene);
 		m_ContentView.SetDirectoryPath(ResourceManager::GetAssetPath());
 		m_EditorSettingsView.SetStyle(EditorStyle::Dark);
-		
+
 		Renderer::SetClearColor(glm::vec4{ 0.1f, 0.1f, 0.1f, 1.0f });
-		
+
 		m_PlayTexture = CreateRef<Texture>("res/EditorIcons/Play.png");
 		m_StopTexture = CreateRef<Texture>("res/EditorIcons/Stop.png");
 		m_SelectTexture = CreateRef<Texture>("res/EditorIcons/Select.png");
@@ -74,101 +75,111 @@ namespace MoonEngine
 		bool control = Input::GetKey(Keycode::LeftControl);
 		bool shift = Input::GetKey(Keycode::LeftShift);
 
-		bool canPress = !m_IsPlaying && !ImGui::IsAnyItemActive() && !shift ;
+		bool canPress = !ImGui::IsAnyItemActive() && !shift;
 
 		switch (e.Key())
 		{
-			case Keycode::Delete:
-			{
+		case Keycode::Delete:
+		{
+			m_HierarchyView.DeleteSelectedEntity();
+			break;
+		}
+		case Keycode::Q:
+		{
+			if (canPress)
+				m_GizmoSelection = GIZMOSELECTION::NONE;
+			break;
+		}
+		case Keycode::W:
+		{
+			if (!control && canPress)
+				m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
+			else if (control)
 				m_HierarchyView.DeleteSelectedEntity();
-				break;
-			}
-			case Keycode::Q:
-			{
-				if (canPress)
-					m_GizmoSelection = GIZMOSELECTION::NONE;
-				break;
-			}
-			case Keycode::W:
-			{
-				if (!control && canPress)
-					m_GizmoSelection = GIZMOSELECTION::TRANSLATE;
-				else if (control)
-					m_HierarchyView.DeleteSelectedEntity();
-				break;
-			}
-			case Keycode::E:
-			{
-				if (canPress)
-					m_GizmoSelection = GIZMOSELECTION::SCALE;
-				break;
-			}
-			case Keycode::R:
-			{
-				if (canPress)
-					m_GizmoSelection = GIZMOSELECTION::RORTATE;
-				break;
-			}
-			case Keycode::D:
-			{
-				if (control)
-					m_HierarchyView.DuplicateSelectedEntity();
-				break;
-			}
-			case Keycode::N:
-			{
-				if (control)
-					NewScene();
-				break;
-			}
-			case Keycode::S:
-			{
-				if (control)
-					if (m_ScenePath.empty())
-						saveDialog.Open();
-					else
-						SaveScene(m_ScenePath);
-				break;
-			}
-			case Keycode::L:
-			{
-				if (control)
-					loadDialog.Open();
-				break;
-			}
-			default:
-				break;
+			break;
+		}
+		case Keycode::E:
+		{
+			if (canPress)
+				m_GizmoSelection = GIZMOSELECTION::SCALE;
+			break;
+		}
+		case Keycode::R:
+		{
+			if (canPress)
+				m_GizmoSelection = GIZMOSELECTION::RORTATE;
+			break;
+		}
+		case Keycode::D:
+		{
+			if (control)
+				m_HierarchyView.DuplicateSelectedEntity();
+			break;
+		}
+		case Keycode::N:
+		{
+			if (control)
+				NewScene();
+			break;
+		}
+		case Keycode::S:
+		{
+			if (control)
+				if (m_ScenePath.empty())
+					saveDialog.Open();
+				else
+					SaveScene(m_ScenePath);
+			break;
+		}
+		case Keycode::L:
+		{
+			if (control)
+				loadDialog.Open();
+			break;
+		}
+		default:
+			break;
 		}
 	}
 
 	void EditorLayer::Update()
 	{
+		//+GameView
+		if (m_GameViewSize.x != m_GameViewFramebuffer->GetWidth() || m_GameViewSize.y != m_GameViewFramebuffer->GetHeight())
+		{
+			m_GameViewFramebuffer->Resize((uint32_t)m_GameViewSize.x, (uint32_t)m_GameViewSize.y);
+		}
+		m_Scene->ResizeViewport(m_GameViewSize.x, m_GameViewSize.y);
+		
+		m_GameViewFramebuffer->Bind();
+		m_Scene->UpdateRuntime(m_IsPlaying);
+		m_GameViewFramebuffer->Unbind();
+		//-GameView
+
+		//+Viewport
 		if (m_ViewportSize.x != m_ViewportFramebuffer->GetWidth() || m_ViewportSize.y != m_ViewportFramebuffer->GetHeight())
 		{
 			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.Resize(m_ViewportSize.x, m_ViewportSize.y);
 		}
 
-		if (!m_IsPlaying)
-		{
-			if (Input::MousePressed(0) && m_ViewportHovered && !ImGuizmo::IsUsing())
-				m_HierarchyView.MouseSelect();
+		if (Input::MousePressed(0) && m_ViewportHovered && !ImGuizmo::IsUsing())
+			m_HierarchyView.MouseSelect();
 
-			if (m_ViewportFocused && !ImGui::IsAnyItemActive())
-				m_EditorCamera.UpdateFocused();
+		if (m_ViewportFocused && !ImGui::IsAnyItemActive())
+			m_EditorCamera.UpdateFocused();
 
-			if (m_ViewportHovered && !ImGui::IsAnyItemActive())
-				m_EditorCamera.UpdateHovered();
-
-			m_EditorCamera.Update();
-			m_IsSnapping = Input::GetKey(Keycode::LeftControl);
-		}
-		else
-			m_Scene->ResizeViewport(m_ViewportSize.x, m_ViewportSize.y);
+		if (m_ViewportHovered && !ImGui::IsAnyItemActive())
+			m_EditorCamera.UpdateHovered();
+	
+		m_EditorCamera.Update();
+	
+		m_IsSnapping = Input::GetKey(Keycode::LeftControl);
 
 		m_ViewportFramebuffer->Bind();
-		m_IsPlaying ? m_Scene->UpdateRuntime() : m_Scene->UpdateEditor(&m_EditorCamera, m_HierarchyView.GetSelectedEntity());
+		m_Scene->UpdateEditor(&m_EditorCamera, m_HierarchyView.GetSelectedEntity());
 		m_ViewportFramebuffer->Unbind();
+		//-Viewport
 	}
 
 	void EditorLayer::OnPlay()
@@ -219,10 +230,11 @@ namespace MoonEngine
 
 	void EditorLayer::DrawGUI()
 	{
-		Dockspace(); //+Dockspace
+		//+Dockspace
+		Dockspace(); 
 
 		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-		
+
 		ImGuiStyle& style = ImGui::GetStyle();
 		float borderSize = style.WindowBorderSize;
 		style.WindowBorderSize = 0;
@@ -254,8 +266,12 @@ namespace MoonEngine
 		if (m_IsViewportActive)
 			ViewportView(m_IsViewportActive);
 
+		if (m_IsGameViewActive)
+			GameView(m_IsGameViewActive);
+
 		Statusbar();
-		ImGui::End(); //-Dockspace
+		ImGui::End();
+		//-Dockspace
 	}
 
 	void EditorLayer::ViewportView(bool& state)
@@ -268,17 +284,14 @@ namespace MoonEngine
 		{
 			m_ViewportPosition.x = ImGui::GetCursorScreenPos().x;
 			m_ViewportPosition.y = ImGui::GetCursorScreenPos().y;
-			
+
 			m_ViewportSize.x = ImGui::GetContentRegionAvail().x;
 			m_ViewportSize.y = ImGui::GetContentRegionAvail().y;
 
 			m_ViewportHovered = ImGui::IsWindowHovered();
 			m_ViewportFocused = ImGui::IsWindowFocused();
 
-			if (!m_IsPlaying)
-				ImGuiLayer::BlockEvent(!m_ViewportHovered);
-			else
-				ImGuiLayer::BlockEvent(true);
+			ImGuiLayer::BlockEvent(!m_ViewportHovered);
 
 			ImGui::Image((void*)m_ViewportFramebuffer->GetTexID(), { m_ViewportSize.x, m_ViewportSize.y }, { 0, 1 }, { 1, 0 });
 
@@ -294,7 +307,7 @@ namespace MoonEngine
 			}
 
 			Entity entity = m_HierarchyView.GetSelectedEntity();
-			if (entity && !m_IsPlaying)
+			if (entity)
 			{
 				//+GizmoSelectorWindow
 				ImGuiStyle& style = ImGui::GetStyle();
@@ -371,6 +384,26 @@ namespace MoonEngine
 		ImGuiLayer::ViewportSize = m_ViewportSize;
 	}
 
+	void EditorLayer::GameView(bool& state)
+	{
+		ImGuiWindowFlags flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (ImGui::Begin(ICON_FK_GAMEPAD "GameView", &state, flags))
+		{
+			m_GameViewPosition.x = ImGui::GetCursorScreenPos().x;
+			m_GameViewPosition.y = ImGui::GetCursorScreenPos().y;
+
+			m_GameViewSize.x = ImGui::GetContentRegionAvail().x;
+			m_GameViewSize.y = ImGui::GetContentRegionAvail().y;
+
+			ImGui::Image((void*)m_GameViewFramebuffer->GetTexID(), { m_GameViewSize.x, m_GameViewSize.y }, { 0, 1 }, { 1, 0 });
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
 	void EditorLayer::Menubar()
 	{
 		saveDialog.Display();
@@ -390,6 +423,7 @@ namespace MoonEngine
 			loadDialog.ClearSelected();
 		}
 
+		//+Menubar
 		ImGui::BeginMainMenuBar();
 		{
 			if (ImGui::BeginMenu("File"))
@@ -410,6 +444,9 @@ namespace MoonEngine
 			{
 				if (ImGui::MenuItem("Viewport", " ", m_IsViewportActive, true))
 					m_IsViewportActive = !m_IsViewportActive;
+				
+				if (ImGui::MenuItem("GameView", " ", m_IsGameViewActive, true))
+					m_IsGameViewActive = !m_IsGameViewActive;
 
 				if (ImGui::MenuItem("Hierarchy", " ", m_IsHierarchyActive, true))
 					m_IsHierarchyActive = !m_IsHierarchyActive;
@@ -428,10 +465,11 @@ namespace MoonEngine
 #ifdef ENGINE_DEBUG
 				if (ImGui::MenuItem("Demo Window", " ", demoWindow, true))
 					demoWindow = !demoWindow;
-#endif // ENGINE_DEBUG
+#endif //ENGINE_DEBUG
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
+			//+Menubar
 		}
 	}
 
@@ -508,7 +546,7 @@ namespace MoonEngine
 		ImGui::Text("FPS: %.1f FPS (%.2f ms/frame) ", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 		ImGui::Text("Drawcalls: %d", Renderer::GetRenderData().DrawCalls);
 		ImGui::Text("QuadCounts: %d", Renderer::GetRenderData().QuadCount);
-		
+
 		ImGuiUtils::SeparatorDistanced(5.0f);
 
 		ImGui::Text("Mouse X: %.1f, Mouse Y: %.1f", Input::GetX(), Input::GetY());

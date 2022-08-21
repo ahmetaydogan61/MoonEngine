@@ -53,79 +53,116 @@ namespace MoonEngine
 		}
 	}
 
-	void Scene::UpdateRuntime()
+	void Scene::UpdateRuntime(bool isPlaying)
 	{
-		m_Registry.view<ScriptComponent>().each([=](auto entity, auto& nsc)
+		if (isPlaying)
 		{
-			if (!nsc.Instance)
-			{
-				nsc.Instance = nsc.InstantiateScript();
-				nsc.Instance->m_Entity = Entity(entity, this);
-				nsc.Instance->Awake();
-			}
-			nsc.Instance->Update();
-		});
-
-		Camera* sceneCamera = nullptr;
-		glm::vec3 cameraPosition;
-
-		auto cameras = m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto entity : cameras)
-		{
-			auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
-			if (camera.IsMain)
-			{
-				sceneCamera = &camera.Camera;
-				cameraPosition = transform.Position;
-				break;
-			}
-		}
-
-		glm::mat4 viewProjection;
-		if (sceneCamera)
-		{
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
-			glm::mat4 m_View = glm::inverse(transform);
-			viewProjection = sceneCamera->GetProjection() * m_View;
-		}
-		Renderer::Begin(viewProjection);
-		float deltaTime = Time::DeltaTime();
-
-		{//+Particle System
-			auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
-			for (auto entity : particleGroup)
-			{
-				auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
-				if (particle.Play)
+			m_Registry.view<ScriptComponent>().each([=](auto entity, auto& nsc)
 				{
-					if (particle.m_DurationElapsed == 0 && particle.BurstMode)
-						particle.Spawn(particle, transform.Position);
-					else if (!particle.BurstMode)
-						particle.Spawn(particle, transform.Position);
-
-					particle.m_DurationElapsed += deltaTime;
-					if (particle.m_DurationElapsed >= particle.Duration)
+					if (!nsc.Instance)
 					{
-						particle.m_DurationElapsed = 0.0f;
-						particle.Play = particle.AutoPlay;
+						nsc.Instance = nsc.InstantiateScript();
+						nsc.Instance->m_Entity = Entity(entity, this);
+						nsc.Instance->Awake();
 					}
-				}
-				else
-					particle.m_DurationElapsed = 0.0f;
+					nsc.Instance->Update();
+				});
 
-				particle.Update();
-			}
-		}//-Particle System
+			Camera* sceneCamera = nullptr;
+			glm::vec3 cameraPosition;
 
-		{//+Sprite Rendering
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
-			for (auto entity : group)
+			auto cameras = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : cameras)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-				Renderer::DrawQuad(transform.Position, transform.Size, transform.Rotation, sprite.Color, sprite.Texture);
+				auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
+				if (camera.IsMain)
+				{
+					sceneCamera = &camera.Camera;
+					cameraPosition = transform.Position;
+					break;
+				}
 			}
-		}//-Sprite Rendering
-		Renderer::End();
+
+			glm::mat4 viewProjection;
+			if (sceneCamera)
+			{
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
+				glm::mat4 m_View = glm::inverse(transform);
+				viewProjection = sceneCamera->GetProjection() * m_View;
+			}
+			Renderer::Begin(viewProjection);
+			float deltaTime = Time::DeltaTime();
+
+			{//+Particle System
+				auto particleGroup = m_Registry.group<ParticleComponent>(entt::get<TransformComponent>);
+				for (auto entity : particleGroup)
+				{
+					auto [particle, transform] = particleGroup.get<ParticleComponent, TransformComponent>(entity);
+					if (particle.Play)
+					{
+						if (particle.m_DurationElapsed == 0 && particle.BurstMode)
+							particle.Spawn(particle, transform.Position);
+						else if (!particle.BurstMode)
+							particle.Spawn(particle, transform.Position);
+
+						particle.m_DurationElapsed += deltaTime;
+						if (particle.m_DurationElapsed >= particle.Duration)
+						{
+							particle.m_DurationElapsed = 0.0f;
+							particle.Play = particle.AutoPlay;
+						}
+					}
+					else
+						particle.m_DurationElapsed = 0.0f;
+
+					particle.Update();
+				}
+			}//-Particle System
+
+			{//+Sprite Rendering
+				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+				for (auto entity : group)
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+					Renderer::DrawQuad(transform.Position, transform.Size, transform.Rotation, sprite.Color, sprite.Texture);
+				}
+			}//-Sprite Rendering
+			Renderer::End();
+		}
+		else
+		{
+			Camera* sceneCamera = nullptr;
+			glm::vec3 cameraPosition;
+
+			auto cameras = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : cameras)
+			{
+				auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
+				if (camera.IsMain)
+				{
+					sceneCamera = &camera.Camera;
+					cameraPosition = transform.Position;
+					break;
+				}
+			}
+
+			glm::mat4 viewProjection;
+			if (sceneCamera)
+			{
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(cameraPosition.x, cameraPosition.y, 0.0f));
+				glm::mat4 m_View = glm::inverse(transform);
+				viewProjection = sceneCamera->GetProjection() * m_View;
+
+				Renderer::Begin(viewProjection);
+				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+				for (auto entity : group)
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+					Renderer::DrawQuad(transform.Position, transform.Size, transform.Rotation, sprite.Color, sprite.Texture);
+				}
+				Renderer::End();
+			}
+		}
 	}
 
 	void Scene::ResizeViewport(float width, float height)
@@ -155,9 +192,9 @@ namespace MoonEngine
 
 		std::vector<entt::entity> entites;
 		scene->m_Registry.each([&](auto entityID)
-		{
-			entites.push_back(entityID);
-		});
+			{
+				entites.push_back(entityID);
+			});
 
 		for (auto e = entites.end(); e != entites.begin();)
 		{

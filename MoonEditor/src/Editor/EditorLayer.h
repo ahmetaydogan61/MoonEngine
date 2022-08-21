@@ -39,6 +39,7 @@ namespace MoonEngine
 		bool m_IsHierarchyActive = true;
 		bool m_IsInspectorActive = true;
 		bool m_IsViewportActive = true;
+		bool m_IsGameViewActive = true;
 		bool m_IsContentActive = true;
 		bool m_IsEditorSettingsActive = false;
 		bool m_IsDebugActive = true;
@@ -48,11 +49,15 @@ namespace MoonEngine
 		void Sidemenubar();
 		void Statusbar();
 		void ViewportView(bool& state);
+		void GameView(bool& state);
 		void DebugView(bool& state);
 		
 		Ref<Framebuffer> m_ViewportFramebuffer = nullptr;
+		Ref<Framebuffer> m_GameViewFramebuffer = nullptr;
 		glm::vec2 m_ViewportPosition;
 		glm::vec2 m_ViewportSize;
+		glm::vec2 m_GameViewPosition;
+		glm::vec2 m_GameViewSize;
 		bool m_ViewportHovered = false;
 		bool m_ViewportFocused = false;
 
