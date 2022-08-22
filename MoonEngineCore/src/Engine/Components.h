@@ -91,6 +91,7 @@ namespace MoonEngine
 	private:
 		ParticleSystem m_ParticleSystem;
 		float m_DurationElapsed = 0.0f;
+
 		friend class Scene;
 	public:
 		ParticleComponent()

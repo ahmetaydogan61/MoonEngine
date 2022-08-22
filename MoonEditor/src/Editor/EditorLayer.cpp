@@ -55,6 +55,8 @@ namespace MoonEngine
 		loadDialog.SetTitle("Load Scene");
 		loadDialog.SetTypeFilters({ ".moon" });
 		loadDialog.SetPwd(ResourceManager::GetAssetPath());
+
+		m_Scene->OnEditorStart();
 	}
 
 	void EditorLayer::OnEvent(Event& event)
@@ -390,7 +392,7 @@ namespace MoonEngine
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGuiIO& io = ImGui::GetIO();
 
-		if (ImGui::Begin(ICON_FK_GAMEPAD "GameView", &state, flags))
+		if (ImGui::Begin(ICON_FK_GAMEPAD "Game View", &state, flags))
 		{
 			m_GameViewPosition.x = ImGui::GetCursorScreenPos().x;
 			m_GameViewPosition.y = ImGui::GetCursorScreenPos().y;
@@ -445,7 +447,7 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Viewport", " ", m_IsViewportActive, true))
 					m_IsViewportActive = !m_IsViewportActive;
 				
-				if (ImGui::MenuItem("GameView", " ", m_IsGameViewActive, true))
+				if (ImGui::MenuItem("Game View", " ", m_IsGameViewActive, true))
 					m_IsGameViewActive = !m_IsGameViewActive;
 
 				if (ImGui::MenuItem("Hierarchy", " ", m_IsHierarchyActive, true))
