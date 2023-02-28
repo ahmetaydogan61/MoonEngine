@@ -1,0 +1,13 @@
+Scene: NewScene
+Entities:
+  - Entity: c3694ac2-4ceb-46a1-a56d-53cc5a78b939
+    IdentityComponent:
+      Name: Entity
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      TexturePath: "null"
