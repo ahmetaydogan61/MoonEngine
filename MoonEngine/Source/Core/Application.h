@@ -50,6 +50,7 @@ namespace MoonEngine
 		void PushLayer(const Shared<ApplicationLayer>& layer) { m_ApplicationLayers.push_back(layer); }
 		void PopLayer(const Shared<ApplicationLayer>& layer) { m_ApplicationLayers.erase(std::find(m_ApplicationLayers.begin(), m_ApplicationLayers.end(), layer)); }
 
+		static void Quit() { s_Instance->m_IsRunning = false; }
 		static bool IsRunning() { return s_Instance && s_Instance->m_IsRunning; }
 		static Application* GetApp() { return s_Instance; }
 		static ApplicationPrefs& GetPrefs() { return s_Instance->m_Prefs; }

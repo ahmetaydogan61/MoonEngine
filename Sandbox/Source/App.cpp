@@ -11,13 +11,9 @@ using namespace MoonEngine;
 class SandboxLayer : public ApplicationLayer
 {
 public:
-	SandboxLayer()
-	{
-		m_Renderer = MakeShared<Renderer>();
-	}
+	SandboxLayer() {}
 	~SandboxLayer() = default;
 
-	Shared<Renderer> m_Renderer;
 	ImGui::ImGuiFileBrowser dialog;
 
 	void Init()
@@ -30,17 +26,29 @@ public:
 			.RootDirectory = "Resource/Assets",
 			.Extensions = {".moonscn" }
 		};
+
+		Renderer::Init();
 	}
 
 	void Update()
 	{
-		m_Renderer->Clear();
+		//m_Renderer->Clear();
+		if (!dialog.IsActive() && Input::GetMouseButtonDown(2));
+			//dialog.OpenFileBrowser();
 
-		if (!dialog.IsActive() && Input::GetMouseButtonDown(2))
-			dialog.OpenFileBrowser();
+		static bool term = true;
+		if ( Input::GetMouseButtonDown(2))
+		{
+			//dialog.CloseFileBrowser();
+			term = false;
 
-		if (dialog.IsActive() && Input::GetMouseButtonDown(2))
-			dialog.CloseFileBrowser();
+		}
+
+		if (!term)
+		{
+			Renderer::Terminate();
+			term = true;
+		}
 
 	}
 

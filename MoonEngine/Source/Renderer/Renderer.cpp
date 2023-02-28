@@ -13,6 +13,22 @@
 
 namespace MoonEngine
 {
+	bool Renderer::m_RendererInitialized = false;
+	
+	uint32_t Renderer::m_VertexArray = 0;
+	uint32_t Renderer::m_VertexBuffer = 0;
+	uint32_t Renderer::m_IndexBuffer = 0;
+	uint32_t Renderer::m_VertexIndex = 0;
+	Vertex* Renderer::m_Vertices = nullptr;
+	
+	Shared<Shader> Renderer::m_Shader = nullptr;
+	Shared<Texture> Renderer::m_DefaultTexture = nullptr;
+	RendererData Renderer::m_RendererData = {};
+
+	uint32_t Renderer::m_TextureIndex = 0;
+	int32_t Renderer::m_TextureIds[32];
+	std::unordered_map<Shared<Texture>, int32_t> Renderer::m_TextureCache;
+
 	const glm::vec4 VertexPositions[4] =
 	{
 		{ -0.5f, -0.5f, 0.0f, 1.0f },
@@ -29,7 +45,7 @@ namespace MoonEngine
 		{ 0.0f, 1.0f }
 	};
 
-	Renderer::Renderer()
+	void Renderer::Init()
 	{
 		m_Shader = MakeShared<Shader>("Resource/Shaders/Default.shader");
 		m_DefaultTexture = MakeShared<Texture>();
@@ -243,6 +259,10 @@ namespace MoonEngine
 
 	void Renderer::Terminate()
 	{
+		glDeleteVertexArrays(1, &m_VertexArray);
+		glDeleteBuffers(1, &m_VertexBuffer);
+		glDeleteBuffers(1, &m_IndexBuffer);
+
 		delete[] m_Vertices;
 		m_TextureIndex = 0;
 		m_VertexIndex = 0;

@@ -52,7 +52,6 @@ namespace MoonEngine
 		m_StopTexture = MakeShared<Texture>("Resource/EditorIcons/Stop.png");
 		m_PauseTexture = MakeShared<Texture>("Resource/EditorIcons/Pause.png");
 
-		m_Renderer = MakeShared<Renderer>();
 		m_AssetsView = MakeShared<AssetsView>("Resource/Assets");
 
 		//+ Events Initilization
@@ -83,6 +82,7 @@ namespace MoonEngine
 		}
 		//+GameView Initiization
 
+		Renderer::Init();
 		NewScene();
 	}
 
@@ -103,18 +103,18 @@ namespace MoonEngine
 			//+Render Viewport
 			m_ViewportFbo->Bind();
 
-			m_Renderer->SetRenderData(m_EditorCamera.GetViewProjection());
-			m_Renderer->SetClearColor({ 0.1f, 0.1f, 0.1f });
-			m_Renderer->Begin();
+			Renderer::SetRenderData(m_EditorCamera.GetViewProjection());
+			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
+			Renderer::Begin();
 			m_ViewportFbo->ClearColorAttachment(1, (void*)-1);
 
 			auto view = m_Scene->m_Registry.view<const TransformComponent, const SpriteComponent>();
 			for (auto [entity, transform, sprite] : view.each())
 			{
-				m_Renderer->DrawEntity(transform, sprite, (int)entity);
+				Renderer::DrawEntity(transform, sprite, (int)entity);
 			}
 
-			m_Renderer->End();
+			Renderer::End();
 
 			//+MousePicking
 			{
@@ -182,17 +182,17 @@ namespace MoonEngine
 			//+Render Game
 			m_GameFbo->Bind();
 
-			m_Renderer->SetRenderData(viewProjection);
-			m_Renderer->SetClearColor({ 0.1f, 0.1f, 0.1f });
-			m_Renderer->Begin();
+			Renderer::SetRenderData(viewProjection);
+			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
+			Renderer::Begin();
 
 			auto view = m_Scene->m_Registry.view<const TransformComponent, const SpriteComponent>();
 			for (auto [entity, transform, sprite] : view.each())
 			{
-				m_Renderer->DrawEntity(transform, sprite, (int)entity);
+				Renderer::DrawEntity(transform, sprite, (int)entity);
 			}
 
-			m_Renderer->End();
+			Renderer::End();
 			m_GameFbo->Unbind();
 			//-Render Game
 		}
@@ -420,17 +420,14 @@ namespace MoonEngine
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
 
-		if (m_Renderer)
-		{
-			const auto& renderData = m_Renderer->GetRendererData();
-			ImGui::Text("Viewport Renderer Data");
-			ImGui::Text("Draw Calls: %d", renderData.DrawCalls);
-			ImGui::Text("Vertex Count: %d", renderData.VertexCount);
-			ImGui::Text("Quad Count: %d", renderData.QuadCount);
+		const auto& renderData = Renderer::GetRendererData();
+		ImGui::Text("Viewport Renderer Data");
+		ImGui::Text("Draw Calls: %d", renderData.DrawCalls);
+		ImGui::Text("Vertex Count: %d", renderData.VertexCount);
+		ImGui::Text("Quad Count: %d", renderData.QuadCount);
 
-			ImGui::Separator();
-			ImGuiUtils::AddPadding(0.0f, 10.0f);
-		}
+		ImGui::Separator();
+		ImGuiUtils::AddPadding(0.0f, 10.0f);
 
 		ImGui::Text("GameView State");
 		ImGui::Text("Hovered: %d ", m_GameViewData.ViewportHovered);
@@ -440,18 +437,6 @@ namespace MoonEngine
 
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
-
-		if (m_Renderer)
-		{
-			const auto& renderData = m_Renderer->GetRendererData();
-			ImGui::Text("Game Renderer Data");
-			ImGui::Text("Draw Calls: %d", renderData.DrawCalls);
-			ImGui::Text("Vertex Count: %d", renderData.VertexCount);
-			ImGui::Text("Quad Count: %d", renderData.QuadCount);
-
-			ImGui::Separator();
-			ImGuiUtils::AddPadding(0.0f, 10.0f);
-		}
 
 		ApplicationPrefs& prefs = Application::GetPrefs();
 		ImGui::Text("Application Prefs");

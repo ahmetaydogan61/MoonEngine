@@ -10,7 +10,6 @@
 namespace MoonEngine
 {
 	class Framebuffer;
-	class Renderer;
 	class Scene;
 
 	enum class GIZMOSELECTION
@@ -51,7 +50,6 @@ namespace MoonEngine
 	private:
 		EditorState m_EditorState = EditorState::Edit;
 		Shared<Texture> m_PlayTexture, m_StopTexture, m_PauseTexture;
-		Shared<Renderer> m_Renderer;
 
 		Shared<Scene> m_Scene, m_EditorScene;
 		Entity m_SelectedEntity;

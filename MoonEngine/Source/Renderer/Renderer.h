@@ -44,50 +44,52 @@ namespace MoonEngine
 	class Renderer
 	{
 	private:
-		bool m_RendererInitialized = false;
-		uint32_t m_VertexArray = 0;
-		uint32_t m_VertexBuffer = 0;
-		uint32_t m_IndexBuffer = 0;
-		uint32_t m_VertexIndex = 0;
-		Vertex* m_Vertices = nullptr;
-
-		Shared<Shader> m_Shader = nullptr;
-		Shared<Texture> m_DefaultTexture = nullptr;
-		RendererData m_RendererData = {};
-
-		uint32_t m_TextureIndex = 0;
-		int32_t m_TextureIds[32];
-		std::unordered_map<Shared<Texture>, int32_t> m_TextureCache;
-
-		int32_t GetTextureFromCache(const Shared<Texture>& texture);
-	public:
-		Renderer();
+		Renderer() = delete;
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) = delete;
-		~Renderer() = default;
+		~Renderer() = delete;
+		
+		static bool m_RendererInitialized;
 
-		void Terminate();
+		static uint32_t m_VertexArray;
+		static uint32_t m_VertexBuffer;
+		static uint32_t m_IndexBuffer;
+		static uint32_t m_VertexIndex;
+		static Vertex* m_Vertices;
 
-		void SetRenderData(const glm::mat4& viewProjection);
-		void SetRenderMode(RenderMode renderMode);
-		void SetClearColor(const glm::vec3& color);
+		static Shared<Shader> m_Shader;
+		static Shared<Texture> m_DefaultTexture;
+		static RendererData m_RendererData;
 
-		void Clear();
-		void Begin();
-		void Render();
-		void End();
+		static uint32_t m_TextureIndex;
+		static int32_t m_TextureIds[32];
+		static std::unordered_map<Shared<Texture>, int32_t> m_TextureCache;
 
-		void DrawQuad(const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
+		static int32_t GetTextureFromCache(const Shared<Texture>& texture);
+	public:
+		static void Init();
+		static void Terminate();
+
+		static void SetRenderData(const glm::mat4& viewProjection);
+		static void SetRenderMode(RenderMode renderMode);
+		static void SetClearColor(const glm::vec3& color);
+
+		static void Clear();
+		static void Begin();
+		static void Render();
+		static void End();
+
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
 					  const Shared<Texture>& texture = 0, const glm::vec4& color = glm::vec4(1.0f), const glm::vec2& tiling = glm::vec2(1.0f));
-		void DrawQuad(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f),
+		static void DrawQuad(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f),
 					  const glm::vec2& tiling = glm::vec2(1.0f));
 
-		void DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId = -1);
-		void DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId = -1);
-		void DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color,
+		static void DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId = -1);
+		static void DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId = -1);
+		static void DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color,
 					  const glm::vec2& tiling, int entityId);
 
-		const RendererData& GetRendererData() { return m_RendererData; }
-		glm::vec3& GetClearColor() { return m_RendererData.ClearColor; }
+		static RendererData& GetRendererData(){ return m_RendererData; }
+		static const glm::vec3& GetClearColor() { return m_RendererData.ClearColor; }
 	};
 }
