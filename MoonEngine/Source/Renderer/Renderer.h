@@ -49,21 +49,21 @@ namespace MoonEngine
 		Renderer(Renderer&&) = delete;
 		~Renderer() = delete;
 		
-		static bool m_RendererInitialized;
+		static bool s_RendererInitialized;
 
-		static uint32_t m_VertexArray;
-		static uint32_t m_VertexBuffer;
-		static uint32_t m_IndexBuffer;
-		static uint32_t m_VertexIndex;
-		static Vertex* m_Vertices;
+		static uint32_t s_VertexArray;
+		static uint32_t s_VertexBuffer;
+		static uint32_t s_IndexBuffer;
+		static uint32_t s_VertexIndex;
+		static Vertex* s_Vertices;
 
-		static Shared<Shader> m_Shader;
-		static Shared<Texture> m_DefaultTexture;
-		static RendererData m_RendererData;
+		static Shared<Shader> s_Shader;
+		static Shared<Texture> s_DefaultTexture;
+		static RendererData s_RendererData;
 
-		static uint32_t m_TextureIndex;
-		static int32_t m_TextureIds[32];
-		static std::unordered_map<Shared<Texture>, int32_t> m_TextureCache;
+		static uint32_t s_TextureIndex;
+		static int32_t s_TextureIds[32];
+		static std::unordered_map<Shared<Texture>, int32_t> s_TextureCache;
 
 		static int32_t GetTextureFromCache(const Shared<Texture>& texture);
 	public:
@@ -89,7 +89,7 @@ namespace MoonEngine
 		static void DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color,
 					  const glm::vec2& tiling, int entityId);
 
-		static RendererData& GetRendererData(){ return m_RendererData; }
-		static const glm::vec3& GetClearColor() { return m_RendererData.ClearColor; }
+		static RendererData& GetRendererData(){ return s_RendererData; }
+		static const glm::vec3& GetClearColor() { return s_RendererData.ClearColor; }
 	};
 }

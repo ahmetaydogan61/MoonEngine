@@ -27,8 +27,7 @@ namespace MoonEngine
 
 	uint32_t Renderer::s_TextureIndex = 0;
 	int32_t Renderer::s_TextureIds[32];
-	std::unordered_map<Shared<Texture>, int32_t> Renderer::s_TextureCache
-		;
+	std::unordered_map<Shared<Texture>, int32_t> Renderer::s_TextureCache;
 
 	const glm::vec4 VertexPositions[4] =
 	{
