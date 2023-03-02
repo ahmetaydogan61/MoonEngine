@@ -50,6 +50,7 @@ namespace MoonEngine
 	private:
 		EditorState m_EditorState = EditorState::Edit;
 		Shared<Texture> m_PlayTexture, m_StopTexture, m_PauseTexture;
+		Shared<Texture> m_SelectTexture, m_TranslateTexture, m_ResizeTexture, m_RotateTexture;
 
 		Shared<Scene> m_Scene, m_EditorScene;
 		Entity m_SelectedEntity;
@@ -65,7 +66,9 @@ namespace MoonEngine
 		CameraController m_EditorCameraController;
 
 		bool m_ShowViewport = true;
+		bool m_ShowOverlay = true;
 		void Viewport(bool& render);
+		void Overlay();
 		//-Viewport Stuff
 
 		//+GameView Stuff

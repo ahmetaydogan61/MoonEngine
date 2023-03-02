@@ -54,6 +54,11 @@ namespace MoonEngine
 		m_StopTexture = MakeShared<Texture>("Resource/EditorIcons/Stop.png");
 		m_PauseTexture = MakeShared<Texture>("Resource/EditorIcons/Pause.png");
 
+		m_SelectTexture = MakeShared<Texture>("Resource/EditorIcons/Select.png");
+		m_TranslateTexture = MakeShared<Texture>("Resource/EditorIcons/Translate.png");
+		m_ResizeTexture = MakeShared<Texture>("Resource/EditorIcons/Resize.png");
+		m_RotateTexture = MakeShared<Texture>("Resource/EditorIcons/Rotate.png");
+
 		m_AssetsView = MakeShared<AssetsView>("Resource/Assets");
 
 		//+ Events Initilization
@@ -103,6 +108,8 @@ namespace MoonEngine
 			}
 
 			m_EditorCameraController.Update(m_ViewportData.ViewportFocused, m_ViewportData.ViewportHovered);
+
+			m_GizmosData.IsSnapping = Input::GetKey(Keycode::LeftControl);
 
 			//+Render Viewport
 			m_ViewportFbo->Bind();
@@ -239,7 +246,7 @@ namespace MoonEngine
 
 	void EditorLayer::KeyEvents(KeyPressEvent& e)
 	{
-		if (e.IsRepeat())
+		if (e.IsRepeat() || ImGui::GetIO().WantTextInput)
 			return;
 
 		bool control = Input::GetKey(Keycode::LeftControl);
@@ -274,6 +281,26 @@ namespace MoonEngine
 			{
 				if (control)
 					loadDialog.OpenFileBrowser();
+				break;
+			}
+			case Keycode::Q:
+			{
+				m_GizmosData.GizmoSelection = GIZMOSELECTION::NONE;
+				break;
+			}
+			case Keycode::W:
+			{
+				m_GizmosData.GizmoSelection = GIZMOSELECTION::TRANSLATE;
+				break;
+			}
+			case Keycode::E:
+			{
+				m_GizmosData.GizmoSelection = GIZMOSELECTION::SCALE;
+				break;
+			}
+			case Keycode::R:
+			{
+				m_GizmosData.GizmoSelection = GIZMOSELECTION::RORTATE;
 				break;
 			}
 		}
@@ -335,6 +362,36 @@ namespace MoonEngine
 		ImGui::End();
 	}
 
+	void EditorLayer::Overlay()
+	{
+		if (!m_ShowOverlay)
+			return;
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing;
+
+		float buttonSize = 25.0f;
+		auto& gizmoSelection = m_GizmosData.GizmoSelection;
+
+		if (ImGui::Begin("Overlay", &m_ShowOverlay, window_flags))
+		{
+			ImGuiUtils::AddPadding(0.0f, buttonSize);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)m_SelectTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::NONE == gizmoSelection))
+				gizmoSelection = GIZMOSELECTION::NONE;
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)m_TranslateTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == gizmoSelection))
+				gizmoSelection = GIZMOSELECTION::TRANSLATE;
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)m_ResizeTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::SCALE == gizmoSelection))
+				gizmoSelection = GIZMOSELECTION::SCALE;
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)m_RotateTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::RORTATE == gizmoSelection))
+				gizmoSelection = GIZMOSELECTION::RORTATE;
+		}
+		ImGui::End();
+	}
+
 	void EditorLayer::Viewport(bool& render)
 	{
 		if (!render)
@@ -358,7 +415,7 @@ namespace MoonEngine
 		m_ViewportData.ViewportPosition.x = viewportPos.x;
 		m_ViewportData.ViewportPosition.y = viewportPos.y;
 
-		//Overlay(render);
+		Overlay();
 
 		ImGui::Image((void*)m_ViewportFbo->GetTexID(), { viewportSize.x, viewportSize.y }, { 0, 1 }, { 1, 0 });
 
@@ -533,6 +590,9 @@ namespace MoonEngine
 				if (ImGui::MenuItem("Inspector", " ", m_ShowInspector, true))
 					m_ShowInspector = !m_ShowInspector;
 
+				if (ImGui::MenuItem("Overlay", " ", m_ShowOverlay, true))
+					m_ShowOverlay = !m_ShowOverlay;
+
 				ImGui::EndMenu();
 			}
 
@@ -546,7 +606,7 @@ namespace MoonEngine
 
 	void EditorLayer::SubMenubar()
 	{
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoNav;
 		float height = ImGui::GetFrameHeight();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
@@ -557,12 +617,26 @@ namespace MoonEngine
 			{
 				float buttonSize = height * 0.5f;
 
-				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x * 0.5f) - (buttonSize * 0.5f), 0.0f);
-
 				bool isEditing = m_EditorState == EditorState::Edit;
 				Shared<Texture> icon = isEditing ? m_PlayTexture : m_PauseTexture;
 
-				if (ImGuiUtils::ButtonSelectable((ImTextureID)icon->GetTextureId(), buttonSize, height * 0.5f, m_EditorState == EditorState::Pause))
+				auto& gizmoSelection = m_GizmosData.GizmoSelection;
+
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_SelectTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::NONE == gizmoSelection))
+					gizmoSelection = GIZMOSELECTION::NONE;
+
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_TranslateTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::TRANSLATE == gizmoSelection))
+					gizmoSelection = GIZMOSELECTION::TRANSLATE;
+
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_ResizeTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::SCALE == gizmoSelection))
+					gizmoSelection = GIZMOSELECTION::SCALE;
+
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)m_RotateTexture->GetTextureId(), buttonSize, buttonSize, GIZMOSELECTION::RORTATE == gizmoSelection))
+					gizmoSelection = GIZMOSELECTION::RORTATE;
+
+				ImGuiUtils::AddPadding((ImGui::GetContentRegionAvail().x * 0.5f) - (buttonSize * 0.5f), 0.0f);
+
+				if (ImGuiUtils::ButtonSelectable((ImTextureID)icon->GetTextureId(), buttonSize, buttonSize, m_EditorState == EditorState::Pause))
 				{
 					if (m_EditorState == EditorState::Edit)
 					{
@@ -596,7 +670,7 @@ namespace MoonEngine
 
 	void EditorLayer::Statusbar()
 	{
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoNav;
 		float height = ImGui::GetFrameHeight();
 
 		if (ImGui::BeginViewportSideBar("##Statusbar", NULL, ImGuiDir_Down, height, window_flags))
@@ -620,7 +694,7 @@ namespace MoonEngine
 		static bool opt_padding = false;
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNav;
 		if (opt_fullscreen)
 		{
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
