@@ -11,6 +11,8 @@
 
 namespace MoonEngine
 {
+	Shared<Texture> cameraTexture;
+
 	ImFont* font16;
 	ImFont* font24;
 
@@ -84,6 +86,8 @@ namespace MoonEngine
 
 		Renderer::Init();
 		NewScene();
+
+		cameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
 	}
 
 	void EditorLayer::Update()
@@ -115,17 +119,40 @@ namespace MoonEngine
 			}
 
 			Renderer::End();
-			Renderer::SetRenderMode(RenderMode::Wireframe);
-			Renderer::SetLineWidth(5.0f);
 
-			if (m_SelectedEntity)
+			Renderer::SetLineWidth(2.0f);
+
+			auto cameraView = m_Scene->m_Registry.view<const TransformComponent, const CameraComponent>();
+			for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
 			{
-				TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
-				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Scale, 0, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
+				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* rotationMat * glm::scale(glm::mat4(1.0f), glm::vec3(cameraComponent.Size * 2.0f, cameraComponent.Size * 2.0f, 0.0f));
+
+				Renderer::DrawRect(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, (int)entity);
+
+				transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+
+				Renderer::DrawEntity(transform, cameraTexture, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, (int)entity);
 			}
 
 			Renderer::End();
-			Renderer::SetRenderMode(RenderMode::Solid);
+
+			Renderer::SetLineWidth(3.0f);
+
+			if (m_SelectedEntity)
+			{
+				TransformComponent& transformComponent = m_SelectedEntity.GetComponent<TransformComponent>();
+				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
+
+				if (!m_SelectedEntity.HasComponent<CameraComponent>())
+					Renderer::DrawRect(transform, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
+			}
+
+			Renderer::End();
 
 			//+MousePicking
 			{
