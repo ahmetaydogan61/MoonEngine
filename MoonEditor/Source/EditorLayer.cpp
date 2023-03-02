@@ -34,7 +34,7 @@ namespace MoonEngine
 		{
 			.Label = "Load Scene",
 			.Flags = ImGuiFileBrowserFlags_CloseWithEsc | ImGuiFileBrowserFlags_SelectFiles | ImGuiFileBrowserFlags_DoubleClickOkay
-			| ImGuiFileBrowserFlags_ResetSelected | ImGuiFileBrowserFlags_SelectDirectories | ImGuiFileBrowserFlags_AllowRename,
+			| ImGuiFileBrowserFlags_ResetSelected | ImGuiFileBrowserFlags_SelectDirectories | ImGuiFileBrowserFlags_AllowRename | ImGuiFileBrowserFlags_AllowDelete,
 			.StartDirectory = "Resource/Assets/Scenes",
 			.RootDirectory = "Resource/Assets"
 		};
@@ -115,6 +115,17 @@ namespace MoonEngine
 			}
 
 			Renderer::End();
+			Renderer::SetRenderMode(RenderMode::Wireframe);
+			Renderer::SetLineWidth(5.0f);
+
+			if (m_SelectedEntity)
+			{
+				TransformComponent& transform = m_SelectedEntity.GetComponent<TransformComponent>();
+				Renderer::DrawQuad(transform.Position, transform.Rotation, transform.Scale, 0, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
+			}
+
+			Renderer::End();
+			Renderer::SetRenderMode(RenderMode::Solid);
 
 			//+MousePicking
 			{
@@ -136,8 +147,8 @@ namespace MoonEngine
 							m_SelectedEntity = pixelData == -1 ? Entity{} : Entity{ (entt::entity)pixelData, m_Scene.get() };
 					}
 				}
-			}
-			//-MousePicking
+			}//-MousePicking
+
 
 			m_ViewportFbo->Unbind();
 			//-Render Viewport
@@ -218,7 +229,6 @@ namespace MoonEngine
 			{
 				if (control)
 					DuplicateSelectedEntity();
-
 				break;
 			}
 			case Keycode::N:
@@ -251,6 +261,7 @@ namespace MoonEngine
 		m_EditorScene = MakeShared<Scene>();
 		m_Scene = m_EditorScene;
 		m_Scene->StartEdit();
+		m_SelectedEntity = {};
 		m_HierarchyView.SetScene(m_Scene);
 	}
 
@@ -420,11 +431,11 @@ namespace MoonEngine
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
 
-		const auto& renderData = Renderer::GetRendererData();
+		const auto& renderStats = Renderer::GetStats();
 		ImGui::Text("Viewport Renderer Data");
-		ImGui::Text("Draw Calls: %d", renderData.DrawCalls);
-		ImGui::Text("Vertex Count: %d", renderData.VertexCount);
-		ImGui::Text("Quad Count: %d", renderData.QuadCount);
+		ImGui::Text("Draw Calls: %d", renderStats.DrawCalls);
+		ImGui::Text("Vertex Count: %d", renderStats.VertexCount);
+		ImGui::Text("Quad Count: %d", renderStats.QuadCount);
 
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
@@ -461,7 +472,13 @@ namespace MoonEngine
 		{
 			if (ImGui::BeginMenu("File", true))
 			{
-				if (ImGui::MenuItem("Load", " ", nullptr, true))
+				if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, true))
+					NewScene();
+
+				if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, true))
+					saveDialog.OpenFileBrowser();
+
+				if (ImGui::MenuItem("Load", "Ctrl+L ", nullptr, true))
 					loadDialog.OpenFileBrowser();
 
 				ImGui::EndMenu();

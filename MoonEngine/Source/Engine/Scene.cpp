@@ -10,7 +10,6 @@
 
 namespace MoonEngine
 {
-
 	Scene::Scene()
 	{
 		m_CameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
@@ -51,7 +50,7 @@ namespace MoonEngine
 	{
 		if (copyFrom.HasComponent<T>())
 		{
-			T& component = copyFrom.GetComponent<T>();
+			T component = copyFrom.GetComponent<T>();
 			copyTo.AddComponent<T>() = component;
 		}
 	}

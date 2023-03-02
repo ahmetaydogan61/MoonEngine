@@ -1,6 +1,6 @@
 Scene: NewScene
 Entities:
-  - Entity: c3694ac2-4ceb-46a1-a56d-53cc5a78b939
+  - Entity: cbee39d3-be99-4c97-8c38-5dccb79a5d0e
     IdentityComponent:
       Name: Entity
     TransformComponent:
@@ -10,4 +10,4 @@ Entities:
     SpriteComponent:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
-      TexturePath: "null"
+      TexturePath: Resource\Assets\Textures\awesomeface.png

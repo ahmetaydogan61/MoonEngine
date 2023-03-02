@@ -11,6 +11,9 @@ namespace MoonEngine
 		if (!m_Camera)
 			return;
 
+		m_Focused = focused;
+		m_Hovered = hovered;
+
 		if (Input::GetKey(Keycode::LeftShift))
 		{
 			m_CurrentPanSpeed = PanSpeed * SpeedMultiplier;
@@ -68,6 +71,9 @@ namespace MoonEngine
 	void CameraController::Zoom(float amount)
 	{
 		if (!m_Camera)
+			return;
+
+		if (!m_Hovered)
 			return;
 
 		float zoomSpeed = SpeedFactor();

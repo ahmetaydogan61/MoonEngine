@@ -7,30 +7,6 @@ namespace MoonEngine
 	struct SpriteComponent;
 	struct TransformComponent;
 
-	enum class RenderMode
-	{
-		Solid,
-		Wireframe
-	};
-
-	struct RendererData
-	{
-		const uint32_t MaxQuads = 10000;
-		const uint32_t MaxVertexCount = MaxQuads * 4;
-		const uint32_t MaxIndexCount = MaxQuads * 6;
-
-		//Data
-		glm::mat4 ViewProjection;
-
-		//Stats
-		uint32_t DrawCalls;
-		uint32_t VertexCount;
-		uint32_t QuadCount;
-
-		//Other
-		glm::vec3 ClearColor;
-	};
-
 	struct Vertex
 	{
 		glm::vec3 Position;
@@ -39,6 +15,46 @@ namespace MoonEngine
 		int32_t TextureId;
 		glm::vec2 Tiling;
 		int EntityId;
+	};
+
+	enum class RenderMode
+	{
+		Solid,
+		Wireframe
+	};
+
+	struct RendererStats
+	{
+		uint32_t DrawCalls;
+		uint32_t VertexCount;
+		uint32_t QuadCount;
+	};
+
+	struct RendererData
+	{
+		//Configs
+		const uint32_t MaxQuads = 10000;
+		const uint32_t MaxVertexCount = MaxQuads * 4;
+		const uint32_t MaxIndexCount = MaxQuads * 6;
+
+		//Data
+		glm::mat4 ViewProjection;
+
+		//Other
+		glm::vec3 ClearColor;
+
+		//Renderer
+		uint32_t VertexArray;
+		uint32_t VertexBuffer;
+		uint32_t IndexBuffer;
+		uint32_t VertexIndex;
+
+		Shared<Shader> QuadShader;
+		Shared<Shader> LineShader;
+
+		Shared<Texture> DefaultTexture;
+
+		Vertex* Vertices;
 	};
 
 	class Renderer
@@ -50,16 +66,9 @@ namespace MoonEngine
 		~Renderer() = delete;
 		
 		static bool s_RendererInitialized;
-
-		static uint32_t s_VertexArray;
-		static uint32_t s_VertexBuffer;
-		static uint32_t s_IndexBuffer;
-		static uint32_t s_VertexIndex;
-		static Vertex* s_Vertices;
-
-		static Shared<Shader> s_Shader;
-		static Shared<Texture> s_DefaultTexture;
-		static RendererData s_RendererData;
+	
+		static RendererStats s_Stats;
+		static RendererData s_Data;
 
 		static uint32_t s_TextureIndex;
 		static int32_t s_TextureIds[32];
@@ -70,11 +79,14 @@ namespace MoonEngine
 		static void Init();
 		static void Terminate();
 
-		static void SetRenderData(const glm::mat4& viewProjection);
-		static void SetRenderMode(RenderMode renderMode);
 		static void SetClearColor(const glm::vec3& color);
+		static const glm::vec3& GetClearColor() { return s_Data.ClearColor; }
+
+		static void SetLineWidth(float width);
+		static void SetRenderMode(RenderMode renderMode);
 
 		static void Clear();
+		static void SetRenderData(const glm::mat4& viewProjection);
 		static void Begin();
 		static void Render();
 		static void End();
@@ -89,7 +101,7 @@ namespace MoonEngine
 		static void DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color,
 					  const glm::vec2& tiling, int entityId);
 
-		static RendererData& GetRendererData(){ return s_RendererData; }
-		static const glm::vec3& GetClearColor() { return s_RendererData.ClearColor; }
+		static const RendererStats& GetStats() { return s_Stats; }
+		static const RendererData& GetData() { return s_Data; }
 	};
 }

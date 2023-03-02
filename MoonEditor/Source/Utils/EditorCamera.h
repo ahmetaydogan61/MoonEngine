@@ -19,7 +19,7 @@ namespace MoonEngine
 
 		float SpeedFactor() const { return m_Camera->GetSize() * 0.25f; }
 
-		bool m_IsPanning = false;
+		bool m_IsPanning = false, m_Focused = false, m_Hovered = false;
 	public:
 		CameraController()
 			:m_Camera(nullptr)

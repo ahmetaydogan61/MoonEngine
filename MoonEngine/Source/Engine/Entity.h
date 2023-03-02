@@ -38,6 +38,7 @@ namespace MoonEngine
 		template<typename T>
 		T& GetComponent()
 		{
+			ME_ASSERT(HasComponent<T>(), "Entity does not have this component!");
 			return m_Scene->m_Registry.get<T>(m_ID);
 		}
 

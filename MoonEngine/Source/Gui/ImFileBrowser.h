@@ -203,7 +203,7 @@ namespace ImGui
 			//Extension Filter Selection
 			if (flags & ImGuiFileBrowserFlags_FilterExtensions)
 			{
-				int extensionsSize = m_Config.Extensions.size();
+				size_t extensionsSize = m_Config.Extensions.size();
 				if (extensionsSize)
 				{
 					auto& extensions = m_Config.Extensions;
