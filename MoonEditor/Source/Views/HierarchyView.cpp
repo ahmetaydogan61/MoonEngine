@@ -4,6 +4,8 @@
 
 #include <Engine/Components.h>
 #include <Engine/Entity.h>
+#include <Gui/ImGuiUtils.h>
+
 #include <IconsMaterialDesign.h>
 
 #include <imgui.h>
@@ -46,7 +48,42 @@ namespace MoonEngine
 		{
 			EditorLayer& editor = *EditorLayer::Get();
 
-			ImGui::Begin(ICON_MD_SORT "Hierarchy", &renderHierarchy, 0);
+			float height = ImGui::GetFrameHeight();
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+			bool openPopup = false;
+
+			ImGui::Begin(ICON_MD_SORT "Hierarchy", &renderHierarchy, window_flags);
+
+			if (ImGui::BeginMenuBar())
+			{
+				const auto& contentRegion = ImGui::GetContentRegionAvail();
+				float buttonSize = ImGui::GetFontSize() + 5.0f;
+				ImGuiUtils::AddPadding(contentRegion.x - (buttonSize * 0.5f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
+				if (ImGui::Button(":", { buttonSize, height }))
+					openPopup = true;
+				ImGui::EndMenuBar();
+			}
+
+			if (openPopup)
+				ImGui::OpenPopup("CreateStuff");
+
+			if (ImGui::BeginPopup("CreateStuff"))
+			{
+				if (ImGui::MenuItem("Entity"))
+				{
+					Entity entity = m_Scene->CreateEntity();
+					editor.SetSelectedEntity(entity);
+				}
+				if (ImGui::MenuItem("Camera"))
+				{
+					Entity entity = m_Scene->CreateEntity();
+					entity.GetComponent<IdentityComponent>().Name = "Camera";
+					entity.AddComponent<CameraComponent>();
+					entity.RemoveComponent<SpriteComponent>();
+					editor.SetSelectedEntity(entity);
+				}
+				ImGui::EndPopup();
+			}
 
 			if (ImGui::BeginPopupContextWindow(0, 1))
 			{

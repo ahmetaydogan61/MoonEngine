@@ -34,8 +34,9 @@ namespace MoonEngine
 	{
 		glm::vec4 Color = glm::vec4(1.0f);
 		glm::vec2 Tiling = glm::vec2(1.0f);
-		int RenderOrder = 0;
 		Shared<Texture> Texture = nullptr;
+		
+		int LayerOrder = 0;
 	};
 
 	struct CameraComponent

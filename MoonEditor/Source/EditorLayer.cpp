@@ -139,7 +139,7 @@ namespace MoonEngine
 				Renderer::DrawRect(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, (int)entity);
 
 				transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-					* glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+					* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
 
 				Renderer::DrawEntity(transform, cameraTexture, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, (int)entity);
 			}
@@ -370,7 +370,7 @@ namespace MoonEngine
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing;
 
-		float buttonSize = 25.0f;
+		float buttonSize = ImGui::GetFontSize() + 1.0f;
 		auto& gizmoSelection = m_GizmosData.GizmoSelection;
 
 		if (ImGui::Begin("Overlay", &m_ShowOverlay, window_flags))
