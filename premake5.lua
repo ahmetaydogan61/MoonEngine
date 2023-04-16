@@ -28,5 +28,3 @@ includeMoonEngine = "%{wks.location}/MoonEngine/Source"
 
 include "MoonEditor/MoonEditorPremake.lua"
 includeMoonEditor = "%{wks.location}/MoonEditor/Source"
-
-include "Sandbox/SandboxPremake.lua"

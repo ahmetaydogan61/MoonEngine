@@ -1,5 +1,0 @@
-Application Prefs:
-  ResolutionWidth: 1920
-  ResolutionHeight: 1009
-  VsyncOn: true
-  MaximizeOnStart: true
