@@ -6,11 +6,8 @@
 
 namespace MoonEngine
 {
-	void CameraController::Update(bool focused, bool hovered)
+	void EditorCamera::Update(bool focused, bool hovered)
 	{
-		if (!m_Camera)
-			return;
-
 		m_Focused = focused;
 		m_Hovered = hovered;
 
@@ -47,7 +44,7 @@ namespace MoonEngine
 
 		if (m_IsPanning)
 		{
-			float cameraSize = m_Camera->GetSize();
+			float cameraSize = GetSize();
 			m_Position.x -= normalX * cameraSize * m_CurrentPanSpeed * ((float)(res.Width) / res.Height);
 			m_Position.y += normalY * cameraSize * m_CurrentPanSpeed;
 		}
@@ -65,20 +62,17 @@ namespace MoonEngine
 				m_Position -= glm::vec3(m_CurrentSpeed * Time::DeltaTime(), 0.0f, 0.0f);
 		}
 
-		m_Camera->Move(m_Position);
+		Move(m_Position);
 	}
 
-	void CameraController::Zoom(float amount)
+	void EditorCamera::ZoomEvent(float amount)
 	{
-		if (!m_Camera)
-			return;
-
 		if (!m_Hovered)
 			return;
 
 		float zoomSpeed = SpeedFactor();
 		zoomSpeed = std::min(zoomSpeed, 50.0f);
 		float zoomAmount = -amount * m_CurrentZoomSpeed * zoomSpeed;
-		m_Camera->Zoom(zoomAmount);
+		Zoom(zoomAmount);
 	}
 }

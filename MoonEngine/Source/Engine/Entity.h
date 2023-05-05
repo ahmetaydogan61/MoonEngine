@@ -5,9 +5,6 @@ namespace MoonEngine
 {
 	class Entity
 	{
-	private:
-		entt::entity m_ID = entt::null;
-		Scene* m_Scene = nullptr;
 	public:
 		Entity() {};
 		~Entity() { m_Scene = nullptr; };
@@ -58,5 +55,9 @@ namespace MoonEngine
 		{
 			m_Scene->m_Registry.destroy(m_ID);
 		}
+
+	private:
+		entt::entity m_ID = entt::null;
+		Scene* m_Scene = nullptr;
 	};
 }

@@ -5,6 +5,8 @@
 #include "Core/Input.h"
 #include "Core/Time.h"
 
+#include "Renderer/Renderer.h"
+
 #include <GLFW/glfw3.h>
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/dll.h>
@@ -14,15 +16,14 @@ namespace MoonEngine
 	Application* Application::s_Instance;
 
 	Application::Application(ApplicationPrefs prefs)
-		:m_Prefs(prefs), m_Debug(nullptr), m_ImGuiLayer(nullptr), m_Window(nullptr)
+		:m_Prefs(prefs), m_ImGuiLayer(nullptr), m_Window(nullptr)
 	{
 		Init();
 	}
 
 	void Application::Init()
 	{
-		m_Debug = new Debug();
-		m_Debug->Init();
+		Debug::Init();
 
 		if (s_Instance)
 		{
@@ -41,6 +42,7 @@ namespace MoonEngine
 		}
 		ME_SYS_SUC("Window Created...");
 
+		Renderer::Init();
 		ME_SYS_SUC("Renderer Initialized...");
 
 		m_ImGuiLayer = new ImGuiLayer();
@@ -87,10 +89,11 @@ namespace MoonEngine
 		out << YAML::Key << "Application Prefs";
 
 		out << YAML::BeginMap;
-		out << YAML::Key << "ResolutionWidth" << YAML::Value << prefs.Resolution.Width;
-		out << YAML::Key << "ResolutionHeight" << YAML::Value << prefs.Resolution.Height;
-		out << YAML::Key << "VsyncOn" << YAML::Value << prefs.VsyncOn;
-		out << YAML::Key << "MaximizeOnStart" << YAML::Value << prefs.MaximizeOnStart;
+		out << YAML::Key << "ResolutionWidth" << YAML::Value << prefs.Window.Resolution.Width;
+		out << YAML::Key << "ResolutionHeight" << YAML::Value << prefs.Window.Resolution.Height;
+		out << YAML::Key << "VsyncOn" << YAML::Value << prefs.Window.VsyncOn;
+		out << YAML::Key << "Fullscreen" << YAML::Value << prefs.Window.Fullscreen;
+		out << YAML::Key << "MaximizeOnStart" << YAML::Value << prefs.Window.MaximizeOnStart;
 		out << YAML::EndMap;
 
 		out << YAML::EndMap;
@@ -119,10 +122,11 @@ namespace MoonEngine
 		ApplicationPrefs prefs;
 		auto yamlPrefs = data["Application Prefs"];
 		prefs.AppName = m_Prefs.AppName;
-		prefs.Resolution.Width = yamlPrefs["ResolutionWidth"].as<float>();
-		prefs.Resolution.Height = yamlPrefs["ResolutionHeight"].as<float>();
-		prefs.VsyncOn = yamlPrefs["VsyncOn"].as<bool>();
-		prefs.MaximizeOnStart = yamlPrefs["MaximizeOnStart"].as<bool>();
+		prefs.Window.Resolution.Width = yamlPrefs["ResolutionWidth"].as<uint32_t>();
+		prefs.Window.Resolution.Height = yamlPrefs["ResolutionHeight"].as<uint32_t>();
+		prefs.Window.VsyncOn = yamlPrefs["VsyncOn"].as<bool>();
+		prefs.Window.Fullscreen = yamlPrefs["Fullscreen"].as<bool>();
+		prefs.Window.MaximizeOnStart = yamlPrefs["MaximizeOnStart"].as<bool>();
 		m_Prefs = prefs;
 	}
 
@@ -139,13 +143,14 @@ namespace MoonEngine
 			layer->Terminate();
 		ME_SYS_LOG("Application Layers Terminated...");
 
+		Renderer::Terminate();
+
 		ME_SYS_LOG("Application Termination Completed..");
-		m_Debug->Terminate();
+		Debug::Terminate();
 	}
 
 	Application::~Application()
 	{
-		delete m_Debug;
 		delete m_ImGuiLayer;
 		delete m_Window;
 

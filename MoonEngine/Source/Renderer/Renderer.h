@@ -69,33 +69,14 @@ namespace MoonEngine
 
 		uint32_t LineVertexIndex;
 		LineVertex* LineVertices;
-		
+
 		Shared<Shader> LineShader;
 		float LineWidth = 3.0f;
 	};
 
 	class Renderer
 	{
-	private:
-		Renderer() = delete;
-		Renderer(const Renderer&) = delete;
-		Renderer(Renderer&&) = delete;
-		~Renderer() = delete;
-		
-		static bool s_RendererInitialized;
-	
-		static RendererStats s_Stats;
-		static RendererData s_Data;
-
-		static uint32_t s_TextureIndex;
-		static int32_t s_TextureIds[32];
-		static std::unordered_map<Shared<Texture>, int32_t> s_TextureCache;
-
-		static int32_t GetTextureFromCache(const Shared<Texture>& texture);
 	public:
-		static void Init();
-		static void Terminate();
-
 		static void SetClearColor(const glm::vec3& color);
 		static const glm::vec3& GetClearColor() { return s_Data.ClearColor; }
 
@@ -111,20 +92,35 @@ namespace MoonEngine
 
 		static const RendererStats& GetStats() { return s_Stats; }
 		static const RendererData& GetData() { return s_Data; }
-		
+
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
-					  const Shared<Texture>& texture = 0, const glm::vec4& color = glm::vec4(1.0f), const glm::vec2& tiling = glm::vec2(1.0f));
-		static void DrawQuad(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f),
-					  const glm::vec2& tiling = glm::vec2(1.0f));
+							 const glm::vec4& color = glm::vec4(1.0f), const Shared<Texture>& texture = 0, const glm::vec2& tiling = glm::vec2(1.0f));
+		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Shared<Texture>& texture = 0,
+							 const glm::vec2& tiling = glm::vec2(1.0f));
 
 		static void DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId = -1);
 		static void DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId = -1);
-		static void DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color,
-					  const glm::vec2& tiling, int entityId);
+		static void DrawEntity(const glm::mat4& transform, const glm::vec4& color, const Shared<Texture>& texture,
+							   const glm::vec2& tiling, int entityId);
 
 		static void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, int entityId = -1);
 
 		static void DrawRect(const glm::vec3& position, const glm::vec2& scale, const glm::vec4& color, int entityId = -1);
 		static void DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityId = -1);
+	private:
+		Renderer() = delete;
+		Renderer(const Renderer&) = delete;
+		Renderer(Renderer&&) = delete;
+		~Renderer() = delete;
+
+		static void Init();
+		static void Terminate();
+
+		static bool s_RendererInitialized;
+
+		static RendererStats s_Stats;
+		static RendererData s_Data;
+
+		friend class Application;
 	};
 }

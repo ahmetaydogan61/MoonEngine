@@ -4,8 +4,8 @@
 
 namespace MoonEngine
 {
-	void Camera::Resize(float aspectRatio)
-    {
+	void CameraOrthographic::Resize(float aspectRatio)
+	{
 		m_AspectRatio = aspectRatio;
 		float left = -aspectRatio * m_Size;
 		float right = aspectRatio * m_Size;
@@ -14,9 +14,9 @@ namespace MoonEngine
 		m_Projection = glm::ortho(left, right, bottom, top, m_NearClip, m_FarClip);
 
 		m_ViewProjection = m_Projection * m_View;
-    }
+	}
 
-	void Camera::Move(const glm::vec3& position)
+	void CameraOrthographic::Move(const glm::vec3& position)
 	{
 		m_View = glm::translate(glm::mat4(1.0f), position);
 		m_View = glm::inverse(m_View);
@@ -24,7 +24,7 @@ namespace MoonEngine
 		m_ViewProjection = m_Projection * m_View;
 	}
 
-	void Camera::Zoom(float amount)
+	void CameraOrthographic::Zoom(float amount)
 	{
 		m_Size += amount;
 		if (m_Size < 0.1f)

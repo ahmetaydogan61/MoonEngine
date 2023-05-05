@@ -62,8 +62,7 @@ namespace MoonEngine
 		GizmosData m_GizmosData;
 		Shared<Framebuffer> m_ViewportFbo;
 
-		Camera m_EditorCamera;
-		CameraController m_EditorCameraController;
+		Shared<EditorCamera> m_EditorCameraController;
 
 		bool m_ShowViewport = true;
 		bool m_ShowOverlay = true;

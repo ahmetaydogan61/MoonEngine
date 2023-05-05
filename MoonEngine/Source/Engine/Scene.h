@@ -10,17 +10,6 @@ namespace MoonEngine
 
 	class Scene
 	{
-	private:
-		entt::registry m_Registry;
-
-		Shared<Renderer> m_Renderer;
-		Shared<Texture> m_CameraTexture;
-
-		friend class Entity;
-		friend class SceneSerializer;
-
-		friend class EditorLayer;
-		friend class HierarchyView;
 	public:
 		Scene();
 		~Scene() = default;
@@ -30,8 +19,10 @@ namespace MoonEngine
 		Entity CreateEntity();
 		Entity DuplicateEntity(Entity& entity);
 
-		void SetRenderer(const Shared<Renderer>& renderer) 
-		{ m_Renderer = renderer; }
+		void SetRenderer(const Shared<Renderer>& renderer)
+		{
+			m_Renderer = renderer;
+		}
 
 		void StartPlay();
 		void StopPlay();
@@ -43,5 +34,16 @@ namespace MoonEngine
 		void UpdateEdit(const Camera* camera);
 
 		static Shared<Scene> CopyScene(Shared<Scene> scene);
+	private:
+		entt::registry m_Registry;
+
+		Shared<Renderer> m_Renderer;
+		Shared<Texture> m_CameraTexture;
+
+		friend class Entity;
+		friend class SceneSerializer;
+
+		friend class EditorLayer;
+		friend class HierarchyView;
 	};
 }

@@ -67,8 +67,8 @@ namespace MoonEngine
 		font24 = ImGuiUtils::AddFont("Resource/Fonts/Roboto/Roboto-Medium.ttf", 24.0f);
 		ImGuiUtils::AddIconFont("Resource/Fonts/material-design-icons/MaterialIcons-Regular.ttf", 24.0f, (ImWchar)ICON_MIN_MD, (ImWchar)ICON_MAX_MD);
 
-		ApplicationPrefs& prefs = Application::GetPrefs();
-		HandleDpiChange(prefs.Resolution.Dpi);
+		WindowPrefs& prefs = Application::GetWindowPrefs();
+		HandleDpiChange(prefs.Dpi);
 
 		Input::OnKeyPress += BIND_ACTION(EditorLayer::KeyEvents);
 		Window::OnDpiChange += HandleDpiChange;
@@ -78,7 +78,7 @@ namespace MoonEngine
 		{
 			FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::RED_INTEGER}, {FramebufferTextureFormat::DEPTH} };
 			m_ViewportFbo = MakeShared<Framebuffer>(props);
-			m_EditorCameraController.SetCamera(&m_EditorCamera);
+			m_EditorCameraController = MakeShared<EditorCamera>();
 		}
 		//-Viewport Initilization
 
@@ -89,7 +89,6 @@ namespace MoonEngine
 		}
 		//+GameView Initiization
 
-		Renderer::Init();
 		NewScene();
 
 		cameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
@@ -104,17 +103,17 @@ namespace MoonEngine
 			if (viewportSize.x != m_ViewportFbo->GetWidth() || viewportSize.y != m_ViewportFbo->GetHeight())
 			{
 				m_ViewportFbo->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-				m_EditorCamera.Resize(viewportSize.x / viewportSize.y);
+				m_EditorCameraController->Resize(viewportSize.x / viewportSize.y);
 			}
 
-			m_EditorCameraController.Update(m_ViewportData.ViewportFocused, m_ViewportData.ViewportHovered);
+			m_EditorCameraController->Update(m_ViewportData.ViewportFocused, m_ViewportData.ViewportHovered);
 
 			m_GizmosData.IsSnapping = Input::GetKey(Keycode::LeftControl);
 
 			//+Render Viewport
 			m_ViewportFbo->Bind();
 
-			Renderer::SetRenderData(m_EditorCamera.GetViewProjection());
+			Renderer::SetRenderData(m_EditorCameraController->GetViewProjection());
 			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
 			Renderer::Begin();
 			m_ViewportFbo->ClearColorAttachment(1, (void*)-1);
@@ -136,12 +135,10 @@ namespace MoonEngine
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* rotationMat * glm::scale(glm::mat4(1.0f), glm::vec3(cameraComponent.Size * 2.0f, cameraComponent.Size * 2.0f, 0.0f));
 
-				Renderer::DrawRect(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, (int)entity);
-
 				transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
 
-				Renderer::DrawEntity(transform, cameraTexture, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, (int)entity);
+				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
 			}
 
 			Renderer::End();
@@ -422,8 +419,8 @@ namespace MoonEngine
 		auto& gizmoSelection = m_GizmosData.GizmoSelection;
 		if (m_SelectedEntity && gizmoSelection != GIZMOSELECTION::NONE)
 		{
-			const glm::mat4& view = m_EditorCamera.GetView();
-			const glm::mat4& projection = m_EditorCamera.GetProjection();
+			const glm::mat4& view = m_EditorCameraController->GetView();
+			const glm::mat4& projection = m_EditorCameraController->GetProjection();
 
 			TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 rotation = glm::toMat4(glm::quat(component.Rotation));
@@ -533,14 +530,14 @@ namespace MoonEngine
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
 
-		ApplicationPrefs& prefs = Application::GetPrefs();
+		WindowPrefs& prefs = Application::GetWindowPrefs();
 		ImGui::Text("Application Prefs");
 		ImGui::Text("Vsync: %s", prefs.VsyncOn ? "On" : "Off");
 		if (ImGui::Button("Set Vsync"))
 			Application::SetVsync(!prefs.VsyncOn);
 
 		ImGui::Text("Resolution x: %d y: %d", prefs.Resolution.Width, prefs.Resolution.Height);
-		ImGui::Text("Resolution Dpi: %.2f", prefs.Resolution.Dpi);
+		ImGui::Text("Resolution Dpi: %.2f", prefs.Dpi);
 
 		ImGui::End();
 	}

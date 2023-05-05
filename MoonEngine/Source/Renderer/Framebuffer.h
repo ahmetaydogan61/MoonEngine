@@ -43,14 +43,6 @@ namespace MoonEngine
 
 	class Framebuffer
 	{
-	private:
-		uint32_t m_FramebufferId = 0;
-		uint32_t textureId = 0;
-		uint32_t redId = 0;
-		uint32_t m_Width = 0;
-		uint32_t m_Height = 0;
-
-		FramebufferProps m_Props;
 	public:
 		Framebuffer() = delete;
 		Framebuffer(FramebufferProps prop)
@@ -74,5 +66,13 @@ namespace MoonEngine
 
 		void ClearColorAttachment(uint32_t attachmentIndex, void* clearData);
 		int ReadPixel(uint32_t index, int x, int y);
+	private:
+		uint32_t m_FramebufferId = 0;
+		uint32_t textureId = 0;
+		uint32_t redId = 0;
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
+
+		FramebufferProps m_Props;
 	};
 }

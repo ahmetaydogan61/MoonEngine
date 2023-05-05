@@ -7,18 +7,19 @@ namespace MoonEngine
 {
 	class Window
 	{
+	public:
+		bool Init();
+		void Terminate();
+		
+		void Update();
+
+		void SetVsync(bool state);
+		GLFWwindow* GetNative() { return m_Window; }
+
+		inline static Action<float> OnDpiChange;
 	private:
 		GLFWwindow* m_Window;
 
 		void BindWindowCallbacks();
-	public:
-		bool Init();
-		void Update();
-		void Terminate();
-		GLFWwindow* GetNative() { return m_Window; }
-
-		void SetVsync(bool state);
-
-		inline static Action<float> OnDpiChange;
 	};
 }

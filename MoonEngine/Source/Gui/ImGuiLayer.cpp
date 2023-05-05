@@ -28,7 +28,6 @@ namespace MoonEngine
 		//io.ConfigViewportsNoTaskBarIcon = true;
 
 		ImGuiUtils::StyleCustomDark(0);
-		Resolution res = Application::GetResoultion();
 		ImGui::GetIO().FontGlobalScale = 1.0f;
 
 		// Setup Platform/Renderer backends

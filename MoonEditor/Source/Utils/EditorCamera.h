@@ -5,11 +5,9 @@
 
 namespace MoonEngine
 {
-	class CameraController
+	class EditorCamera : public CameraOrthographic
 	{
 	private:
-		Camera* m_Camera;
-
 		float m_CurrentSpeed = 0.0f;
 		float m_CurrentPanSpeed = 0.0f;
 		float m_CurrentZoomSpeed = 0.0f;
@@ -17,22 +15,20 @@ namespace MoonEngine
 		glm::vec3 m_Position = glm::vec3(0.0f);
 		glm::vec2 m_MouseLastPos = glm::vec2(0.0f);
 
-		float SpeedFactor() const { return m_Camera->GetSize() * 0.25f; }
+		float SpeedFactor() const { return GetSize() * 0.25f; }
 
 		bool m_IsPanning = false, m_Focused = false, m_Hovered = false;
 	public:
-		CameraController()
-			:m_Camera(nullptr)
+		EditorCamera()
 		{
-			Input::OnMouseScroll += BIND_ACTION(CameraController::Zoom);
+			ME_LOG("Created");
+			Input::OnMouseScroll += BIND_ACTION(EditorCamera::ZoomEvent);
 		}
-		~CameraController()
+		~EditorCamera()
 		{
-			Input::OnMouseScroll -= BIND_ACTION(CameraController::Zoom);
-			m_Camera = nullptr;
+			ME_LOG("Destroyed");
+			Input::OnMouseScroll -= BIND_ACTION(EditorCamera::ZoomEvent);
 		}
-
-		void SetCamera(Camera* camera) { m_Camera = camera; }
 
 		float Speed = 7.5f;
 		float SpeedMultiplier = 2.5f;
@@ -40,6 +36,6 @@ namespace MoonEngine
 		float ZoomSpeed = 0.4f;
 
 		void Update(bool focused, bool hovered);
-		void Zoom(float amount);
+		void ZoomEvent(float amount);
 	};
 }

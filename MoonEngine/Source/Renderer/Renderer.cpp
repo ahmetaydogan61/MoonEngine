@@ -17,10 +17,6 @@ namespace MoonEngine
 	RendererStats Renderer::s_Stats;
 	RendererData Renderer::s_Data;
 
-	uint32_t Renderer::s_TextureIndex = 0;
-	int32_t Renderer::s_TextureIds[32];
-	std::unordered_map<Shared<Texture>, int32_t> Renderer::s_TextureCache;
-
 	const glm::vec4 VertexPositions[4] =
 	{
 		{ -0.5f, -0.5f, 0.0f, 1.0f },
@@ -36,6 +32,21 @@ namespace MoonEngine
 		{ 1.0f, 1.0f },
 		{ 0.0f, 1.0f }
 	};
+
+	static uint32_t s_TextureIndex;
+	static int32_t s_TextureIds[32];
+	static std::unordered_map<Shared<Texture>, int32_t> s_TextureCache;
+
+	static int32_t GetTextureFromCache(const Shared<Texture>& texture)
+	{
+		if (s_TextureCache.find(texture) != s_TextureCache.end())
+			return s_TextureCache.at(texture);
+
+		s_TextureIndex++;
+		texture->Bind(s_TextureIndex);
+		s_TextureCache[texture] = s_TextureIndex;
+		return s_TextureIndex;
+	}
 
 	void Renderer::Init()
 	{
@@ -227,20 +238,23 @@ namespace MoonEngine
 	}
 
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale,
-							const Shared<Texture>& texture, const glm::vec4& color, const glm::vec2& tiling)
+							const glm::vec4& color, const Shared<Texture>& texture, const glm::vec2& tiling)
 	{
 		const glm::mat4& rotationMat = glm::toMat4(glm::quat(rotation));
 		const glm::mat4& transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
 
-		DrawQuad(transform, texture, color, tiling);
+		DrawQuad(transform, color, texture, tiling);
 	}
 
-	void Renderer::DrawQuad(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color, const glm::vec2& tiling)
+	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Shared<Texture>& texture, const glm::vec2& tiling)
 	{
 		uint32_t vertexIndex = s_Data.QuadVertexIndex;
 
 		if (vertexIndex >= s_Data.MaxVertexCount || s_TextureIndex >= 32)
+		{
 			End();
+			vertexIndex = 0;
+		}
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -262,7 +276,7 @@ namespace MoonEngine
 
 	void Renderer::DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId)
 	{
-		DrawEntity(transform, spriteComponent.Texture, spriteComponent.Color, spriteComponent.Tiling, entityId);
+		DrawEntity(transform, spriteComponent.Color, spriteComponent.Texture, spriteComponent.Tiling, entityId);
 	}
 
 	void Renderer::DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId)
@@ -274,12 +288,15 @@ namespace MoonEngine
 		DrawEntity(transform, spriteComponent, entityId);
 	}
 
-	void Renderer::DrawEntity(const glm::mat4& transform, const Shared<Texture>& texture, const glm::vec4& color, const glm::vec2& tiling, int entityId)
+	void Renderer::DrawEntity(const glm::mat4& transform, const glm::vec4& color, const Shared<Texture>& texture, const glm::vec2& tiling, int entityId)
 	{
 		uint32_t vertexIndex = s_Data.QuadVertexIndex;
 
 		if (vertexIndex >= s_Data.MaxVertexCount || s_TextureIndex >= 32)
+		{
 			End();
+			vertexIndex = 0;
+		}
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -343,17 +360,6 @@ namespace MoonEngine
 		DrawLine(lineVertices[1], lineVertices[2], color, entityId);
 		DrawLine(lineVertices[2], lineVertices[3], color, entityId);
 		DrawLine(lineVertices[3], lineVertices[0], color, entityId);
-	}
-
-	int32_t Renderer::GetTextureFromCache(const Shared<Texture>& texture)
-	{
-		if (s_TextureCache.find(texture) != s_TextureCache.end())
-			return s_TextureCache.at(texture);
-
-		s_TextureIndex++;
-		texture->Bind(s_TextureIndex);
-		s_TextureCache[texture] = s_TextureIndex;
-		return s_TextureIndex;
 	}
 
 	void Renderer::SetLineWidth(float width)

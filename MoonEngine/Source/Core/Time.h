@@ -4,6 +4,8 @@ namespace MoonEngine
 {
 	class Time
 	{
+	public:
+		static float DeltaTime() { return s_DeltaTime; }
 	private:
 		inline static float s_DeltaTime;
 		float m_LastTime;
@@ -16,7 +18,5 @@ namespace MoonEngine
 		}
 		//-
 		friend class Application;
-	public:
-		static float DeltaTime() { return s_DeltaTime; }
 	};
 }

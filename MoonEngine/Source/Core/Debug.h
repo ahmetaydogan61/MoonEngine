@@ -6,15 +6,15 @@ namespace MoonEngine
 {
 	class Debug
 	{
-	private:
-		static std::shared_ptr<spdlog::logger> s_Logger;
-		static std::shared_ptr<spdlog::logger> s_SystemLogger;
 	public:
-		void Init();
-		void Terminate();
+		static void Init();
+		static void Terminate();
 
 		static std::shared_ptr<spdlog::logger>& GetLogger() { return s_Logger; }
 		static std::shared_ptr<spdlog::logger>& GetSystemLogger() { return s_SystemLogger; }
+	private:
+		static std::shared_ptr<spdlog::logger> s_Logger;
+		static std::shared_ptr<spdlog::logger> s_SystemLogger;
 	};
 }
 

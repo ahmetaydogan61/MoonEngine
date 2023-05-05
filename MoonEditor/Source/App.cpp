@@ -6,12 +6,18 @@ int main()
 {
 	using namespace MoonEngine;
 
+	WindowPrefs wPrefs =
+	{
+		.Resolution{1280, 720},
+		.VsyncOn = true,
+		.Fullscreen = false,
+		.MaximizeOnStart = true
+	};
+
 	ApplicationPrefs prefs =
 	{
 		.AppName = "Moon Engine",
-		.Resolution{1280, 720},
-		.VsyncOn = true,
-		.MaximizeOnStart = true
+		.Window = wPrefs
 	};
 
 	Application* application = new Application(prefs);

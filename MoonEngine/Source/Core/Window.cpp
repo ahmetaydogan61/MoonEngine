@@ -14,9 +14,9 @@ namespace MoonEngine
 		if (!glfwInit())
 			return false;
 
-		ApplicationPrefs& prefs = Application::GetApp()->GetPrefs();
+		WindowPrefs& prefs = Application::GetApp()->GetPrefs().Window;
 
-		m_Window = glfwCreateWindow(prefs.Resolution.Width, prefs.Resolution.Height, prefs.AppName, NULL, NULL);
+		m_Window = glfwCreateWindow(prefs.Resolution.Width, prefs.Resolution.Height, Application::GetPrefs().AppName, prefs.Fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 		if (!m_Window)
 		{
 			glfwTerminate();
@@ -28,7 +28,7 @@ namespace MoonEngine
 
 		float xscale, yscale;
 		glfwGetWindowContentScale(m_Window, &xscale, &yscale);
-		prefs.Resolution.Dpi = xscale;
+		prefs.Dpi = xscale;
 
 		BindWindowCallbacks();
 
@@ -44,49 +44,39 @@ namespace MoonEngine
 	{
 		glfwSetWindowCloseCallback(m_Window, [](auto window)
 		{
-			{
-				Application* app = Application::GetApp();
-				app->Terminate();
-			}
+			Application* app = Application::GetApp();
+			app->Quit();
 		});
 
 		glfwSetWindowSizeCallback(m_Window, [](auto window, int width, int height)
 		{
-			{
-				ApplicationPrefs& prefs = Application::GetPrefs();
-				prefs.Resolution.Width = (uint32_t)width;
-				prefs.Resolution.Height = (uint32_t)height;
-			}
+			WindowPrefs& prefs = Application::GetWindowPrefs();
+			prefs.Resolution.Width = (uint32_t)width;
+			prefs.Resolution.Height = (uint32_t)height;
 		});
 
 		glfwSetFramebufferSizeCallback(m_Window, [](auto window, int width, int height)
 		{
-			{
-				glViewport(0, 0, width, height);
-			}
+			glViewport(0, 0, width, height);
 		});
 
 		glfwSetWindowContentScaleCallback(m_Window, [](GLFWwindow* window, float xscale, float yscale)
 		{
-			{
-				OnDpiChange.Invoke(xscale);
-				ApplicationPrefs& prefs = Application::GetPrefs();
-				float scale = yscale > xscale ? yscale : xscale;
-				prefs.Resolution.Dpi = scale;
-			}
+			OnDpiChange.Invoke(xscale);
+			WindowPrefs& prefs = Application::GetWindowPrefs();
+			float scale = yscale > xscale ? yscale : xscale;
+			prefs.Dpi = scale;
 		});
 
 		glfwSetWindowMaximizeCallback(m_Window, [](auto window, int maximized)
 		{
-			{
-				ApplicationPrefs& prefs = Application::GetPrefs();
-				prefs.MaximizeOnStart = maximized;
-			}
+			WindowPrefs& prefs = Application::GetWindowPrefs();
+			prefs.MaximizeOnStart = maximized;
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
 		{
-			Input::OnMouseScroll.Invoke(yoffset);
+			Input::OnMouseScroll.Invoke(static_cast<float>(yoffset));
 		});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
