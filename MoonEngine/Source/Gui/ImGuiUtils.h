@@ -65,6 +65,19 @@ namespace MoonEngine
 			return returnValue;
 		}
 
+		static bool ButtonSelectable(const char* label, float width, float height, bool selected, ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered])
+		{
+			if (selected)
+				ImGui::PushStyleColor(ImGuiCol_Button, color);
+
+			bool returnValue = ImGui::Button(label, { width, height });
+
+			if (selected)
+				ImGui::PopStyleColor();
+
+			return returnValue;
+		}
+
 		static ImFont* AddFont(const char* path, float pixelSize = 16.0f, bool setDefault = true, ImFontConfig* config = nullptr)
 		{
 			auto& io = ImGui::GetIO();

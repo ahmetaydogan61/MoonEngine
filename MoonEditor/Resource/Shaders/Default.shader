@@ -17,7 +17,7 @@ uniform mat4 uVP;
 
 void main()
 {
-	gl_Position = uVP * vec4(aPosition.x, aPosition.y, aPosition.z, 1.0);
+	gl_Position = uVP * vec4(aPosition, 1.0);
 
 	fColor = aColor;
 	fTexCoord = aTexCoord;

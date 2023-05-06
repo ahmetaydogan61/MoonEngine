@@ -2,16 +2,23 @@
 
 namespace MoonEngine
 {
+	class Texture;
+
 	enum class EmitterType
 	{
 		None,
 		Box,
+		Cone
 	};
 
-	struct ParticleComponent
+	enum class SortMode
 	{
-		glm::vec3 Position = glm::vec3(0.0f);
+		OldestInFront,
+		YoungestInFront
+	};
 
+	struct ParticleBody
+	{
 		//Lifecylce
 		bool IsLifetimeConstant = true;
 		glm::vec2 Lifetime = glm::vec2(2.0f, 3.5f);
@@ -22,16 +29,14 @@ namespace MoonEngine
 		glm::vec3 SpawnPosition = glm::vec3(0.0f);
 		glm::vec3 SpawnRadius = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		//Emitter Type
-		EmitterType EmitterType;
-		float RandomDirectionFactor = 0.0f;
+		float RandomDirectionFactor = 1.0f;
 
 		//Scale
 		bool IsScale3D = false;
 		bool IsScaleConstant = true;
 		glm::vec3 ScaleStart = glm::vec3(1.0f);
 		glm::vec3 ScaleStartRandom = glm::vec3(1.0f);
-		bool IsScaleCycle = false;
+		bool IsScaleCycle = true;
 		bool IsScaleEndConstant = true;
 		glm::vec3 ScaleEnd = glm::vec3(0.0f);
 		glm::vec3 ScaleEndRandom = glm::vec3(0.0f);
@@ -46,7 +51,8 @@ namespace MoonEngine
 		glm::vec3 RotationEnd = glm::vec3(0.0f);
 		glm::vec3 RotationEndRandom = glm::vec3(0.0f);
 
-		//Color
+		//Rendering
+		Shared<Texture> Texture;
 		bool IsColorConstant = true;
 		glm::vec4 ColorStart = glm::vec4(1.0f);
 		glm::vec4 ColorStartRandom = glm::vec4(1.0f);
@@ -75,6 +81,7 @@ namespace MoonEngine
 		glm::vec3 ScaleStart = glm::vec3(0.0f);
 		glm::vec3 ScaleEnd = glm::vec3(0.0f);
 
+		Shared<Texture> Texture;
 		glm::vec4 Color = glm::vec4(0.0f);
 		glm::vec4 ColorStart = glm::vec4(0.0f);
 		glm::vec4 ColorEnd = glm::vec4(0.0f);
@@ -86,10 +93,12 @@ namespace MoonEngine
 		ParticleSystem();
 		~ParticleSystem() = default;
 
-		void Update(float dt, const ParticleComponent& particle);
-		void Spawn(const ParticleComponent& particle);
-		void UpdateParticles(float dt);
+		void Update(float dt, const ParticleBody& particle, const glm::vec3& position);
+		void Spawn(const ParticleBody& particle, const glm::vec3& position);
+		void UpdateParticles(float dt, int entityId);
 
+		SortMode SortMode = SortMode::YoungestInFront;
+		EmitterType EmitterType = EmitterType::Box;
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;
@@ -101,8 +110,6 @@ namespace MoonEngine
 		void Play() { m_IsPlaying = true; m_IsPaused = false; }
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
-
-		void DrawGui();
 	private:
 		bool m_IsPlaying = false;
 		bool m_IsPaused = false;
@@ -115,5 +122,7 @@ namespace MoonEngine
 		uint32_t m_PoolSize = 1000;
 		uint32_t m_PoolIndex = 0;
 		uint32_t m_AliveParticles = 0;
+
+		void SortedUpdate(float dt, int i, int entityId);
 	};
 }

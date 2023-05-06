@@ -124,18 +124,18 @@ namespace MoonEngine
 
 		glGenVertexArrays(1, &s_Data.LineVertexArray);
 		glGenBuffers(1, &s_Data.LineVertexBuffer);
-		
+
 		glBindVertexArray(s_Data.LineVertexArray);
-		
+
 		glBindBuffer(GL_ARRAY_BUFFER, s_Data.LineVertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * s_Data.MaxVertexCount, s_Data.LineVertices, GL_DYNAMIC_DRAW);
-		
+
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), 0);
 		glEnableVertexAttribArray(0);
-		
+
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)offsetof(LineVertex, Color));
 		glEnableVertexAttribArray(1);
-		
+
 		glVertexAttribIPointer(2, 1, GL_INT, sizeof(LineVertex), (void*)offsetof(LineVertex, EntityId));
 		glEnableVertexAttribArray(2);
 
@@ -194,7 +194,7 @@ namespace MoonEngine
 			s_Data.QuadShader->SetIntArray("uTexture", 32, s_TextureIds);
 
 			s_Data.DefaultTexture->Bind(0);
-			
+
 			RenderIndexed();
 
 			s_Data.QuadVertexIndex = 0;
@@ -277,6 +277,13 @@ namespace MoonEngine
 	void Renderer::DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId)
 	{
 		DrawEntity(transform, spriteComponent.Color, spriteComponent.Texture, spriteComponent.Tiling, entityId);
+	}
+
+	void Renderer::DrawEntity(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color, const Shared<Texture>& texture, const glm::vec2& tiling, int entityId)
+	{
+		const glm::mat4& rotationMat = glm::toMat4(glm::quat(rotation));
+		const glm::mat4& transform = glm::translate(glm::mat4(1.0f), position) * rotationMat * glm::scale(glm::mat4(1.0f), scale);
+		DrawEntity(transform, color, texture, tiling, entityId);
 	}
 
 	void Renderer::DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId)

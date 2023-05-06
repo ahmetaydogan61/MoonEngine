@@ -98,6 +98,8 @@ namespace MoonEngine
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Shared<Texture>& texture = 0,
 							 const glm::vec2& tiling = glm::vec2(1.0f));
 
+		static void DrawEntity(const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
+							 const glm::vec4& color = glm::vec4(1.0f), const Shared<Texture>& texture = 0, const glm::vec2& tiling = glm::vec2(1.0f), int entityId = -1);
 		static void DrawEntity(const TransformComponent& transformComponent, const SpriteComponent& spriteComponent, int entityId = -1);
 		static void DrawEntity(const glm::mat4& transform, const SpriteComponent& spriteComponent, int entityId = -1);
 		static void DrawEntity(const glm::mat4& transform, const glm::vec4& color, const Shared<Texture>& texture,

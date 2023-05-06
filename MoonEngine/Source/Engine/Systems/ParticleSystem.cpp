@@ -2,9 +2,10 @@
 #include "Engine/Systems/ParticleSystem.h"
 
 #include "Core/Time.h"
-#include "Utils/Maths.h"
-
 #include "Renderer/Renderer.h"
+#include "Renderer/Texture.h"
+
+#include "Utils/Maths.h"
 
 #include <imgui.h>
 
@@ -15,7 +16,7 @@ namespace MoonEngine
 		m_Particles.resize(m_PoolSize);
 	}
 
-	void ParticleSystem::Update(float dt, const ParticleComponent& particle)
+	void ParticleSystem::Update(float dt, const ParticleBody& particle, const glm::vec3& position)
 	{
 		if (!m_IsPlaying)
 			return;
@@ -36,45 +37,63 @@ namespace MoonEngine
 		}
 
 		for (uint32_t i = 0; i < m_SpawnCount; i++)
-			Spawn(particle);
+			Spawn(particle, position);
 
 		m_SpawnCount = 0.0f;
 	}
 
-	void ParticleSystem::UpdateParticles(float dt)
+	void ParticleSystem::UpdateParticles(float dt, int entityId)
 	{
 		if (!m_IsPlaying && !m_IsPaused)
 			return;
 
 		m_AliveParticles = 0;
 
-		for (auto& particle : m_Particles)
+
+		if (SortMode == SortMode::YoungestInFront)
 		{
-			if (!particle.IsActive)
-				continue;
-
-			if (!m_IsPaused)
+			for (int i = 0; i < m_PoolSize; i++)
 			{
-				float normalizedLife = particle.LifeElapsed / particle.Lifetime;
-
-				particle.Position += particle.Direction * particle.Speed * dt;
-				particle.Scale = Maths::Lerp(particle.ScaleStart, particle.ScaleEnd, normalizedLife);
-				particle.Rotation = Maths::Lerp(particle.RotationStart, particle.RotationEnd, normalizedLife);
-				particle.Color = Maths::Lerp(particle.ColorStart, particle.ColorEnd, normalizedLife);
-
-				particle.LifeElapsed += dt;
-				if (particle.LifeElapsed >= particle.Lifetime)
-				{
-					particle.LifeElapsed = particle.Lifetime;
-					particle.IsActive = false;
-				}
+				SortedUpdate(dt, i, entityId);
 			}
-			m_AliveParticles++;
-			Renderer::DrawQuad(particle.Position, particle.Rotation, particle.Scale, particle.Color);
+		}
+		else if (SortMode == SortMode::OldestInFront)
+		{
+			for (int i = m_PoolSize - 1; i >= 0; i--)
+			{
+				SortedUpdate(dt, i, entityId);
+			}
 		}
 	}
 
-	void ParticleSystem::Spawn(const ParticleComponent& p)
+	void ParticleSystem::SortedUpdate(float dt, int i, int entityId)
+	{
+		Particle& particle = m_Particles[i];
+
+		if (!particle.IsActive)
+			return;
+
+		if (!m_IsPaused)
+		{
+			float normalizedLife = particle.LifeElapsed / particle.Lifetime;
+
+			particle.Position += particle.Direction * particle.Speed * dt;
+			particle.Scale = Maths::Lerp(particle.ScaleStart, particle.ScaleEnd, normalizedLife);
+			particle.Rotation = Maths::Lerp(particle.RotationStart, particle.RotationEnd, normalizedLife);
+			particle.Color = Maths::Lerp(particle.ColorStart, particle.ColorEnd, normalizedLife);
+
+			particle.LifeElapsed += dt;
+			if (particle.LifeElapsed >= particle.Lifetime)
+			{
+				particle.LifeElapsed = particle.Lifetime;
+				particle.IsActive = false;
+			}
+		}
+		m_AliveParticles++;
+		Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
+	}
+
+	void ParticleSystem::Spawn(const ParticleBody& p, const glm::vec3& position)
 	{
 		if (m_Particles.size() <= 0)
 		{
@@ -96,17 +115,17 @@ namespace MoonEngine
 		else
 			particle.Speed = Maths::RandomFloat(p.Speed[0], p.Speed[1]);
 
-		particle.Position = p.Position + p.SpawnPosition;
+		particle.Position = position + p.SpawnPosition;
 		const glm::vec3 spawns = p.SpawnRadius * 0.5f;
 		const glm::vec3& spawnRand = glm::vec3(Maths::RandomFloat(-spawns.x, spawns.x),
 											   Maths::RandomFloat(-spawns.y, spawns.y),
 											   Maths::RandomFloat(-spawns.z, spawns.z));
 
-		
+
 		particle.Position = particle.Position + spawnRand;
 		particle.Direction = glm::vec3(0.0f, 1.0f, 0.0f);
 
-		switch (p.EmitterType)
+		switch (EmitterType)
 		{
 			case EmitterType::Box:
 			{
@@ -224,6 +243,7 @@ namespace MoonEngine
 #pragma endregion
 
 #pragma region Rendering
+		particle.Texture = p.Texture;
 
 		if (p.IsColorConstant)
 			particle.ColorStart = p.ColorStart;
@@ -272,16 +292,5 @@ namespace MoonEngine
 		m_IsPaused = false;
 		m_Particles.clear();
 		m_Particles.resize(m_PoolSize);
-	}
-
-	void ParticleSystem::DrawGui()
-	{
-		ImGui::Begin("Particle Stats");
-
-		ImGui::Text("Duration: %.2f", m_DurationTimer);
-		ImGui::Text("Per Second Timer: %.2f", m_PerSecondTimer);
-		ImGui::Text("Particle Count: %d", m_AliveParticles);
-
-		ImGui::End();
 	}
 }

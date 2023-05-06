@@ -12,6 +12,7 @@
 namespace MoonEngine
 {
 	Shared<Texture> cameraTexture;
+	Shared<Texture> flareTexture;
 
 	ImFont* font16;
 	ImFont* font24;
@@ -78,7 +79,7 @@ namespace MoonEngine
 		{
 			FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::RED_INTEGER}, {FramebufferTextureFormat::DEPTH} };
 			m_ViewportFbo = MakeShared<Framebuffer>(props);
-			m_EditorCameraController = MakeShared<EditorCamera>();
+			m_EditorCamera = MakeShared<EditorCamera>();
 		}
 		//-Viewport Initilization
 
@@ -92,98 +93,14 @@ namespace MoonEngine
 		NewScene();
 
 		cameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
+		flareTexture = MakeShared<Texture>("Resource/EditorIcons/Flare.png");
 	}
 
 	void EditorLayer::Update()
 	{
 		//+Viewport Update
 		if (m_ShowViewport)
-		{
-			const auto& viewportSize = m_ViewportData.ViewportSize;
-			if (viewportSize.x != m_ViewportFbo->GetWidth() || viewportSize.y != m_ViewportFbo->GetHeight())
-			{
-				m_ViewportFbo->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-				m_EditorCameraController->Resize(viewportSize.x / viewportSize.y);
-			}
-
-			m_EditorCameraController->Update(m_ViewportData.ViewportFocused, m_ViewportData.ViewportHovered);
-
-			m_GizmosData.IsSnapping = Input::GetKey(Keycode::LeftControl);
-
-			//+Render Viewport
-			m_ViewportFbo->Bind();
-
-			Renderer::SetRenderData(m_EditorCameraController->GetViewProjection());
-			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
-			Renderer::Begin();
-			m_ViewportFbo->ClearColorAttachment(1, (void*)-1);
-
-			auto view = m_Scene->m_Registry.view<const TransformComponent, const SpriteComponent>();
-			for (auto [entity, transform, sprite] : view.each())
-			{
-				Renderer::DrawEntity(transform, sprite, (int)entity);
-			}
-
-			Renderer::End();
-
-			Renderer::SetLineWidth(2.0f);
-
-			auto cameraView = m_Scene->m_Registry.view<const TransformComponent, const CameraComponent>();
-			for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
-			{
-				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-					* rotationMat * glm::scale(glm::mat4(1.0f), glm::vec3(cameraComponent.Size * 2.0f, cameraComponent.Size * 2.0f, 0.0f));
-
-				transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-					* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
-
-				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
-			}
-
-			Renderer::End();
-
-			Renderer::SetLineWidth(3.0f);
-
-			if (m_SelectedEntity)
-			{
-				TransformComponent& transformComponent = m_SelectedEntity.GetComponent<TransformComponent>();
-				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-					* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
-
-				if (!m_SelectedEntity.HasComponent<CameraComponent>())
-					Renderer::DrawRect(transform, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
-			}
-
-			Renderer::End();
-
-			//+MousePicking
-			{
-				if (m_ViewportData.ViewportFocused)
-				{
-					const auto& viewportPositon = m_ViewportData.ViewportPosition;
-					ImVec2 mousePos = ImGui::GetMousePos();
-					mousePos.x -= viewportPositon.x;
-					mousePos.y -= viewportPositon.y;
-					mousePos.y = viewportSize.y - mousePos.y;
-
-					int mouseX = (int)mousePos.x;
-					int mouseY = (int)mousePos.y;
-
-					if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && (int)mouseY < viewportSize.y && Input::GetMouseButtonDown(0))
-					{
-						int pixelData = m_ViewportFbo->ReadPixel(1, mouseX, mouseY);
-						if (!m_GizmosData.IsUsing)
-							m_SelectedEntity = pixelData == -1 ? Entity{} : Entity{ (entt::entity)pixelData, m_Scene.get() };
-					}
-				}
-			}//-MousePicking
-
-
-			m_ViewportFbo->Unbind();
-			//-Render Viewport
-		}
+			EditorLoop();
 		//-Viewport Update
 
 		//+Gameview Update
@@ -359,6 +276,127 @@ namespace MoonEngine
 		ImGui::End();
 	}
 
+	void EditorLayer::EditorLoop()
+	{
+		const auto& viewportSize = m_ViewportData.ViewportSize;
+		if (viewportSize.x != m_ViewportFbo->GetWidth() || viewportSize.y != m_ViewportFbo->GetHeight())
+		{
+			m_ViewportFbo->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			m_EditorCamera->Resize(viewportSize.x / viewportSize.y);
+		}
+
+		m_EditorCamera->Update(m_ViewportData.ViewportFocused, m_ViewportData.ViewportHovered);
+
+		m_GizmosData.IsSnapping = Input::GetKey(Keycode::LeftControl);
+
+		//+Render Viewport
+		m_ViewportFbo->Bind();
+
+		Renderer::SetRenderData(m_EditorCamera->GetViewProjection());
+		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
+		Renderer::Begin();
+		m_ViewportFbo->ClearColorAttachment(1, (void*)-1);
+
+		//SpriteRenderer
+		auto view = m_Scene->m_Registry.view<const TransformComponent, const SpriteComponent>();
+		for (auto [entity, transform, sprite] : view.each())
+		{
+			Renderer::DrawEntity(transform, sprite, (int)entity);
+		}
+
+		Renderer::SetLineWidth(2.0f);
+
+		//ParticleSystem
+		auto particleSystemView = m_Scene->m_Registry.view<const TransformComponent, ParticleComponent>();
+		float dt = Time::DeltaTime();
+		for (auto [entity, transformComponent, particle] : particleSystemView.each())
+		{
+			particle.ParticleSystem.Update(dt, particle.Particle, transformComponent.Position);
+			particle.ParticleSystem.UpdateParticles(dt, (int)entity);
+
+			if (!particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
+			{
+				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position);
+				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, flareTexture, { 1.0f, 1.0f }, (int)entity);
+			}
+
+			Entity e{ entity, m_Scene.get() };
+			if (m_SelectedEntity == e)
+			{
+				switch (particle.ParticleSystem.EmitterType)
+				{
+					case EmitterType::Box:
+					{
+						Renderer::DrawRect(transformComponent.Position + particle.Particle.SpawnPosition, particle.Particle.SpawnRadius,
+										   { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f }, (int)entity);
+						break;
+					}
+					default:
+						break;
+				}
+			}
+		}
+
+		Renderer::End();
+
+		//CameraComponent
+		auto cameraView = m_Scene->m_Registry.view<const TransformComponent, const CameraComponent>();
+		for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
+		{
+			const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+				* rotationMat * glm::scale(glm::mat4(1.0f), glm::vec3(cameraComponent.Size * 2.0f, cameraComponent.Size * 2.0f, 0.0f));
+
+			transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+				* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
+
+			Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
+		}
+
+		Renderer::End();
+
+		Renderer::SetLineWidth(4.0f);
+
+		if (m_SelectedEntity)
+		{
+			TransformComponent& transformComponent = m_SelectedEntity.GetComponent<TransformComponent>();
+			const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+			const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+				* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
+
+			if (!m_SelectedEntity.HasComponent<CameraComponent>() && !m_SelectedEntity.HasComponent<ParticleComponent>())
+				Renderer::DrawRect(transform, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
+		}
+
+		Renderer::End();
+
+		//+MousePicking
+		if (m_ViewportData.ViewportHovered)
+		{
+			const auto& viewportPositon = m_ViewportData.ViewportPosition;
+			ImVec2 mousePos = ImGui::GetMousePos();
+			mousePos.x -= viewportPositon.x;
+			mousePos.y -= viewportPositon.y;
+			mousePos.y = viewportSize.y - mousePos.y;
+
+			int mouseX = (int)mousePos.x;
+			int mouseY = (int)mousePos.y;
+
+			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && (int)mouseY < viewportSize.y && Input::GetMouseButtonDown(0))
+			{
+				int pixelData = m_ViewportFbo->ReadPixel(1, mouseX, mouseY);
+				if (!m_GizmosData.IsUsing)
+					m_SelectedEntity = pixelData == -1 ? Entity{} : Entity{ (entt::entity)pixelData, m_Scene.get() };
+			}
+		}
+		//-MousePicking
+
+
+		m_ViewportFbo->Unbind();
+		//-Render Viewport
+	}
+
 	void EditorLayer::Overlay()
 	{
 		if (!m_ShowOverlay)
@@ -419,8 +457,8 @@ namespace MoonEngine
 		auto& gizmoSelection = m_GizmosData.GizmoSelection;
 		if (m_SelectedEntity && gizmoSelection != GIZMOSELECTION::NONE)
 		{
-			const glm::mat4& view = m_EditorCameraController->GetView();
-			const glm::mat4& projection = m_EditorCameraController->GetProjection();
+			const glm::mat4& view = m_EditorCamera->GetView();
+			const glm::mat4& projection = m_EditorCamera->GetProjection();
 
 			TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 rotation = glm::toMat4(glm::quat(component.Rotation));

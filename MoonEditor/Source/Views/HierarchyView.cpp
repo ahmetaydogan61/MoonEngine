@@ -82,6 +82,14 @@ namespace MoonEngine
 					entity.RemoveComponent<SpriteComponent>();
 					editor.SetSelectedEntity(entity);
 				}
+				if (ImGui::MenuItem("Particle"))
+				{
+					Entity entity = m_Scene->CreateEntity();
+					entity.GetComponent<IdentityComponent>().Name = "Particle";
+					entity.AddComponent<ParticleComponent>();
+					entity.RemoveComponent<SpriteComponent>();
+					editor.SetSelectedEntity(entity);
+				}
 				ImGui::EndPopup();
 			}
 
@@ -97,6 +105,14 @@ namespace MoonEngine
 					Entity entity = m_Scene->CreateEntity();
 					entity.GetComponent<IdentityComponent>().Name = "Camera";
 					entity.AddComponent<CameraComponent>();
+					entity.RemoveComponent<SpriteComponent>();
+					editor.SetSelectedEntity(entity);
+				}
+				if (ImGui::MenuItem("Particle"))
+				{
+					Entity entity = m_Scene->CreateEntity();
+					entity.GetComponent<IdentityComponent>().Name = "Particle";
+					entity.AddComponent<ParticleComponent>().ParticleSystem.Play();
 					entity.RemoveComponent<SpriteComponent>();
 					editor.SetSelectedEntity(entity);
 				}

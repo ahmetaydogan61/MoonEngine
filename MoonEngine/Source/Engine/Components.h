@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Systems/ParticleSystem.h"
 
 #include "Renderer/Camera.h"
 #include "Renderer/Texture.h"
@@ -59,12 +60,7 @@ namespace MoonEngine
 			if (Size < 0.1f)
 				Size = 0.1f;
 
-			float left = -m_AspectRatio * Size;
-			float right = m_AspectRatio * Size;
-			float bottom = -Size;
-			float top = Size;
-
-			m_Projection = glm::ortho(left, right, bottom, top, m_NearClip, m_FarClip);
+			Resize(m_AspectRatio);
 		}
 
 		void Resize(float aspectRatio)
@@ -78,5 +74,11 @@ namespace MoonEngine
 		}
 
 		const glm::mat4& GetProjection() const { return m_Projection; }
+	};
+
+	struct ParticleComponent
+	{
+		ParticleBody Particle;
+		ParticleSystem ParticleSystem;
 	};
 }

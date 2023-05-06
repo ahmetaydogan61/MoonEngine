@@ -16,7 +16,7 @@ namespace MoonEngine
 {
 	void BeginDrawProp(const char* label)
 	{
-		ImGui::BeginTable(label, 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings);
+		ImGui::BeginTable(label, 2, ImGuiTableFlags_::ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable);
 	}
 
 	void EndDrawProp()
@@ -26,10 +26,28 @@ namespace MoonEngine
 
 	void RenderProp(const char* label, std::function<void()> func)
 	{
+		ImGui::PushID(label);
 		ImGui::TableNextColumn();
 		ImGuiUtils::Label(label, false);
 		ImGui::TableNextColumn();
 		func();
+		ImGui::PopID();
+	}
+
+	void DrawTreeProp(const char* label, std::function<void()> func)
+	{
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth;
+		bool treeopen = ImGui::TreeNodeEx(label, flags);
+
+		if (treeopen)
+		{
+			ImGuiUtils::AddPadding(0.0f, 10.0f);
+			BeginDrawProp(label);
+			func();
+			EndDrawProp();
+			ImGuiUtils::AddPadding(0.0f, 20.0f);
+			ImGui::TreePop();
+		}
 	}
 
 	void UtilVectorColumn(const std::string& vecName, glm::vec3& vector, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -160,35 +178,322 @@ namespace MoonEngine
 	{
 		ShowComponent<SpriteComponent>("Sprite", [&](SpriteComponent& component)
 		{
-			{
-				BeginDrawProp("##Sprite");
+			BeginDrawProp("##Sprite");
 
-				RenderProp("Color", [&]
+			RenderProp("Color", [&]
+			{
+				ImGui::ColorEdit4("##Color", &component.Color[0]);
+			});
+
+			RenderProp("Tiling {x:y}", [&]
+			{
+				ImGui::DragFloat2("##Tiling", &component.Tiling[0], 0.1f, 0.0f, 0.0f, "%.2f");
+			});
+
+			RenderProp("Texture", [&]
+			{
+				if (component.Texture)
 				{
-					ImGui::ColorEdit4("##Color", &component.Color[0]);
-				});
-				
-				RenderProp("Tiling {x:y}", [&]
+					bool reset = false;
+					if (ImGui::Button(" X "))
+						reset = true;
+
+					ImGui::SameLine();
+					ImGui::Text(component.Texture->GetPath().filename().string().c_str());
+					if (ImGui::IsItemHovered())
+					{
+						ImGui::SetTooltip(component.Texture->GetPath().string().c_str());
+					}
+					if (reset)
+						component.Texture = nullptr;
+				}
+				else
+					ImGui::Text("None");
+
+				if (ImGui::BeginDragDropTarget())
 				{
-					ImGui::DragFloat2("##Tiling", &component.Tiling[0], 0.1f, 0.0f, 0.0f, "%.2f");
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_AssetItem"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = path;
+						Shared<Texture> texture = MakeShared<Texture>(texturePath.string());
+						if (texture)
+							component.Texture = texture;
+						else
+							ME_ERR("Failed to load Texture! Path: {}", texturePath.string().c_str());
+					}
+					ImGui::EndDragDropTarget();
+				}
+			});
+			EndDrawProp();
+		}, selectedEntity);
+
+		ShowComponent<CameraComponent>("Camera", [&](CameraComponent& component)
+		{
+			BeginDrawProp("##Camera");
+
+			RenderProp("Is Main", [&]
+			{
+				ImGui::Checkbox("##IsMain", &component.IsMain);
+			});
+
+			RenderProp("Size", [&]
+			{
+				ImGui::DragFloat("##Size", &component.Size, 0.1f, 0.0f, FLT_MAX, "%.2f");
+			});
+
+			EndDrawProp();
+		}, selectedEntity);
+
+		ShowComponent<ParticleComponent>("Particle System", [&](ParticleComponent& component)
+		{
+			float dragSliderSpeed = 0.1f;
+
+			bool isPlaying = component.ParticleSystem.IsPlaying();
+			const char* label = isPlaying ? "Pause" : "Play";
+			if (ImGuiUtils::ButtonSelectable(label, 0, 0, isPlaying, ImGui::GetStyle().Colors[ImGuiCol_::ImGuiCol_Button]))
+				isPlaying ? component.ParticleSystem.Pause() : component.ParticleSystem.Play();
+
+			ImGui::SameLine();
+
+			if (ImGuiUtils::ButtonSelectable("Stop", 0, 0, false, ImGui::GetStyle().Colors[ImGuiCol_::ImGuiCol_Button]))
+				component.ParticleSystem.Stop();
+
+			ImGui::SameLine();
+
+			if (ImGuiUtils::ButtonSelectable("Restart", 0, 0, false, ImGui::GetStyle().Colors[ImGuiCol_::ImGuiCol_Button]))
+			{
+				component.ParticleSystem.Stop();
+				component.ParticleSystem.Play();
+			}
+
+			ImGuiUtils::AddPadding(0.0f, 10.0f);
+
+			DrawTreeProp("System", [&]
+			{
+				RenderProp("Looping", [&]
+				{
+					ImGui::Checkbox("##Loop", &component.ParticleSystem.Looping);
 				});
-				
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Duration", [&]
+				{
+					ImGui::DragFloat("##Dur", &component.ParticleSystem.Duration, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Particles Per Second", [&]
+				{
+					ImGui::DragFloat("##PPS", &component.ParticleSystem.ParticlePerSecond, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Lifetime", [&]
+				{
+					ImGui::Checkbox("Constant", &component.Particle.IsLifetimeConstant);
+
+					if (component.Particle.IsLifetimeConstant)
+						ImGui::DragFloat("##Lt", &component.Particle.Lifetime[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					else
+						ImGui::DragFloat2("##Lt", &component.Particle.Lifetime[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+			});
+
+			DrawTreeProp("Emitter", [&]
+			{
+				RenderProp("Speed", [&]
+				{
+					ImGui::Checkbox("Constant", &component.Particle.IsSpeedConstant);
+
+					if (component.Particle.IsSpeedConstant)
+						ImGui::DragFloat("##Spd", &component.Particle.Speed[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					else
+						ImGui::DragFloat2("##Spd", &component.Particle.Speed[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Spawn Position", [&]()
+				{
+					ImGui::DragFloat3("##Rad", &component.Particle.SpawnPosition[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				RenderProp("Spawn Radius", [&]()
+				{
+					ImGui::DragFloat3("##Rad", &component.Particle.SpawnRadius[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Emitter Type", [&]
+				{
+					int currentStlye = (int)component.ParticleSystem.EmitterType;
+					if (ImGui::Combo("##Type", &currentStlye, "None\0Box\0"))
+						component.ParticleSystem.EmitterType = (EmitterType)currentStlye;
+				});
+
+				switch (component.ParticleSystem.EmitterType)
+				{
+					case EmitterType::Box:
+					{
+						RenderProp("Randomize Direction", [&]()
+						{
+							ImGui::DragFloat("##Dir", &component.Particle.RandomDirectionFactor, 0.01f, 0.0f, 1.0f, "%.2f");
+							component.Particle.RandomDirectionFactor = glm::clamp(component.Particle.RandomDirectionFactor, 0.0f, 1.0f);
+						});
+						break;
+					}
+					default:
+						break;
+				}
+			});
+
+			DrawTreeProp("Scale", [&]
+			{
+				RenderProp("##Scale", [&]
+				{
+					ImGui::Checkbox("Is3D", &component.Particle.IsScale3D);
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Start", [&]
+				{
+					ImGui::Checkbox("Constant", &component.Particle.IsScaleConstant);
+
+					if (component.Particle.IsScale3D)
+					{
+						ImGui::DragFloat3("##Scale", &component.Particle.ScaleStart[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsScaleConstant)
+							ImGui::DragFloat3("##Range", &component.Particle.ScaleStartRandom[0]), dragSliderSpeed, 0.0f, 0.0f, "%.2f";
+					}
+					else
+					{
+						ImGui::DragFloat("##Scale", &component.Particle.ScaleStart[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsScaleConstant)
+							ImGui::DragFloat("##Range", &component.Particle.ScaleStartRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("End", [&]
+				{
+					ImGui::Checkbox("Enabled", &component.Particle.IsScaleCycle);
+
+					if (!component.Particle.IsScaleCycle)
+						return;
+
+					ImGui::Checkbox("Constant", &component.Particle.IsScaleEndConstant);
+
+					if (component.Particle.IsScale3D)
+					{
+						ImGui::DragFloat3("##Scale", &component.Particle.ScaleEnd[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsScaleEndConstant)
+							ImGui::DragFloat3("##Range", &component.Particle.ScaleEndRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+					else
+					{
+						ImGui::DragFloat("##Scale", &component.Particle.ScaleEnd[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsScaleEndConstant)
+							ImGui::DragFloat("##Range", &component.Particle.ScaleEndRandom[0]), dragSliderSpeed, 0.0f, 0.0f, "%.2f";
+					}
+				});
+			});
+
+			DrawTreeProp("Rotation", [&]
+			{
+				RenderProp("##Rot", [&]
+				{
+					ImGui::Checkbox("Is3D", &component.Particle.IsRotation3D);
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Start", [&]
+				{
+					ImGui::Checkbox("Constant", &component.Particle.IsRotationConstant);
+
+					glm::vec3 rotation = glm::degrees(component.Particle.RotationStart);
+					glm::vec3 rotationRandom = glm::degrees(component.Particle.RotationStartRandom);
+					if (component.Particle.IsRotation3D)
+					{
+						ImGui::DragFloat3("##RotStart", &rotation[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsRotationConstant)
+							ImGui::DragFloat3("##RotRandom", &rotationRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+					else
+					{
+						ImGui::DragFloat("##RotStart", &rotation.z, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsRotationConstant)
+							ImGui::DragFloat("##RotRandom", &rotationRandom.z, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+					component.Particle.RotationStart = glm::radians(rotation);
+					component.Particle.RotationStartRandom = glm::radians(rotationRandom);
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("End", [&]
+				{
+					ImGui::Checkbox("Enabled", &component.Particle.IsRotationCycle);
+
+					if (!component.Particle.IsRotationCycle)
+						return;
+
+					glm::vec3 rotation = glm::degrees(component.Particle.RotationEnd);
+					glm::vec3 rotationRandom = glm::degrees(component.Particle.RotationEndRandom);
+
+					ImGui::Checkbox("Constant", &component.Particle.IsRotationEndConstant);
+
+					if (component.Particle.IsRotation3D)
+					{
+						ImGui::DragFloat3("##Rot", &rotation[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsRotationEndConstant)
+							ImGui::DragFloat3("##Range", &rotationRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+					else
+					{
+						ImGui::DragFloat("##Rot", &rotation.z, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						if (!component.Particle.IsRotationEndConstant)
+							ImGui::DragFloat("##Range", &rotationRandom.z, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					}
+					component.Particle.RotationEnd = glm::radians(rotation);
+					component.Particle.RotationEndRandom = glm::radians(rotationRandom);
+				});
+			});
+
+			DrawTreeProp("Rendering", [&]
+			{
+				RenderProp("Sort Mode", [&]
+				{
+					int currentMode = (int)component.ParticleSystem.SortMode;
+					if (ImGui::Combo("##Type", &currentMode, "Oldest in Front\0Youngest in Front\0"))
+						component.ParticleSystem.SortMode = (SortMode)currentMode;
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
 				RenderProp("Texture", [&]
 				{
-					if (component.Texture)
+					if (component.Particle.Texture)
 					{
 						bool reset = false;
-						if (ImGui::Button("X"))
+						if (ImGui::Button(" X "))
 							reset = true;
 
 						ImGui::SameLine();
-						ImGui::Text(component.Texture->GetPath().filename().string().c_str());
+						ImGui::Text(component.Particle.Texture->GetPath().filename().string().c_str());
 						if (ImGui::IsItemHovered())
 						{
-							ImGui::SetTooltip(component.Texture->GetPath().string().c_str());
+							ImGui::SetTooltip(component.Particle.Texture->GetPath().string().c_str());
 						}
-						if(reset)
-							component.Texture = nullptr;
+						if (reset)
+							component.Particle.Texture = nullptr;
 					}
 					else
 						ImGui::Text("None");
@@ -201,34 +506,41 @@ namespace MoonEngine
 							std::filesystem::path texturePath = path;
 							Shared<Texture> texture = MakeShared<Texture>(texturePath.string());
 							if (texture)
-								component.Texture = texture;
+								component.Particle.Texture = texture;
 							else
 								ME_ERR("Failed to load Texture! Path: {}", texturePath.string().c_str());
 						}
 						ImGui::EndDragDropTarget();
 					}
 				});
-				EndDrawProp();
-			}
-		}, selectedEntity);
 
-		ShowComponent<CameraComponent>("Camera", [&](CameraComponent& component)
-		{
-			{
-				BeginDrawProp("##Camera");
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-				RenderProp("Is Main", [&]
+				RenderProp("Color Start", [&]
 				{
-					ImGui::Checkbox("##IsMain", &component.IsMain);
+					ImGui::Checkbox("Constant", &component.Particle.IsColorConstant);
+
+					ImGui::ColorEdit4("##RotStart", &component.Particle.ColorStart[0]);
+					if (!component.Particle.IsColorConstant)
+						ImGui::ColorEdit4("##RotRand", &component.Particle.ColorStartRandom[0]);
 				});
 
-				RenderProp("Size", [&]
-				{
-					ImGui::DragFloat("##Size", &component.Size, 0.1f, 0.0f, FLT_MAX, "%.2f");
-				});
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-				EndDrawProp();
-			}
+				RenderProp("Color End", [&]
+				{
+					ImGui::Checkbox("Enabled", &component.Particle.IsColorCycle);
+
+					if (!component.Particle.IsColorCycle)
+						return;
+
+					ImGui::Checkbox("Constant", &component.Particle.IsColorEndConstant);
+
+					ImGui::ColorEdit4("##ColEnd", &component.Particle.ColorEnd[0]);
+					if (!component.Particle.IsColorEndConstant)
+						ImGui::ColorEdit4("##RColRand", &component.Particle.ColorEndRandom[0]);
+				});
+			});
 		}, selectedEntity);
 	}
 
@@ -278,6 +590,10 @@ namespace MoonEngine
 					if (ImGui::MenuItem("Camera"))
 						if (!selectedEntity.HasComponent<CameraComponent>())
 							selectedEntity.AddComponent<CameraComponent>();
+
+					if (ImGui::MenuItem("Particle System"))
+						if (!selectedEntity.HasComponent<ParticleComponent>())
+							selectedEntity.AddComponent<ParticleComponent>();
 					ImGui::EndPopup();
 				}
 			}//-Add Component Button

@@ -62,7 +62,7 @@ namespace MoonEngine
 		GizmosData m_GizmosData;
 		Shared<Framebuffer> m_ViewportFbo;
 
-		Shared<EditorCamera> m_EditorCameraController;
+		Shared<EditorCamera> m_EditorCamera;
 
 		bool m_ShowViewport = true;
 		bool m_ShowOverlay = true;
@@ -102,6 +102,7 @@ namespace MoonEngine
 		void Init();
 		void Update();
 		void DrawGui();
+		void EditorLoop();
 
 		void NewScene();
 		void SaveScene(const std::string& path);
