@@ -27,9 +27,11 @@ namespace MoonEngine
 		bool IsSpeedConstant = true;
 		glm::vec2 Speed = glm::vec2(1.0f, 3.0f);
 		glm::vec3 SpawnPosition = glm::vec3(0.0f);
-		glm::vec3 SpawnRadius = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 SpawnRadius = glm::vec3(1.0f, 1.0f, 0.0f);
 
+		//Emiiter
 		float RandomDirectionFactor = 1.0f;
+		float ConeRadius = 1.0f;
 
 		//Scale
 		bool IsScale3D = false;
@@ -98,7 +100,7 @@ namespace MoonEngine
 		void UpdateParticles(float dt, int entityId);
 
 		SortMode SortMode = SortMode::YoungestInFront;
-		EmitterType EmitterType = EmitterType::Box;
+		EmitterType EmitterType = EmitterType::Cone;
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;

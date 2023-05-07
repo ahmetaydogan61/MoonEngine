@@ -115,26 +115,42 @@ namespace MoonEngine
 		else
 			particle.Speed = Maths::RandomFloat(p.Speed[0], p.Speed[1]);
 
-		particle.Position = position + p.SpawnPosition;
-		const glm::vec3 spawns = p.SpawnRadius * 0.5f;
-		const glm::vec3& spawnRand = glm::vec3(Maths::RandomFloat(-spawns.x, spawns.x),
-											   Maths::RandomFloat(-spawns.y, spawns.y),
-											   Maths::RandomFloat(-spawns.z, spawns.z));
-
-
-		particle.Position = particle.Position + spawnRand;
+		particle.Position = position;
 		particle.Direction = glm::vec3(0.0f, 1.0f, 0.0f);
 
 		switch (EmitterType)
 		{
 			case EmitterType::Box:
 			{
+				const glm::vec3& spawnRadius = p.SpawnRadius * 0.5f;
+				const glm::vec3& spawnPos = glm::vec3(Maths::RandomFloat(-spawnRadius.x, spawnRadius.x),
+													  Maths::RandomFloat(-spawnRadius.y, spawnRadius.y),
+													  0.0f);
+
+				particle.Position += p.SpawnPosition + spawnPos;
+
 				if (p.RandomDirectionFactor > 0.0f)
 				{
 					particle.Direction = glm::vec3(Maths::RandomFloat(-1.0f, 1.0f),
 												   Maths::RandomFloat(-1.0f, 1.0f),
 												   Maths::RandomFloat(-1.0f, 1.0f));
 				}
+				break;
+			}
+			case EmitterType::Cone:
+			{
+				float spawnRadius = p.SpawnRadius.x * 0.5f;
+				const glm::vec3& spawnPos = glm::vec3(Maths::RandomFloat(-spawnRadius - 0.1f, spawnRadius + 0.1f), 0.0f, 0.0f);
+				particle.Position += p.SpawnPosition + spawnPos;
+				int dir = 0;
+				if (spawnPos.x <= -0.01f)
+					dir = -1;
+				else if (spawnPos.x >= 0.01f)
+					dir = 1;
+
+				float randomDirX = spawnRadius + p.ConeRadius * 0.5f;
+				particle.Direction.x = Maths::RandomFloat(0.0f, dir * randomDirX);
+				particle.Direction.y += p.SpawnRadius.y * 0.5f;
 				break;
 			}
 			default:

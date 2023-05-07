@@ -317,38 +317,42 @@ namespace MoonEngine
 
 				ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-				RenderProp("Spawn Position", [&]()
+				RenderProp("Emitter Type", [&]
 				{
-					ImGui::DragFloat3("##Rad", &component.Particle.SpawnPosition[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
-				});
-
-				RenderProp("Spawn Radius", [&]()
-				{
-					ImGui::DragFloat3("##Rad", &component.Particle.SpawnRadius[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					int currentStlye = (int)component.ParticleSystem.EmitterType;
+					if (ImGui::Combo("##Type", &currentStlye, "None\0Box\0Cone\0"))
+						component.ParticleSystem.EmitterType = (EmitterType)currentStlye;
 				});
 
 				ImGuiUtils::AddPadding(0.0f, 5.0f);
 
-				RenderProp("Emitter Type", [&]
-				{
-					int currentStlye = (int)component.ParticleSystem.EmitterType;
-					if (ImGui::Combo("##Type", &currentStlye, "None\0Box\0"))
-						component.ParticleSystem.EmitterType = (EmitterType)currentStlye;
-				});
+				EmitterType emitterType = component.ParticleSystem.EmitterType;
 
-				switch (component.ParticleSystem.EmitterType)
+				if (emitterType != EmitterType::None)
 				{
-					case EmitterType::Box:
+					RenderProp("Spawn Position", [&]()
 					{
-						RenderProp("Randomize Direction", [&]()
-						{
-							ImGui::DragFloat("##Dir", &component.Particle.RandomDirectionFactor, 0.01f, 0.0f, 1.0f, "%.2f");
-							component.Particle.RandomDirectionFactor = glm::clamp(component.Particle.RandomDirectionFactor, 0.0f, 1.0f);
-						});
-						break;
-					}
-					default:
-						break;
+						ImGui::DragFloat3("##Rad", &component.Particle.SpawnPosition[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					});
+
+					RenderProp("Spawn Radius", [&]()
+					{
+						ImGui::DragFloat3("##Rad", &component.Particle.SpawnRadius[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					});
+
+					RenderProp("Randomize Direction", [&]()
+					{
+						ImGui::DragFloat("##Dir", &component.Particle.RandomDirectionFactor, 0.01f, 0.0f, 1.0f, "%.2f");
+						component.Particle.RandomDirectionFactor = glm::clamp(component.Particle.RandomDirectionFactor, 0.0f, 1.0f);
+					});
+				}
+
+				if (emitterType == EmitterType::Cone)
+				{
+					RenderProp("Cone Radius", [&]()
+					{
+						ImGui::DragFloat("##Rad", &component.Particle.ConeRadius, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					});
 				}
 			});
 

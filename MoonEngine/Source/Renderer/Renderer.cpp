@@ -346,10 +346,10 @@ namespace MoonEngine
 
 	void Renderer::DrawRect(const glm::vec3& position, const glm::vec2& scale, const glm::vec4& color, int entityId)
 	{
-		glm::vec3 p0 = glm::vec3(position.x - scale.x * 0.5f, position.y - scale.y * 0.5f, position.z);
-		glm::vec3 p1 = glm::vec3(position.x + scale.x * 0.5f, position.y - scale.y * 0.5f, position.z);
-		glm::vec3 p2 = glm::vec3(position.x + scale.x * 0.5f, position.y + scale.y * 0.5f, position.z);
-		glm::vec3 p3 = glm::vec3(position.x - scale.x * 0.5f, position.y + scale.y * 0.5f, position.z);
+		const glm::vec3& p0 = glm::vec3(position.x - scale.x * 0.5f, position.y - scale.y * 0.5f, position.z);
+		const glm::vec3& p1 = glm::vec3(position.x + scale.x * 0.5f, position.y - scale.y * 0.5f, position.z);
+		const glm::vec3& p2 = glm::vec3(position.x + scale.x * 0.5f, position.y + scale.y * 0.5f, position.z);
+		const glm::vec3& p3 = glm::vec3(position.x - scale.x * 0.5f, position.y + scale.y * 0.5f, position.z);
 
 		DrawLine(p0, p1, color, entityId);
 		DrawLine(p1, p2, color, entityId);

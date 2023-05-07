@@ -332,6 +332,33 @@ namespace MoonEngine
 										   { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f }, (int)entity);
 						break;
 					}
+					case EmitterType::Cone:
+					{
+						int ent = (int)entity;
+						const auto& color = glm::vec4{ 0.0f, 150.0f / 255.0f, 1.0f, 1.0f };
+
+						const glm::vec3& spawnPos = transformComponent.Position + particle.Particle.SpawnPosition;
+						const glm::vec3& tipPos = spawnPos + glm::vec3(0.0f, particle.Particle.SpawnRadius.y, 0.0f);
+
+						Renderer::DrawLine(spawnPos, tipPos, color, ent);
+
+						float spawnRadiusX = particle.Particle.SpawnRadius.x * 0.5f;
+						const glm::vec3& spawnRadius = glm::vec3(spawnRadiusX, 0.0f, 0.0f);
+						
+						const glm::vec3& p0 = spawnPos - spawnRadius;
+						const glm::vec3& p1 = spawnPos + spawnRadius;
+						Renderer::DrawLine(p0, p1, color, ent);
+
+						float coneRadiusSize = particle.Particle.ConeRadius * 0.5f;
+						const glm::vec3& coneRadius = glm::vec3(coneRadiusSize, 0.0f, 0.0f);
+
+						const glm::vec3& p3 = tipPos - spawnRadius - coneRadius;
+						const glm::vec3& p4 = tipPos + spawnRadius + coneRadius;
+						Renderer::DrawLine(p3, p4, color, ent);
+
+						Renderer::DrawLine(p0, p3, color, ent);
+						Renderer::DrawLine(p1, p4, color, ent);
+					}
 					default:
 						break;
 				}
