@@ -1,4 +1,7 @@
 #pragma once
+#include "Views/Viewport/Viewport.h"
+#include "Views/Game/GameView.h"
+
 #include "Utils/EditorCamera.h"
 #include "Views/AssetsView.h"
 #include "Views/HierarchyView.h"
@@ -12,32 +15,6 @@ namespace MoonEngine
 	class Framebuffer;
 	class Scene;
 
-	enum class GIZMOSELECTION
-	{
-		//These are the values from ImGuizmo OPERATION enum
-		NONE = -1,
-		TRANSLATE = 7,
-		RORTATE = 120,
-		SCALE = 896,
-	};
-
-	struct GizmosData
-	{
-		GIZMOSELECTION GizmoSelection = GIZMOSELECTION::TRANSLATE;
-		float SnapAmount = 0.25f;
-		bool IsSnapping = false;
-		bool IsUsing = false;
-	};
-
-	struct ViewportData
-	{
-		bool ViewportFocused = false;
-		bool ViewportHovered = false;
-
-		glm::vec2 ViewportSize = glm::vec2(0.0f);
-		glm::vec2 ViewportPosition = glm::vec2(0.0f);
-	};
-
 	class EditorLayer : public ApplicationLayer
 	{
 		enum class EditorState
@@ -49,35 +26,16 @@ namespace MoonEngine
 
 	private:
 		EditorState m_EditorState = EditorState::Edit;
-		Shared<Texture> m_PlayTexture, m_StopTexture, m_PauseTexture;
-		Shared<Texture> m_SelectTexture, m_TranslateTexture, m_ResizeTexture, m_RotateTexture;
-
+		
 		Shared<Scene> m_Scene, m_EditorScene;
-		Entity m_SelectedEntity;
+		Entity m_SelectedEntity = {};
 
-		void KeyEvents(KeyPressEvent& a);
+		Shared<ViewportView> m_ViewportView;
+		Shared<GameView> m_GameView;
 
-		//+Viewport Stuff
-		ViewportData m_ViewportData;
-		GizmosData m_GizmosData;
-		Shared<Framebuffer> m_ViewportFbo;
-
-		Shared<EditorCamera> m_EditorCamera;
-
-		bool m_ShowViewport = true;
-		bool m_ShowOverlay = true;
-		void Viewport(bool& render);
-		void Overlay();
-		//-Viewport Stuff
-
-		//+GameView Stuff
-		ViewportData m_GameViewData;
-		Shared<Framebuffer> m_GameFbo;
-
-		bool m_ShowGameView = true;
-		void GameView(bool& render);
-		//-GameView Stuff
-
+		void KeyEvents(KeyPressEvent& e);
+		void OnSceneChange();
+		
 		//+Hierarchy Stuff
 		bool m_ShowHierarchy = true;
 		bool m_ShowInspector = true;
@@ -102,7 +60,6 @@ namespace MoonEngine
 		void Init();
 		void Update();
 		void DrawGui();
-		void EditorLoop();
 
 		void NewScene();
 		void SaveScene(const std::string& path);

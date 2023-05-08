@@ -45,5 +45,6 @@ namespace MoonEngine
 
 		friend class EditorLayer;
 		friend class HierarchyView;
+		friend struct BasicView;
 	};
 }

@@ -1,6 +1,6 @@
 #include "mpch.h"
 #include "Views/HierarchyView.h"
-#include "EditorLayer.h"
+#include "Editor/EditorLayer.h"
 
 #include <Engine/Components.h>
 #include <Engine/Entity.h>

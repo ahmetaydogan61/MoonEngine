@@ -1,9 +1,8 @@
 #include "mpch.h"
 #include "Views/InspectorView.h"
-#include "EditorLayer.h"
+#include "Editor/EditorLayer.h"
 
-#include "Core/Debug.h"
-#include "Engine/Components.h"
+#include <Engine/Components.h>
 #include <Gui/ImGuiUtils.h>
 #include <IconsMaterialDesign.h>
 
@@ -328,6 +327,16 @@ namespace MoonEngine
 
 				EmitterType emitterType = component.ParticleSystem.EmitterType;
 
+				if (emitterType == EmitterType::Cone)
+				{
+					RenderProp("Cone Radius", [&]()
+					{
+						ImGui::DragFloat("##Rad", &component.Particle.ConeRadius, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+					});
+				}
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
 				if (emitterType != EmitterType::None)
 				{
 					RenderProp("Spawn Position", [&]()
@@ -344,14 +353,6 @@ namespace MoonEngine
 					{
 						ImGui::DragFloat("##Dir", &component.Particle.RandomDirectionFactor, 0.01f, 0.0f, 1.0f, "%.2f");
 						component.Particle.RandomDirectionFactor = glm::clamp(component.Particle.RandomDirectionFactor, 0.0f, 1.0f);
-					});
-				}
-
-				if (emitterType == EmitterType::Cone)
-				{
-					RenderProp("Cone Radius", [&]()
-					{
-						ImGui::DragFloat("##Rad", &component.Particle.ConeRadius, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 					});
 				}
 			});

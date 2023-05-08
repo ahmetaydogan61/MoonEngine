@@ -39,7 +39,7 @@ namespace MoonEngine
 		for (uint32_t i = 0; i < m_SpawnCount; i++)
 			Spawn(particle, position);
 
-		m_SpawnCount = 0.0f;
+		m_SpawnCount = 0;
 	}
 
 	void ParticleSystem::UpdateParticles(float dt, int entityId)
@@ -49,17 +49,19 @@ namespace MoonEngine
 
 		m_AliveParticles = 0;
 
+		if (m_PoolSize <= 0)
+			return;
 
 		if (SortMode == SortMode::YoungestInFront)
 		{
-			for (int i = 0; i < m_PoolSize; i++)
+			for (uint32_t i = 0; i < m_PoolSize; i++)
 			{
 				SortedUpdate(dt, i, entityId);
 			}
 		}
 		else if (SortMode == SortMode::OldestInFront)
 		{
-			for (int i = m_PoolSize - 1; i >= 0; i--)
+			for (uint32_t i = m_PoolSize - 1; i > 0; i--)
 			{
 				SortedUpdate(dt, i, entityId);
 			}

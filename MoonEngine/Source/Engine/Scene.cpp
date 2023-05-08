@@ -37,12 +37,12 @@ namespace MoonEngine
 
 	void Scene::UpdateEdit(const Camera* camera)
 	{
-		
+
 	}
 
 	void Scene::UpdatePlay(const glm::vec2& gameViewSize, bool paused)
 	{
-		
+
 	}
 
 	template<typename T>
@@ -72,6 +72,7 @@ namespace MoonEngine
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
 		CopyIfExists<SpriteComponent>(e, entity);
+		CopyIfExists<ParticleComponent>(e, entity);
 		return e;
 	}
 
@@ -82,15 +83,14 @@ namespace MoonEngine
 
 		scene->m_Registry.each_reverse([&](auto entityID)
 		{
-			{
-				Entity copyFrom{ entityID, scene.get() };
-				Entity copyTo = { tempScene->m_Registry.create(), tempScene.get() };
-				CopyIfExists<UUIDComponent>(copyTo, copyFrom);
-				CopyIfExists<IdentityComponent>(copyTo, copyFrom);
-				CopyIfExists<TransformComponent>(copyTo, copyFrom);
-				CopyIfExists<SpriteComponent>(copyTo, copyFrom);
-				CopyIfExists<CameraComponent>(copyTo, copyFrom);
-			}
+			Entity copyFrom{ entityID, scene.get() };
+			Entity copyTo = { tempScene->m_Registry.create(), tempScene.get() };
+			CopyIfExists<UUIDComponent>(copyTo, copyFrom);
+			CopyIfExists<IdentityComponent>(copyTo, copyFrom);
+			CopyIfExists<TransformComponent>(copyTo, copyFrom);
+			CopyIfExists<SpriteComponent>(copyTo, copyFrom);
+			CopyIfExists<CameraComponent>(copyTo, copyFrom);
+			CopyIfExists<ParticleComponent>(copyTo, copyFrom);
 		});
 		return tempScene;
 	}

@@ -1,5 +1,6 @@
 #include "mpch.h"
-#include "EditorLayer.h"
+#include "Editor/EditorLayer.h"
+#include "Editor/EditorAssets.h"
 #include <Core/Application.h>
 
 int main()
@@ -21,6 +22,7 @@ int main()
 	};
 
 	Application* application = new Application(prefs);
+	EditorAssets::LoadTextures();
 	application->PushLayer(MakeShared<EditorLayer>());
 	application->Run();
 }
