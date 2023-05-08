@@ -1,11 +1,13 @@
 #include <mpch.h>
 #include "Views/Viewport/Viewport.h"
+#include "Editor/EditorAssets.h"
 #include "Editor/EditorLayer.h"
 
 #include <Core/Time.h>
 #include <Engine/Components.h>
 #include <Engine/Entity.h>
 #include <Utils/Maths.h>
+#include <Gui/ImGuiUtils.h>
 
 #include <imgui.h>
 #include <imguizmo/ImGuizmo.h>
@@ -21,6 +23,9 @@ namespace MoonEngine
 		Name = ICON_MD_CAMERA;
 		Name += "Viewport";
 		Flags = ImGuiWindowFlags_NoScrollbar;
+
+		m_GizmosData.ShowGizmos = true;
+		m_GizmosData.GizmosColor = { 0.0f, 0.6f, 1.0f, 1.0f };
 
 		FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::RED_INTEGER}, {FramebufferTextureFormat::DEPTH} };
 		Viewbuffer = MakeShared<Framebuffer>(props);
@@ -72,10 +77,12 @@ namespace MoonEngine
 			particle.ParticleSystem.Update(dt, particle.Particle, transformComponent.Position);
 			particle.ParticleSystem.UpdateParticles(dt, (int)entity);
 
-			if (!particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
+			//GIZMO_ParticleSystem
+			if (m_GizmosData.ShowGizmos && !particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
 			{
 				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));;
 				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, flareTexture, { 1.0f, 1.0f }, (int)entity);
 			}
 
@@ -87,13 +94,13 @@ namespace MoonEngine
 					case EmitterType::Box:
 					{
 						Renderer::DrawRect(transformComponent.Position + particle.Particle.SpawnPosition, particle.Particle.SpawnRadius,
-										   { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f }, (int)entity);
+										   m_GizmosData.GizmosColor, (int)entity);
 						break;
 					}
 					case EmitterType::Cone:
 					{
 						int ent = (int)entity;
-						const auto& color = glm::vec4{ 0.0f, 150.0f / 255.0f, 1.0f, 1.0f };
+						const auto& color = m_GizmosData.GizmosColor;
 
 						const glm::vec3& spawnPos = transformComponent.Position + particle.Particle.SpawnPosition;
 						const glm::vec3& tipPos = spawnPos + glm::vec3(0.0f, particle.Particle.SpawnRadius.y, 0.0f);
@@ -125,36 +132,36 @@ namespace MoonEngine
 
 		Renderer::End();
 
-		//CameraComponent
-		auto cameraView = registry.view<const TransformComponent, const CameraComponent>();
-		for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
+		if (m_GizmosData.ShowGizmos)
 		{
-			const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-				* rotationMat * glm::scale(glm::mat4(1.0f), glm::vec3(cameraComponent.Size * 2.0f, cameraComponent.Size * 2.0f, 0.0f));
+			//GIZMO_CameraComponent
+			auto cameraView = registry.view<const TransformComponent, const CameraComponent>();
+			for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
+			{
+				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));
 
-			transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-				* glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
+				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
+			}
 
-			Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
+			Renderer::End();
+
+			Renderer::SetLineWidth(4.0f);
+
+			//GIZMO_SELECT
+			if (selectedEntity)
+			{
+				TransformComponent& transformComponent = selectedEntity.GetComponent<TransformComponent>();
+				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+					* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
+
+				if (!selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
+					Renderer::DrawRect(transform, m_GizmosData.GizmosColor);
+			}
+
+			Renderer::End();
 		}
-
-		Renderer::End();
-
-		Renderer::SetLineWidth(4.0f);
-
-		if (selectedEntity)
-		{
-			TransformComponent& transformComponent = selectedEntity.GetComponent<TransformComponent>();
-			const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-			const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-				* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
-
-			if (!selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
-				Renderer::DrawRect(transform, { 0.0f, 150.0f / 255.0f, 1.0f, 1.0f });
-		}
-
-		Renderer::End();
 
 		//+MousePicking
 		if (ViewHovered)
@@ -189,15 +196,68 @@ namespace MoonEngine
 
 		auto& selectedEntity = EditorLayer::Get()->GetSelectedEntity();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin(Name.c_str(), &Enabled, Flags);
-		
+
+		float fontSize = ImGui::GetFontSize();
+		float padY = fontSize * 0.1f;
+		float buttonSize = fontSize * 0.8f + 2.0f;
+		ImGuiUtils::AddPadding(fontSize * 0.3f, padY * 2.0f);
+
+		ImGui::BeginGroup();
+		{//Gizmo Button Group
+			ImGui::BeginGroup();
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::SelectTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.GizmoSelection == GizmoSelection::NONE))
+				m_GizmosData.GizmoSelection = GizmoSelection::NONE;
+
+			ImGui::SameLine(0.0f, fontSize * 0.3f);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::TranslateTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.GizmoSelection == GizmoSelection::TRANSLATE))
+				m_GizmosData.GizmoSelection = GizmoSelection::TRANSLATE;
+
+			ImGui::SameLine(0.0f, fontSize * 0.3f);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::ResizeTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.GizmoSelection == GizmoSelection::SCALE))
+				m_GizmosData.GizmoSelection = GizmoSelection::SCALE;
+
+			ImGui::SameLine(0.0f, fontSize * 0.3f);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::RotateTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.GizmoSelection == GizmoSelection::RORTATE))
+				m_GizmosData.GizmoSelection = GizmoSelection::RORTATE;
+
+			ImGui::SameLine(ImGui::GetContentRegionAvail().x - padY - buttonSize * 2.0f);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::SettingsTexture->GetTextureId(), buttonSize, buttonSize, false))
+				ImGui::OpenPopup("GizmoSettingsPopup");
+
+			if (ImGui::BeginPopup("GizmoSettingsPopup", ImGuiWindowFlags_NoMove))
+			{
+				ImGuiUtils::Label("Icon Size: ");
+				ImGui::SliderFloat("##is", &m_GizmosData.IconSize, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+				ImGuiUtils::Label("Color: ");
+				ImGui::ColorEdit4("##t", &m_GizmosData.GizmosColor[0]);
+				ImGui::EndPopup();
+			}
+			ImGui::SameLine(ImGui::GetContentRegionAvail().x - padY - buttonSize * 4.0f);
+
+			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::TransformationTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.ShowGizmos))
+				m_GizmosData.ShowGizmos = !m_GizmosData.ShowGizmos;
+
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+				ImGui::SetTooltip(" Show Gizmos ");
+
+			ImGui::EndGroup();
+			ImGuiUtils::AddPadding(0.0f, padY);
+		}
+		ImGui::EndGroup();
+
 		OnWindowBegin();
 
 		ImGui::Image((void*)Viewbuffer->GetTexID(), { ViewSize.x, ViewSize.y }, { 0, 1 }, { 1, 0 });
 
-		auto& gizmoSelection = m_GizmosData.GizmoSelection;
-		if (selectedEntity && gizmoSelection != GIZMOSELECTION::NONE)
+		auto& GizmoSelection = m_GizmosData.GizmoSelection;
+		if (selectedEntity && GizmoSelection != GizmoSelection::NONE)
 		{
 			const glm::mat4& view = m_EditorCamera->GetView();
 			const glm::mat4& projection = m_EditorCamera->GetProjection();
@@ -212,12 +272,12 @@ namespace MoonEngine
 
 			float snapAmount = 0;
 
-			if (gizmoSelection != GIZMOSELECTION::RORTATE)
+			if (GizmoSelection != GizmoSelection::RORTATE)
 				snapAmount = m_GizmosData.SnapAmount;
 			else
 				snapAmount = 45.0f;
 
-			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)gizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_GizmosData.IsSnapping ? &snapAmount : NULL);
+			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)GizmoSelection, ImGuizmo::LOCAL, glm::value_ptr(transform), NULL, m_GizmosData.IsSnapping ? &snapAmount : NULL);
 
 			if (ImGuizmo::IsUsing())
 			{
@@ -235,7 +295,6 @@ namespace MoonEngine
 		}
 		else
 			m_GizmosData.IsUsing = false;
-
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
@@ -246,22 +305,22 @@ namespace MoonEngine
 		{
 			case Keycode::Q:
 			{
-				m_GizmosData.GizmoSelection = GIZMOSELECTION::NONE;
+				m_GizmosData.GizmoSelection = GizmoSelection::NONE;
 				break;
 			}
 			case Keycode::W:
 			{
-				m_GizmosData.GizmoSelection = GIZMOSELECTION::TRANSLATE;
+				m_GizmosData.GizmoSelection = GizmoSelection::TRANSLATE;
 				break;
 			}
 			case Keycode::E:
 			{
-				m_GizmosData.GizmoSelection = GIZMOSELECTION::SCALE;
+				m_GizmosData.GizmoSelection = GizmoSelection::SCALE;
 				break;
 			}
 			case Keycode::R:
 			{
-				m_GizmosData.GizmoSelection = GIZMOSELECTION::RORTATE;
+				m_GizmosData.GizmoSelection = GizmoSelection::RORTATE;
 				break;
 			}
 		}

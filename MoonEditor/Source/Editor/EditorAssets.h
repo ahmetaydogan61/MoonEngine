@@ -6,8 +6,8 @@ namespace MoonEngine
 {
 	struct EditorAssets
 	{
-		static Shared<Texture> PlayTexture, StopTexture, PauseTexture;
-		static Shared<Texture> SelectTexture, TranslateTexture, ResizeTexture, RotateTexture;
+		static Shared<Texture> PlayTexture, StopTexture, PauseTexture, SettingsTexture;
+		static Shared<Texture> SelectTexture, TranslateTexture, ResizeTexture, RotateTexture, TransformationTexture;
 
 		static void LoadTextures();
 	};

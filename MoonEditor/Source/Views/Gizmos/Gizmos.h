@@ -2,7 +2,7 @@
 
 namespace MoonEngine
 {
-	enum class GIZMOSELECTION
+	enum class GizmoSelection
 	{
 		//These are the values from ImGuizmo OPERATION enum
 		NONE = -1,
@@ -13,14 +13,14 @@ namespace MoonEngine
 
 	struct GizmosData
 	{
-		GIZMOSELECTION GizmoSelection = GIZMOSELECTION::TRANSLATE;
+		bool ShowGizmos = false;
+		float IconSize = 0.5f;
+		glm::vec4 GizmosColor = glm::vec4(1.0f);
+
+		//Translation
+		GizmoSelection GizmoSelection = GizmoSelection::TRANSLATE;
 		float SnapAmount = 0.25f;
 		bool IsSnapping = false;
 		bool IsUsing = false;
-	};
-
-	struct Gizmos
-	{
-
 	};
 }

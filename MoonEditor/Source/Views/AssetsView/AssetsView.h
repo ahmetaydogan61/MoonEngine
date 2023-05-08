@@ -16,7 +16,7 @@ namespace MoonEngine
 		void SetPath(const std::filesystem::path& path) { m_StartPath = path; }
 		void RenderSettings();
 	private:
-		Shared<Texture> m_FileIcon, m_FolderIcon, m_SettingsIcon;
+		Shared<Texture> m_FileIcon, m_FolderIcon;
 		std::filesystem::path m_StartPath, m_CurrentPath;
 
 		float m_PaddingFactor = 16.0f;

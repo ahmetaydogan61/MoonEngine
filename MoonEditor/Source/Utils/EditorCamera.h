@@ -21,12 +21,10 @@ namespace MoonEngine
 	public:
 		EditorCamera()
 		{
-			ME_LOG("Created");
 			Input::OnMouseScroll += BIND_ACTION(EditorCamera::ZoomEvent);
 		}
 		~EditorCamera()
 		{
-			ME_LOG("Destroyed");
 			Input::OnMouseScroll -= BIND_ACTION(EditorCamera::ZoomEvent);
 		}
 

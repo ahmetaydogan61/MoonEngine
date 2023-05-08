@@ -12,10 +12,10 @@ namespace MoonEngine
 		Name = ICON_MD_LANDSCAPE;
 		Name += "GameView";
 		Flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar;
+		Enabled = false;
 
 		FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::DEPTH} };
 		m_Gamebuffer = MakeShared<Framebuffer>(props);
-
 	}
 
 	void GameView::Update()

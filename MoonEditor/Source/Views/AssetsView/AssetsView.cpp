@@ -1,5 +1,6 @@
 #include "mpch.h"
 #include "Views/AssetsView/AssetsView.h"
+#include "Editor/EditorAssets.h"
 
 #include <Renderer/Texture.h>
 #include <Gui/ImGuiUtils.h>
@@ -91,7 +92,6 @@ namespace MoonEngine
 
 		m_FileIcon = MakeShared<Texture>("Resource/EditorIcons/File.png");
 		m_FolderIcon = MakeShared<Texture>("Resource/EditorIcons/Folder.png");
-		m_SettingsIcon = MakeShared<Texture>("Resource/EditorIcons/Settings.png");
 
 		m_StartPath = startPath;
 		m_CurrentPath = m_StartPath;
@@ -177,7 +177,7 @@ namespace MoonEngine
 		ImGui::SameLine();
 
 		float settingsButtonSize = ImGui::GetFrameHeight();
-		if (ImGuiUtils::ImageButton((ImTextureID)m_SettingsIcon->GetTextureId(), { settingsButtonSize, settingsButtonSize }))
+		if (ImGuiUtils::ImageButton((ImTextureID)EditorAssets::SettingsTexture->GetTextureId(), { settingsButtonSize, settingsButtonSize }))
 			ImGui::OpenPopup("AssetSettingsPopup");
 
 		if (ImGui::BeginPopup("AssetSettingsPopup", ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {

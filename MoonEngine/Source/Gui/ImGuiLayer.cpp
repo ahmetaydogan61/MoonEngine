@@ -10,8 +10,6 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_opengl3.cpp>
 
-#include <imguizmo/ImGuizmo.h>
-
 #include <GLFW/glfw3.h>
 
 namespace MoonEngine

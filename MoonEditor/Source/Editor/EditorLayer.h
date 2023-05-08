@@ -24,6 +24,21 @@ namespace MoonEngine
 			Pause
 		};
 
+	public:
+		void Init();
+		void Update();
+		void DrawGui();
+
+		void NewScene();
+		void SaveScene(const std::string& path);
+		void LoadScene(const std::string& path);
+
+		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
+		Entity& GetSelectedEntity() { return m_SelectedEntity; }
+		void DuplicateSelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity = m_Scene->DuplicateEntity(m_SelectedEntity); }
+		void DestroySelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity.Destroy(); m_SelectedEntity = {}; }
+
+		static EditorLayer* Get() { if (s_EditorLayer) return s_EditorLayer; else return nullptr; }
 	private:
 		EditorState m_EditorState = EditorState::Edit;
 		
@@ -48,20 +63,5 @@ namespace MoonEngine
 		void Statusbar();
 
 		inline static EditorLayer* s_EditorLayer;
-	public:
-		void Init();
-		void Update();
-		void DrawGui();
-
-		void NewScene();
-		void SaveScene(const std::string& path);
-		void LoadScene(const std::string& path);
-
-		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
-		Entity& GetSelectedEntity() { return m_SelectedEntity; }
-		void DuplicateSelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity = m_Scene->DuplicateEntity(m_SelectedEntity); }
-		void DestroySelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity.Destroy(); m_SelectedEntity = {}; }
-
-		static EditorLayer* Get() { if (s_EditorLayer) return s_EditorLayer; else return nullptr; }
 	};
 }
