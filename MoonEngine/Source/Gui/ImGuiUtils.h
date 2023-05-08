@@ -171,6 +171,7 @@ namespace MoonEngine
 			style.WindowPadding = ImVec2(5, 5);
 			style.FramePadding = ImVec2(6, 4);
 			style.ItemSpacing = ImVec2(6, 3);
+			style.ItemInnerSpacing.x = 2;
 			style.ScrollbarSize = 14;
 			style.GrabMinSize = 10;
 

@@ -61,7 +61,6 @@ namespace MoonEngine
 		entity.AddComponent<UUIDComponent>();
 		entity.AddComponent<IdentityComponent>();
 		entity.AddComponent<TransformComponent>();
-		entity.AddComponent<SpriteComponent>();
 		return entity;
 	}
 

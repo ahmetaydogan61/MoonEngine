@@ -31,7 +31,7 @@ namespace MoonEngine
 
 		//Emiiter
 		float RandomDirectionFactor = 1.0f;
-		float ConeRadius = 1.0f;
+		float DirectionRadiusFactor = 1.0f;
 
 		//Scale
 		bool IsScale3D = false;
@@ -62,6 +62,22 @@ namespace MoonEngine
 		bool IsColorEndConstant = true;
 		glm::vec4 ColorEnd = glm::vec4(1.0f);
 		glm::vec4 ColorEndRandom = glm::vec4(1.0f);
+
+		REFLECT
+		(
+			("IsLifetimeConstant", IsLifetimeConstant)("Lifetime", Lifetime)
+			("IsSpeedConstant", IsSpeedConstant)("Speed", Speed)("SpawnPosition", SpawnPosition)("SpawnRadius", SpawnRadius)
+			("RandomDirectionFactor", RandomDirectionFactor)("DirectionRadiusFactor", DirectionRadiusFactor)
+
+			("IsScale3D", IsScale3D)("IsScaleConstant", IsScaleConstant)("ScaleStart", ScaleStart)("ScaleStartRandom", ScaleStartRandom)
+			("IsScaleCycle", IsScaleCycle)("IsScaleEndConstant", IsScaleEndConstant)("ScaleEnd", ScaleEnd)("ScaleEndRandom", ScaleEndRandom)
+
+			("IsRotation3D", IsRotation3D)("IsRotationConstant", IsRotationConstant)("RotationStart", RotationStart)("RotationStartRandom", RotationStartRandom)
+			("IsRotationCycle", IsRotationCycle)("IsRotationEndConstant", IsRotationEndConstant)("RotationEnd", RotationEnd)("RotationEndRandom", RotationEndRandom)
+
+			("Texture", Texture)("IsColorConstant", IsColorConstant)("ColorStart", ColorStart)("ColorStartRandom", ColorStartRandom)
+			("IsColorCycle", IsColorCycle)("IsColorEndConstant", IsColorEndConstant)("ColorEnd", ColorEnd)("ColorEndRandom", ColorEndRandom)
+		)
 	};
 
 	struct Particle
@@ -89,6 +105,7 @@ namespace MoonEngine
 		glm::vec4 ColorEnd = glm::vec4(0.0f);
 	};
 
+
 	struct ParticleSystem
 	{
 	public:
@@ -104,7 +121,6 @@ namespace MoonEngine
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;
-		float PerSecond = 0.2f;
 
 		bool IsPlaying() { return m_IsPlaying; }
 		bool IsPaused() { return m_IsPaused; }
@@ -112,6 +128,8 @@ namespace MoonEngine
 		void Play() { m_IsPlaying = true; m_IsPaused = false; }
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
+
+		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond))
 	private:
 		bool m_IsPlaying = false;
 		bool m_IsPaused = false;

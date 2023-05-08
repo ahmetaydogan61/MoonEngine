@@ -150,7 +150,7 @@ namespace MoonEngine
 				else if (spawnPos.x >= 0.01f)
 					dir = 1;
 
-				float randomDirX = spawnRadius + p.ConeRadius * 0.5f;
+				float randomDirX = spawnRadius + p.DirectionRadiusFactor * 0.5f;
 				particle.Direction.x = Maths::RandomFloat(0.0f, dir * randomDirX);
 				particle.Direction.y += p.SpawnRadius.y * 0.5f;
 				break;

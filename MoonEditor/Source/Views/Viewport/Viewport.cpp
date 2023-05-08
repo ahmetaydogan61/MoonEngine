@@ -107,7 +107,7 @@ namespace MoonEngine
 						const glm::vec3& p1 = spawnPos + spawnRadius;
 						Renderer::DrawLine(p0, p1, color, ent);
 
-						float coneRadiusSize = particle.Particle.ConeRadius * 0.5f;
+						float coneRadiusSize = particle.Particle.DirectionRadiusFactor * 0.5f;
 						const glm::vec3& coneRadius = glm::vec3(coneRadiusSize, 0.0f, 0.0f);
 
 						const glm::vec3& p3 = tipPos - spawnRadius - coneRadius;

@@ -37,3 +37,5 @@ constexpr Unique<T> MakeUnique(Args&& ... args)
 
 template<typename T>
 using Weak = std::weak_ptr<T>;
+
+#define REFLECT(x) template<class R> void reflect(R& r) { r x; }

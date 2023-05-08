@@ -1,0 +1,47 @@
+Scene: newParse
+Entities:
+  - Entity: a60ea40e-a697-49ef-9bc0-ac2caafc19dc
+    struct MoonEngine::IdentityComponent:
+      Name: Particle
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::ParticleComponent:
+      SortMode: 0
+      EmitterType: 1
+      Looping: true
+      Duration: 5
+      ParticlePerSecond: 50
+      IsLifetimeConstant: true
+      Lifetime: [5, 3.5]
+      IsSpeedConstant: true
+      Speed: [2, 3]
+      SpawnPosition: [0, 0, 0]
+      SpawnRadius: [0, 1, 0]
+      RandomDirectionFactor: 0
+      DirectionRadiusFactor: 1
+      IsScale3D: false
+      IsScaleConstant: true
+      ScaleStart: [1, 1, 1]
+      ScaleStartRandom: [1, 1, 1]
+      IsScaleCycle: false
+      IsScaleEndConstant: true
+      ScaleEnd: [0, 0, 0]
+      ScaleEndRandom: [0, 0, 0]
+      IsRotation3D: false
+      IsRotationConstant: true
+      RotationStart: [0, 0, 0]
+      RotationStartRandom: [0, 0, 0]
+      IsRotationCycle: false
+      IsRotationEndConstant: true
+      RotationEnd: [0, 0, 0]
+      RotationEndRandom: [0, 0, 0]
+      Texture: "null"
+      IsColorConstant: false
+      ColorStart: [1, 0, 0, 1]
+      ColorStartRandom: [1, 1, 1, 1]
+      IsColorCycle: false
+      IsColorEndConstant: true
+      ColorEnd: [1, 1, 1, 1]
+      ColorEndRandom: [1, 1, 1, 1]

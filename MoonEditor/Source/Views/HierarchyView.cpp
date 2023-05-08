@@ -49,12 +49,59 @@ namespace MoonEngine
 		Flags = ImGuiWindowFlags_MenuBar;
 	}
 
+	void HierarchyView::EntityCreationMenu()
+	{
+		EditorLayer& editor = *EditorLayer::Get();
+
+		if (ImGui::MenuItem("Entity"))
+		{
+			Entity entity = Scene->CreateEntity();
+			editor.SetSelectedEntity(entity);
+		}
+
+		ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+		if (ImGui::BeginMenu("Sprites"))
+		{
+			if (ImGui::MenuItem("Square"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Square";
+				entity.AddComponent<SpriteComponent>();
+				editor.SetSelectedEntity(entity);
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+		if (ImGui::BeginMenu("Effects"))
+		{
+			if (ImGui::MenuItem("Particle"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Particle";
+				entity.AddComponent<ParticleComponent>().ParticleSystem.Play();
+				editor.SetSelectedEntity(entity);
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+		if (ImGui::MenuItem("Camera"))
+		{
+			Entity entity = Scene->CreateEntity();
+			entity.GetComponent<IdentityComponent>().Name = "Camera";
+			entity.AddComponent<CameraComponent>();
+			editor.SetSelectedEntity(entity);
+		}
+	}
+
 	void HierarchyView::Render()
 	{
 		if (!Enabled)
 			return;
-
-		EditorLayer& editor = *EditorLayer::Get();
 
 		float height = ImGui::GetFrameHeight();
 		bool openPopup = false;
@@ -71,60 +118,27 @@ namespace MoonEngine
 			ImGui::EndMenuBar();
 		}
 
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, { 0.0f, 0.0f, 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_PopupBg, { 1.0f, 1.0f, 1.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Header, { 0.75f, 0.75f, 0.75f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_HeaderHovered, { 0.5f, 0.5f, 0.5f, 1.0f });
+
 		if (openPopup)
 			ImGui::OpenPopup("CreateStuff");
 
 		if (ImGui::BeginPopup("CreateStuff"))
 		{
-			if (ImGui::MenuItem("Entity"))
-			{
-				Entity entity = Scene->CreateEntity();
-				editor.SetSelectedEntity(entity);
-			}
-			if (ImGui::MenuItem("Camera"))
-			{
-				Entity entity = Scene->CreateEntity();
-				entity.GetComponent<IdentityComponent>().Name = "Camera";
-				entity.AddComponent<CameraComponent>();
-				entity.RemoveComponent<SpriteComponent>();
-				editor.SetSelectedEntity(entity);
-			}
-			if (ImGui::MenuItem("Particle"))
-			{
-				Entity entity = Scene->CreateEntity();
-				entity.GetComponent<IdentityComponent>().Name = "Particle";
-				entity.AddComponent<ParticleComponent>();
-				entity.RemoveComponent<SpriteComponent>();
-				editor.SetSelectedEntity(entity);
-			}
+			EntityCreationMenu();
 			ImGui::EndPopup();
 		}
 
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
-			if (ImGui::MenuItem("Entity"))
-			{
-				Entity entity = Scene->CreateEntity();
-				editor.SetSelectedEntity(entity);
-			}
-			if (ImGui::MenuItem("Camera"))
-			{
-				Entity entity = Scene->CreateEntity();
-				entity.GetComponent<IdentityComponent>().Name = "Camera";
-				entity.AddComponent<CameraComponent>();
-				entity.RemoveComponent<SpriteComponent>();
-				editor.SetSelectedEntity(entity);
-			}
-			if (ImGui::MenuItem("Particle"))
-			{
-				Entity entity = Scene->CreateEntity();
-				entity.GetComponent<IdentityComponent>().Name = "Particle";
-				entity.AddComponent<ParticleComponent>().ParticleSystem.Play();
-				entity.RemoveComponent<SpriteComponent>();
-				editor.SetSelectedEntity(entity);
-			}
+			EntityCreationMenu();
 			ImGui::EndPopup();
 		}
+
+		ImGui::PopStyleColor(4);
 
 		int id = 0;
 		GetRegistry().each_reverse([&](auto entityID)
@@ -134,7 +148,7 @@ namespace MoonEngine
 		});
 
 		if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			editor.SetSelectedEntity({});
+			EditorLayer::Get()->SetSelectedEntity({});
 		ImGui::End();
 	}
 }

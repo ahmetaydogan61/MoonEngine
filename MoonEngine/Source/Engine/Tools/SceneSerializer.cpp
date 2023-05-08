@@ -84,7 +84,6 @@ namespace YAML
 			return true;
 		}
 	};
-
 }
 
 namespace MoonEngine
@@ -110,63 +109,181 @@ namespace MoonEngine
 		return out;
 	}
 
+	YAML::Emitter& operator<<(YAML::Emitter& out, const Shared<MoonEngine::Texture>& t)
+	{
+		if (t == nullptr)
+			out << "null";
+		else
+			out << t->GetPath().string();
+		return out;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& out, EmitterType et)
+	{
+		out << (int)et;
+		return out;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& out, SortMode sm)
+	{
+		out << (int)sm;
+		return out;
+	}
+
+	struct YAMLSerializer
+	{
+		YAMLSerializer(YAML::Emitter& out)
+			:output(out) {}
+
+		YAML::Emitter& output;
+
+		void BeginParse(const std::string& key)
+		{
+			output << YAML::Key << key;
+			output << YAML::BeginMap;
+		}
+
+		void EndParse() { output << YAML::EndMap; }
+
+		template<class T>
+		auto Serialize(T& obj) -> decltype(obj.reflect(*this), void()) {
+
+			obj.reflect(*this);
+		}
+
+		template<class T>
+		YAMLSerializer& operator()(const char* propertyID, T& field) {
+			output << YAML::Key << propertyID << YAML::Value << field;
+			return *this;
+		}
+	};
+
+	struct YAMLDeserializer
+	{
+		YAMLDeserializer(YAML::Node& node)
+			:Node(node) {}
+
+		YAML::Node& Node;
+
+		template<class T>
+		auto Deserialize(T& obj) -> decltype(obj.reflect(*this), void()) {
+
+			obj.reflect(*this);
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, SortMode& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto type = propNode.as<int>();
+			field = (SortMode)type;
+			return *this;
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, EmitterType& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto type = propNode.as<int>();
+			field = (EmitterType)type;
+			return *this;
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, Shared<Texture>& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto path = propNode.as<std::string>();
+
+			if (path != "null")
+				field = MakeShared<Texture>(path);
+
+			return *this;
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, glm::vec2& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto vec = propNode.as<std::vector<float>>();
+			if (vec.size() == 1)
+				field = glm::vec2(vec[0]);
+			else if (vec.size() == 2)
+				field = glm::make_vec2(vec.data());
+			return *this;
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, glm::vec3& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto vec = propNode.as<std::vector<float>>();
+			if (vec.size() == 1)
+				field = glm::vec3(vec[0]);
+			else if (vec.size() == 3)
+				field = glm::make_vec3(vec.data());
+			return *this;
+		}
+
+		YAMLDeserializer& operator()(const char* propertyID, glm::vec4& field) {
+			auto propNode = Node[propertyID];
+			if (!propNode)
+				return *this;
+
+			auto vec = propNode.as<std::vector<float>>();
+			if (vec.size() == 4)
+				field = glm::vec4(vec[0]);
+			else if (vec.size() == 4)
+				field = glm::make_vec4(vec.data());
+			return *this;
+		}
+
+		template<class T>
+		YAMLDeserializer& operator()(const char* propertyID, T& field) {
+			auto propNode = Node[propertyID];
+			if (propNode)
+				field = propNode.as<T>();
+			return *this;
+		}
+	};
+
+	template<typename T>
+	void SerializeIfExists(YAML::Emitter& out, Entity& entity)
+	{
+		if (entity.HasComponent<T>())
+		{
+			YAMLSerializer parser(out);
+			T& c = entity.GetComponent<T>();
+			parser.BeginParse(typeid(T).name());
+			parser.Serialize(c);
+			parser.EndParse();
+		}
+	}
+
 	void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;
 		const auto& uuid = entity.GetComponent<UUIDComponent>();
 		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.str();
 
-		if (entity.HasComponent<IdentityComponent>())
+		SerializeIfExists<IdentityComponent>(out, entity);
+		SerializeIfExists<TransformComponent>(out, entity);
+		SerializeIfExists<SpriteComponent>(out, entity);
+		SerializeIfExists<CameraComponent>(out, entity);
+
+		if (entity.HasComponent<ParticleComponent>())
 		{
-			out << YAML::Key << "IdentityComponent";
-			out << YAML::BeginMap;
-
-			const auto& name = entity.GetComponent<IdentityComponent>().Name;
-			out << YAML::Key << "Name" << YAML::Value << name;
-
-			out << YAML::EndMap;
-		}
-
-		if (entity.HasComponent<TransformComponent>())
-		{
-			out << YAML::Key << "TransformComponent";
-			out << YAML::BeginMap;
-
-			const TransformComponent& component = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Position" << YAML::Value << component.Position;
-			out << YAML::Key << "Rotation" << YAML::Value << component.Rotation;
-			out << YAML::Key << "Scale" << YAML::Value << component.Scale;
-
-			out << YAML::EndMap;
-		}
-
-		if (entity.HasComponent<SpriteComponent>())
-		{
-			out << YAML::Key << "SpriteComponent";
-			out << YAML::BeginMap;
-
-			const SpriteComponent& spriteComponent = entity.GetComponent<SpriteComponent>();
-			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
-			out << YAML::Key << "Tiling" << YAML::Value << spriteComponent.Tiling;
-
-			if (spriteComponent.Texture)
-				out << YAML::Key << "TexturePath" << YAML::Value << spriteComponent.Texture->GetPath().string();
-			else
-				out << YAML::Key << "TexturePath" << YAML::Value << "null";
-
-			out << YAML::EndMap;
-		}
-
-		if (entity.HasComponent<CameraComponent>())
-		{
-			out << YAML::Key << "CameraComponent";
-			out << YAML::BeginMap;
-
-			const CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
-			out << YAML::Key << "IsMain" << YAML::Value << cameraComponent.IsMain;
-			out << YAML::Key << "Size" << YAML::Value << cameraComponent.Size;
-
-			out << YAML::EndMap;
+			YAMLSerializer parser(out);
+			ParticleComponent& c = entity.GetComponent<ParticleComponent>();
+			parser.BeginParse(typeid(ParticleComponent).name());
+			parser.Serialize(c.ParticleSystem);
+			parser.Serialize(c.Particle);
+			parser.EndParse();
 		}
 
 		out << YAML::EndMap;
@@ -198,15 +315,23 @@ namespace MoonEngine
 	}
 
 	template<typename T>
-	bool GetIfExists(T* value, const YAML::Node& node, const char* label)
+	void GetIfExists(YAML::Node& node, Entity& entity)
 	{
-		auto& subnode = node[label];
-		if (subnode)
+		auto componentNode = node[typeid(T).name()];
+		if (componentNode)
 		{
-			*value = subnode.as<T>();
-			return true;
+			YAMLDeserializer deserializer(componentNode);
+			if (entity.HasComponent<T>())
+			{
+				T& component = entity.GetComponent<T>();
+				deserializer.Deserialize(component);
+			}
+			else
+			{
+				T& component = entity.AddComponent<T>();
+				deserializer.Deserialize(component);
+			}
 		}
-		return false;
 	}
 
 	void SceneSerializer::Deserialize(const Shared<Scene>& scene, const std::filesystem::path& path)
@@ -239,39 +364,27 @@ namespace MoonEngine
 				auto& uuidComponent = deserializedEntity.GetComponent<UUIDComponent>();
 				uuidComponent.ID.fromStr(entity["Entity"].as<std::string>().c_str());
 
-				std::string name;
-				auto idComponent = entity["IdentityComponent"];
-				if (idComponent)
-					name = idComponent["Name"].as<std::string>();
-				deserializedEntity.GetComponent<IdentityComponent>().Name = name;
+				GetIfExists<IdentityComponent>(entity, deserializedEntity);
+				GetIfExists<TransformComponent>(entity, deserializedEntity);
+				GetIfExists<SpriteComponent>(entity, deserializedEntity);
+				GetIfExists<CameraComponent>(entity, deserializedEntity);
 
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				auto particleNode = entity[typeid(ParticleComponent).name()];
+				if (particleNode)
 				{
-					TransformComponent& component = deserializedEntity.GetComponent<TransformComponent>();
-					component.Position = transformComponent["Position"].as<glm::vec3>();
-					component.Rotation = transformComponent["Rotation"].as<glm::vec3>();
-					component.Scale = transformComponent["Scale"].as<glm::vec3>();
-				}
-
-				auto spriteComponent = entity["SpriteComponent"];
-				if (spriteComponent)
-				{
-					SpriteComponent& component = deserializedEntity.GetComponent<SpriteComponent>();
-					component.Color = spriteComponent["Color"].as<glm::vec4>();
-					const auto& texturePath = spriteComponent["TexturePath"].as<std::string>();
-					if (texturePath != "null")
-						component.Texture = MakeShared<Texture>(texturePath);
-				}
-				else
-					deserializedEntity.RemoveComponent<SpriteComponent>();
-
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
-				{
-					CameraComponent& component = deserializedEntity.AddComponent<CameraComponent>();
-					component.IsMain = cameraComponent["IsMain"].as<bool>();
-					component.Size = cameraComponent["Size"].as<float>();
+					YAMLDeserializer deserializer(particleNode);
+					if (deserializedEntity.HasComponent<ParticleComponent>())
+					{
+						ParticleComponent& component = deserializedEntity.GetComponent<ParticleComponent>();
+						deserializer.Deserialize(component.ParticleSystem);
+						deserializer.Deserialize(component.Particle);
+					}
+					else
+					{
+						ParticleComponent& component = deserializedEntity.AddComponent<ParticleComponent>();
+						deserializer.Deserialize(component.ParticleSystem);
+						deserializer.Deserialize(component.Particle);
+					}
 				}
 			}
 		}

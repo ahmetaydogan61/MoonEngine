@@ -22,6 +22,7 @@ namespace MoonEngine
 	struct IdentityComponent
 	{
 		std::string Name = "Entity";
+		REFLECT(("Name", Name))
 	};
 
 	struct TransformComponent
@@ -29,6 +30,8 @@ namespace MoonEngine
 		glm::vec3 Position = glm::vec3(0.0f);
 		glm::vec3 Rotation = glm::vec3(0.0f);
 		glm::vec3 Scale = glm::vec3(1.0f);
+
+		REFLECT(("Position", Position)("Rotation", Rotation)("Scale", Scale))
 	};
 
 	struct SpriteComponent
@@ -36,6 +39,8 @@ namespace MoonEngine
 		glm::vec4 Color = glm::vec4(1.0f);
 		glm::vec2 Tiling = glm::vec2(1.0f);
 		Shared<Texture> Texture = nullptr;
+		
+		REFLECT(("Color", Color)("Tiling", Tiling)("Texture", Texture))
 	};
 
 	struct CameraComponent
@@ -74,6 +79,8 @@ namespace MoonEngine
 		}
 
 		const glm::mat4& GetProjection() const { return m_Projection; }
+
+		REFLECT(("IsMain", IsMain)("Size", Size))
 	};
 
 	struct ParticleComponent

@@ -14,5 +14,6 @@ namespace MoonEngine
 		void Render();
 	private:
 		void EntityTreeNode(Entity& entity, int id);
+		void EntityCreationMenu();
 	};
 }

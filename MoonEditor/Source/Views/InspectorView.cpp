@@ -335,9 +335,9 @@ namespace MoonEngine
 
 				if (emitterType == EmitterType::Cone)
 				{
-					RenderProp("Cone Radius", [&]()
+					RenderProp("Radius", [&]()
 					{
-						ImGui::DragFloat("##Rad", &component.Particle.ConeRadius, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+						ImGui::DragFloat("##Rad", &component.Particle.DirectionRadiusFactor, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 					});
 				}
 
