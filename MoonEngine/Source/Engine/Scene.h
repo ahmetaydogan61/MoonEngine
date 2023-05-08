@@ -44,7 +44,6 @@ namespace MoonEngine
 		friend class SceneSerializer;
 
 		friend class EditorLayer;
-		friend class HierarchyView;
 		friend struct BasicView;
 	};
 }

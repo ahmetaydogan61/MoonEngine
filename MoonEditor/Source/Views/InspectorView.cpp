@@ -13,6 +13,12 @@
 
 namespace MoonEngine
 {
+	InspectorView::InspectorView()
+	{
+		Name = ICON_MD_MANAGE_SEARCH;
+		Name += "Inspector";
+	}
+
 	void BeginDrawProp(const char* label)
 	{
 		ImGui::BeginTable(label, 2, ImGuiTableFlags_::ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable);
@@ -549,9 +555,9 @@ namespace MoonEngine
 		}, selectedEntity);
 	}
 
-	void InspectorView::Render(bool& render)
+	void InspectorView::Render()
 	{
-		if (!render)
+		if (!Enabled)
 			return;
 
 		Entity selectedEntity = EditorLayer::Get()->GetSelectedEntity();
@@ -563,7 +569,7 @@ namespace MoonEngine
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color, color, color, alpha));
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(color, color, color, alpha));
 
-		ImGui::Begin(ICON_MD_MANAGE_SEARCH "Inspector", &render);
+		ImGui::Begin(Name.c_str(), &Enabled, Flags);
 
 		if (selectedEntity)
 		{

@@ -66,6 +66,8 @@ namespace MoonEngine
 
 		m_ViewportView = MakeShared<ViewportView>();
 		m_GameView = MakeShared<GameView>();
+		m_InspectroView = MakeShared<InspectorView>();
+		m_HierarchyView = MakeShared<HierarchyView>();
 		NewScene();
 	}
 
@@ -116,7 +118,7 @@ namespace MoonEngine
 	{
 		m_SelectedEntity = {};
 
-		m_HierarchyView.SetScene(m_Scene);
+		m_HierarchyView->Scene = m_Scene.get();
 
 		m_ViewportView->Scene = m_Scene.get();
 		m_GameView->Scene = m_Scene.get();
@@ -176,8 +178,9 @@ namespace MoonEngine
 
 		m_ViewportView->Render();
 		m_GameView->Render();
-		m_AssetsView->Render(m_ShowAssets);
-		m_HierarchyView.Render(m_ShowHierarchy, m_ShowInspector);
+		m_AssetsView->Render();
+		m_HierarchyView->Render();
+		m_InspectroView->Render();
 
 		Statusbar();
 		ImGui::End();
@@ -256,12 +259,9 @@ namespace MoonEngine
 			{
 				m_ViewportView->GetMenuItem();
 				m_GameView->GetMenuItem();
-
-				if (ImGui::MenuItem("Hierarchy", " ", m_ShowHierarchy, true))
-					m_ShowHierarchy = !m_ShowHierarchy;
-
-				if (ImGui::MenuItem("Inspector", " ", m_ShowInspector, true))
-					m_ShowInspector = !m_ShowInspector;
+				m_AssetsView->GetMenuItem();
+				m_HierarchyView->GetMenuItem();
+				m_InspectroView->GetMenuItem();
 
 				ImGui::EndMenu();
 			}

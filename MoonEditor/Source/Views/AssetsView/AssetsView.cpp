@@ -1,5 +1,5 @@
 #include "mpch.h"
-#include "Views/AssetsView.h"
+#include "Views/AssetsView/AssetsView.h"
 
 #include <Renderer/Texture.h>
 #include <Gui/ImGuiUtils.h>
@@ -39,24 +39,26 @@ namespace MoonEngine
 			std::string explorerPath = "explorer ";
 
 			std::string fileName = path.filename().string();
+			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_FrameBg, { 0.0f, 0.0f, 0.0f, 0.0f });
+
 			if (ImGui::InputText("##Name", &fileName, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				std::filesystem::path newPath = path;
 				newPath.replace_filename(fileName);
 				std::filesystem::rename(path, newPath);
 			}
-
-			ImGuiUtils::SeparatorDistanced(0.0f, 5.0f);
+			ImGui::PopStyleColor();
+			ImGuiUtils::SeparatorDistanced(2.5f, 5.0f);
 
 			if (entry.is_directory())
 			{
-				if (ImGui::MenuItem("Open Explorer"))
+				if (ImGui::MenuItem("Show Explorer"))
 				{
 					explorerPath += std::filesystem::canonical(path).parent_path().string();
 					system(explorerPath.c_str());
 				}
 
-				ImGuiUtils::SeparatorDistanced(2.5f, 2.5f);
+				ImGuiUtils::AddPadding(2.5f, 2.5f);
 
 				if (ImGui::MenuItem("Delete Folder"))
 				{
@@ -65,7 +67,7 @@ namespace MoonEngine
 			}
 			else
 			{
-				if (ImGui::MenuItem("Open Explorer"))
+				if (ImGui::MenuItem("Show Explorer"))
 				{
 					explorerPath += std::filesystem::canonical(path.parent_path()).string();
 					system(explorerPath.c_str());
@@ -84,6 +86,9 @@ namespace MoonEngine
 
 	AssetsView::AssetsView(const std::filesystem::path& startPath)
 	{
+		Name = ICON_MD_TOKEN;
+		Name += "Assets";
+
 		m_FileIcon = MakeShared<Texture>("Resource/EditorIcons/File.png");
 		m_FolderIcon = MakeShared<Texture>("Resource/EditorIcons/Folder.png");
 		m_SettingsIcon = MakeShared<Texture>("Resource/EditorIcons/Settings.png");
@@ -125,7 +130,11 @@ namespace MoonEngine
 		ContentItemPopup(entry);
 
 		ImGui::BeginChild("##childFrame", { thumbnailSize, ImGui::GetFontSize() });
-		ImGuiUtils::AddPadding(thumbnailSize * 0.1f, 0.0f);
+
+		float texSiz = thumbnailSize * 0.5f - ImGui::CalcTextSize(filenameString.c_str()).x * 0.5f;
+		texSiz = std::max(0.0f, texSiz);
+
+		ImGuiUtils::AddPadding(texSiz + 0.1f, 0.0f);
 
 		ImGui::Text(filenameString.c_str());
 
@@ -137,12 +146,12 @@ namespace MoonEngine
 		ImGui::PopID();
 	}
 
-	void AssetsView::Render(bool& render)
+	void AssetsView::Render()
 	{
-		if (!render)
+		if (!Enabled)
 			return;
 
-		ImGui::Begin(ICON_MD_TOKEN "Assets", &render);
+		ImGui::Begin(Name.c_str(), &Enabled, Flags);
 
 		float fontSize = ImGui::GetFontSize();
 		static std::string searchPath;
@@ -205,7 +214,6 @@ namespace MoonEngine
 		if (cantReturn)
 			ImGui::EndDisabled();
 
-
 		if (m_CurrentPath != m_StartPath)
 			for (const auto& p : relative)
 			{
@@ -231,7 +239,7 @@ namespace MoonEngine
 
 		//-Menubar render
 
-		ImGuiUtils::AddPadding(0.0f, 15.0f);
+		ImGuiUtils::AddPadding(0.0f, 15.0f + fontSize * 0.5f);
 
 		//+Directory Render
 

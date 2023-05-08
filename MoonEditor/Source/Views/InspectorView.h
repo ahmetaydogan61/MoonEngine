@@ -1,9 +1,12 @@
 #pragma once
+#include "Views/Views.h"
+
 namespace MoonEngine
 {
-	class InspectorView
+	struct InspectorView : public BasicView
 	{
-	public:
-		void Render(bool& render);
+		InspectorView();
+		~InspectorView() = default;
+		void Render();
 	};
 }

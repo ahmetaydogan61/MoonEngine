@@ -42,97 +42,100 @@ namespace MoonEngine
 			ImGui::TreePop();
 	}
 
-	void HierarchyView::Render(bool& renderHierarchy, bool& renderInspector)
+	HierarchyView::HierarchyView()
 	{
-		if (renderHierarchy)
+		Name = ICON_MD_SORT;
+		Name += "Hierarchy";
+		Flags = ImGuiWindowFlags_MenuBar;
+	}
+
+	void HierarchyView::Render()
+	{
+		if (!Enabled)
+			return;
+
+		EditorLayer& editor = *EditorLayer::Get();
+
+		float height = ImGui::GetFrameHeight();
+		bool openPopup = false;
+
+		ImGui::Begin(Name.c_str(), &Enabled, Flags);
+
+		if (ImGui::BeginMenuBar())
 		{
-			EditorLayer& editor = *EditorLayer::Get();
-
-			float height = ImGui::GetFrameHeight();
-			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
-			bool openPopup = false;
-
-			ImGui::Begin(ICON_MD_SORT "Hierarchy", &renderHierarchy, window_flags);
-
-			if (ImGui::BeginMenuBar())
-			{
-				const auto& contentRegion = ImGui::GetContentRegionAvail();
-				float buttonSize = ImGui::GetFontSize() + 5.0f;
-				ImGuiUtils::AddPadding(contentRegion.x - (buttonSize * 0.5f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
-				if (ImGui::Button(":", { buttonSize, height }))
-					openPopup = true;
-				ImGui::EndMenuBar();
-			}
-
-			if (openPopup)
-				ImGui::OpenPopup("CreateStuff");
-
-			if (ImGui::BeginPopup("CreateStuff"))
-			{
-				if (ImGui::MenuItem("Entity"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					editor.SetSelectedEntity(entity);
-				}
-				if (ImGui::MenuItem("Camera"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					entity.GetComponent<IdentityComponent>().Name = "Camera";
-					entity.AddComponent<CameraComponent>();
-					entity.RemoveComponent<SpriteComponent>();
-					editor.SetSelectedEntity(entity);
-				}
-				if (ImGui::MenuItem("Particle"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					entity.GetComponent<IdentityComponent>().Name = "Particle";
-					entity.AddComponent<ParticleComponent>();
-					entity.RemoveComponent<SpriteComponent>();
-					editor.SetSelectedEntity(entity);
-				}
-				ImGui::EndPopup();
-			}
-
-			if (ImGui::BeginPopupContextWindow(0, 1))
-			{
-				if (ImGui::MenuItem("Entity"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					editor.SetSelectedEntity(entity);
-				}
-				if (ImGui::MenuItem("Camera"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					entity.GetComponent<IdentityComponent>().Name = "Camera";
-					entity.AddComponent<CameraComponent>();
-					entity.RemoveComponent<SpriteComponent>();
-					editor.SetSelectedEntity(entity);
-				}
-				if (ImGui::MenuItem("Particle"))
-				{
-					Entity entity = m_Scene->CreateEntity();
-					entity.GetComponent<IdentityComponent>().Name = "Particle";
-					entity.AddComponent<ParticleComponent>().ParticleSystem.Play();
-					entity.RemoveComponent<SpriteComponent>();
-					editor.SetSelectedEntity(entity);
-				}
-				ImGui::EndPopup();
-			}
-
-			int id = 0;
-			m_Scene->m_Registry.each_reverse([&](auto entityID)
-			{
-				Entity entity{ entityID, m_Scene.get() };
-			EntityTreeNode(entity, id++);
-			});
-
-			if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				editor.SetSelectedEntity({});
-			ImGui::End();
+			const auto& contentRegion = ImGui::GetContentRegionAvail();
+			float buttonSize = ImGui::GetFontSize() + 5.0f;
+			ImGuiUtils::AddPadding(contentRegion.x - (buttonSize * 0.5f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);
+			if (ImGui::Button(":", { buttonSize, height }))
+				openPopup = true;
+			ImGui::EndMenuBar();
 		}
 
-		if (renderInspector)
-			m_InspectorView.Render(renderInspector);
+		if (openPopup)
+			ImGui::OpenPopup("CreateStuff");
+
+		if (ImGui::BeginPopup("CreateStuff"))
+		{
+			if (ImGui::MenuItem("Entity"))
+			{
+				Entity entity = Scene->CreateEntity();
+				editor.SetSelectedEntity(entity);
+			}
+			if (ImGui::MenuItem("Camera"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Camera";
+				entity.AddComponent<CameraComponent>();
+				entity.RemoveComponent<SpriteComponent>();
+				editor.SetSelectedEntity(entity);
+			}
+			if (ImGui::MenuItem("Particle"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Particle";
+				entity.AddComponent<ParticleComponent>();
+				entity.RemoveComponent<SpriteComponent>();
+				editor.SetSelectedEntity(entity);
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopupContextWindow(0, 1))
+		{
+			if (ImGui::MenuItem("Entity"))
+			{
+				Entity entity = Scene->CreateEntity();
+				editor.SetSelectedEntity(entity);
+			}
+			if (ImGui::MenuItem("Camera"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Camera";
+				entity.AddComponent<CameraComponent>();
+				entity.RemoveComponent<SpriteComponent>();
+				editor.SetSelectedEntity(entity);
+			}
+			if (ImGui::MenuItem("Particle"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Particle";
+				entity.AddComponent<ParticleComponent>().ParticleSystem.Play();
+				entity.RemoveComponent<SpriteComponent>();
+				editor.SetSelectedEntity(entity);
+			}
+			ImGui::EndPopup();
+		}
+
+		int id = 0;
+		GetRegistry().each_reverse([&](auto entityID)
+		{
+			Entity entity{ entityID, Scene };
+			EntityTreeNode(entity, id++);
+		});
+
+		if (!ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			editor.SetSelectedEntity({});
+		ImGui::End();
 	}
 }
 

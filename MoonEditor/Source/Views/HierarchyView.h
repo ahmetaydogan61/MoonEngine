@@ -6,15 +6,13 @@ namespace MoonEngine
 	class Scene;
 	class Entity;
 
-	class HierarchyView
+	struct HierarchyView : public BasicView
 	{
-	private:
-		Shared<Scene> m_Scene;
-		InspectorView m_InspectorView;
-
-		void EntityTreeNode(Entity& entity, int id);
 	public:
-		void SetScene(const Shared<Scene>& scene) { m_Scene = scene; }
-		void Render(bool& renderHierarchy, bool& renderInspector);
+		HierarchyView();
+		~HierarchyView() = default;
+		void Render();
+	private:
+		void EntityTreeNode(Entity& entity, int id);
 	};
 }

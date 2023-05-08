@@ -1,11 +1,20 @@
 #pragma once
+#include "Views/Views.h"
 
 namespace MoonEngine
 {
 	class Texture;
 
-	class AssetsView
+	struct AssetsView : public BasicView
 	{
+	public:
+		AssetsView() = default;
+		AssetsView(const std::filesystem::path& startPath);
+		~AssetsView() = default;
+
+		void Render();
+		void SetPath(const std::filesystem::path& path) { m_StartPath = path; }
+		void RenderSettings();
 	private:
 		Shared<Texture> m_FileIcon, m_FolderIcon, m_SettingsIcon;
 		std::filesystem::path m_StartPath, m_CurrentPath;
@@ -15,11 +24,5 @@ namespace MoonEngine
 		bool m_ShowNameTooltip = true;
 
 		void ShowEntry(const std::filesystem::directory_entry& entry, float thumbnailSize);
-	public:
-		AssetsView() = default;
-		AssetsView(const std::filesystem::path& startPath);
-		void SetPath(const std::filesystem::path& path) { m_StartPath = path; }
-		void Render(bool& render);
-		void RenderSettings();
 	};
 }

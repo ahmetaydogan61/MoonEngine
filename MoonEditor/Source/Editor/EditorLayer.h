@@ -3,7 +3,7 @@
 #include "Views/Game/GameView.h"
 
 #include "Utils/EditorCamera.h"
-#include "Views/AssetsView.h"
+#include "Views/AssetsView/AssetsView.h"
 #include "Views/HierarchyView.h"
 
 #include <Core/ApplicationLayer.h>
@@ -30,23 +30,15 @@ namespace MoonEngine
 		Shared<Scene> m_Scene, m_EditorScene;
 		Entity m_SelectedEntity = {};
 
-		Shared<ViewportView> m_ViewportView;
+		Shared<AssetsView> m_AssetsView;
 		Shared<GameView> m_GameView;
+		Shared<ViewportView> m_ViewportView;
+		Shared<HierarchyView> m_HierarchyView;
+		Shared<InspectorView> m_InspectroView;
 
 		void KeyEvents(KeyPressEvent& e);
 		void OnSceneChange();
 		
-		//+Hierarchy Stuff
-		bool m_ShowHierarchy = true;
-		bool m_ShowInspector = true;
-		HierarchyView m_HierarchyView;
-		//-Hierarchy Stuff
-
-		//+Assets Stuff
-		bool m_ShowAssets = true;
-		Shared<AssetsView> m_AssetsView;
-		//-Assets Stuff
-
 		bool m_ShowDebug = true;
 		void Debug();
 
