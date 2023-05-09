@@ -177,7 +177,7 @@ namespace MoonEngine
 					Maths::RandomFloat(p.ScaleStart.z, p.ScaleStartRandom.z));
 			}
 			else
-				particle.Scale = glm::vec3(Maths::RandomFloat(p.ScaleStart.x, p.ScaleStartRandom.x));
+				particle.ScaleStart = glm::vec3(Maths::RandomFloat(p.ScaleStart.x, p.ScaleStartRandom.x));
 		}
 
 		if (p.IsScaleCycle)

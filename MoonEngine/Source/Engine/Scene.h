@@ -16,7 +16,7 @@ namespace MoonEngine
 		Scene();
 		~Scene() = default;
 
-		std::string SceneName = "NewScene";
+		std::string SceneName = "New Scene";
 
 		Entity CreateEntity();
 		Entity DuplicateEntity(Entity& entity);

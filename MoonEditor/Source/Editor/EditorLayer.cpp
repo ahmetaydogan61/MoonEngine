@@ -43,8 +43,8 @@ namespace MoonEngine
 		saveDialog = ImGuiFileBrowserConfig
 		{
 			.Label = "Save Scene",
-			.Flags = ImGuiFileBrowserFlags_CloseWithEsc | ImGuiFileBrowserFlags_AllowCreateFolder | ImGuiFileBrowserFlags_ResetSelected
-			 | ImGuiFileBrowserFlags_CreateFile | ImGuiFileBrowserFlags_AllowDelete | ImGuiFileBrowserFlags_SelectFiles | ImGuiFileBrowserFlags_DoneAfterCreateFile,
+			.Flags = ImGuiFileBrowserFlags_CloseWithEsc | ImGuiFileBrowserFlags_AllowCreateFolder | ImGuiFileBrowserFlags_ResetSelected |
+			 ImGuiFileBrowserFlags_AllowDelete | ImGuiFileBrowserFlags_OkayTriggersEnter | ImGuiFileBrowserFlags_SelectFiles | ImGuiFileBrowserFlags_DoneAfterCreateFile,
 			.StartDirectory = "Resource/Assets/Scenes",
 			.RootDirectory = "Resource/Assets"
 		};
@@ -101,7 +101,7 @@ namespace MoonEngine
 			case Keycode::S:
 			{
 				if (control && m_EditorState == EditorState::Edit)
-					saveDialog.OpenFileBrowser();
+					QuickSave();
 				break;
 			}
 			case Keycode::L:
@@ -111,7 +111,8 @@ namespace MoonEngine
 				break;
 			}
 		}
-		m_ViewportView->OnKeyEvent(e.Key());
+		if (m_ViewportView->ViewFocused)
+			m_ViewportView->OnKeyEvent(e.Key());
 	}
 
 	void EditorLayer::OnSceneChange()
@@ -133,7 +134,7 @@ namespace MoonEngine
 		m_EditorScene = MakeShared<Scene>();
 		m_Scene = m_EditorScene;
 		m_Scene->StartEdit();
-
+		m_ScenePath.clear();
 		OnSceneChange();
 	}
 
@@ -146,6 +147,19 @@ namespace MoonEngine
 	{
 		NewScene();
 		SceneSerializer::Deserialize(m_Scene, path);
+	}
+
+	void EditorLayer::QuickSave()
+	{
+		if (m_ScenePath == "")
+			saveDialog.OpenFileBrowser();
+		else
+		{
+			if ((m_Scene->SceneName + ".moonscn") != m_ScenePath.filename())
+				saveDialog.OpenFileBrowser();
+			else
+				SaveScene(m_ScenePath.string());
+		}
 	}
 
 	void EditorLayer::Update()
@@ -165,15 +179,24 @@ namespace MoonEngine
 		{
 			const std::string& path = loadDialog.GetSelected().string();
 			if (path != "")
+			{
 				LoadScene(path);
+				m_ScenePath = path;
+			}
 		}
 
 		saveDialog.BeginFileBrowser();
 		if (saveDialog.IsDone())
 		{
-			const std::string& path = saveDialog.GetSelected().string();
-			if (path != "")
-				SaveScene(path);
+			const auto& path = saveDialog.GetCurrentPath();
+			std::string pathstr = saveDialog.GetCurrentPath().string();
+
+			if (pathstr != "")
+			{
+				pathstr += "/" + m_Scene->SceneName + ".moonscn";
+				SaveScene(pathstr);
+				m_ScenePath = pathstr;
+			}
 		}
 
 		m_ViewportView->Render();
@@ -202,6 +225,16 @@ namespace MoonEngine
 
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);
+
+		if (m_Scene)
+		{
+			ImGui::Text("Scene Name: %s", m_Scene->SceneName.c_str());
+			ImGui::Text("Scene Path: %s", m_ScenePath.string().c_str());
+			ImGui::Text("Scene Filename: %s", m_ScenePath.filename().string().c_str());
+
+			ImGui::Separator();
+			ImGuiUtils::AddPadding(0.0f, 10.0f);
+		}
 
 		const auto& renderStats = Renderer::GetStats();
 		ImGui::Text("Viewport Renderer Data");
@@ -239,7 +272,7 @@ namespace MoonEngine
 					NewScene();
 
 				if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, true))
-					saveDialog.OpenFileBrowser();
+					QuickSave();
 
 				if (ImGui::MenuItem("Load", "Ctrl+L ", nullptr, true))
 					loadDialog.OpenFileBrowser();
