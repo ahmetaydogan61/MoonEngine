@@ -14,7 +14,8 @@ Note that you can create a new solution and use "MoonEngine" features like Scene
 <ul>
    <li>Batch Renderer</li>
    <li>Entity Component System</li>
-   <li>Scene Serializer (Save/Load)</li>
+   <li>Particle System</li>
+   <li>Scene Serializer/Deserializer with simple Reflection</li>
 </ul>
 
 <h2><b>The Editor</b></h2>
@@ -50,12 +51,12 @@ The editor can be used to create/delete entities, add/remove components, play/pa
 <h3><b>Shortcuts</b></h3>
 <ul>
   <li>LeftCtrl+D: Duplicate selected entity.</li>
-  <li>LeftCtrl+W or Delete: Delete selected entity.</li>
+  <li>Delete: Delete selected entity.</li>
   <li>LeftCtrl+N: New Scene.</li>
   <li>LeftCtrl+S: Save Scene.</li>
   <li>LeftCtrl+L: Load Scene.</li>
   <li>
-  For Gizmo operation selection, while not in Play mode;
+  Gizmo operation selection
   </br> Q: Select, W: Translate, E: Scale, R: Rotate.
   </li>
 </ul>
