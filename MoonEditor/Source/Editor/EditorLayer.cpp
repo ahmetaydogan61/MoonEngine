@@ -68,6 +68,7 @@ namespace MoonEngine
 		m_GameView = MakeShared<GameView>();
 		m_InspectroView = MakeShared<InspectorView>();
 		m_HierarchyView = MakeShared<HierarchyView>();
+
 		NewScene();
 	}
 
@@ -164,6 +165,7 @@ namespace MoonEngine
 
 	void EditorLayer::Update()
 	{
+		m_Scene->UpdateRuntime(EditorLayer::State() == EditorLayer::EditorState::Play);
 		m_ViewportView->Update();
 		m_GameView->Update();
 	}

@@ -25,7 +25,7 @@ namespace MoonEngine
 		float RestitutionThreshold = 0.5f;
 
 		REFLECT(
-			("Offset", Offset)("FreezeRotation", Size)
+			("Offset", Offset)("Size", Size)
 			("Density", Density)("Friction", Friction)("Restitution", Restitution)("RestitutionThreshold", RestitutionThreshold)
 		)
 

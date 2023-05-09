@@ -41,13 +41,10 @@ namespace MoonEngine
 
 		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
 
-		auto view = m_Registry.view<RigidbodyComponent>();
-		for (auto e : view)
+		auto view = m_Registry.view<const TransformComponent, RigidbodyComponent>();
+		for (auto [e, transform, rb] : view.each())
 		{
-			ME_LOG("Rigidbody Updated");
 			Entity entity{ e, this };
-			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb = entity.GetComponent<RigidbodyComponent>();
 
 			b2BodyDef bodyDef;
 			bodyDef.type = ConvertBodyType(rb.Type);
@@ -111,31 +108,18 @@ namespace MoonEngine
 				const int32_t positionIterations = 2;
 				m_PhysicsWorld->Step(Time::DeltaTime(), velocityIterations, positionIterations);
 
-				auto view = m_Registry.view<RigidbodyComponent>();
-				for (auto e : view)
+				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
+				for (auto [e, transform, rigidbody] : view.each())
 				{
 					Entity entity{ e, this };
-					auto& transform = entity.GetComponent<TransformComponent>();
-					auto& rigidbody = entity.GetComponent<RigidbodyComponent>();
 
 					auto* body = (b2Body*)rigidbody.RuntimeBody;
 					const auto& position = body->GetPosition();
+
 					transform.Position.x = position.x;
 					transform.Position.y = position.y;
-
 					transform.Rotation.z = body->GetAngle();
-
-					ME_LOG("Rigidbodies are being updated");
 				}
-			}
-		}
-
-		//SpriteRenderer
-		{
-			auto view = m_Registry.view<const TransformComponent, const SpriteComponent>();
-			for (auto [entity, transform, sprite] : view.each())
-			{
-				Renderer::DrawEntity(transform, sprite, (int)entity);
 			}
 		}
 	}

@@ -1,0 +1,107 @@
+Scene: PhysicsTest
+Entities:
+  - Entity: 515fb0c4-038d-4092-8ca8-a68aa8a8ff55
+    struct MoonEngine::IdentityComponent:
+      Name: DynamicBox
+    struct MoonEngine::TransformComponent:
+      Position: [0, 1.7565608, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Dynamic
+      FreezeRotation: true
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 0.200000003
+      Friction: 0.25
+      Restitution: 0.189999998
+      RestitutionThreshold: 0.5
+  - Entity: 6983a73d-73f7-4cd5-925e-258c118bddd8
+    struct MoonEngine::IdentityComponent:
+      Name: DarkDynamicBox
+    struct MoonEngine::TransformComponent:
+      Position: [-2.59135413, 0.862680972, 0]
+      Rotation: [0, 0, -0.748545587]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [0.641833782, 0.641833782, 0.641833782, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Dynamic
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.660000026
+      RestitutionThreshold: 0.5
+  - Entity: db6eaabb-03c3-46a9-9e30-961ba762b3e5
+    struct MoonEngine::IdentityComponent:
+      Name: Square
+    struct MoonEngine::TransformComponent:
+      Position: [1.26757383, -1.65707004, 0]
+      Rotation: [0, 0, 0.543946743]
+      Scale: [5, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [5, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Static
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 6a78589f-f1b4-4585-ac70-1bb5137c3e27
+    struct MoonEngine::IdentityComponent:
+      Name: Square
+    struct MoonEngine::TransformComponent:
+      Position: [-2.94397736, -2.43617868, 0]
+      Rotation: [0, 0, -0.1648871]
+      Scale: [5.00000477, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [5, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Static
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 63f0241f-e71b-4599-87a3-3e57ed45a607
+    struct MoonEngine::IdentityComponent:
+      Name: DynamicBox
+    struct MoonEngine::TransformComponent:
+      Position: [1.57634676, 1.7565608, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Dynamic
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 0.200000003
+      Friction: 0.25
+      Restitution: 0.189999998
+      RestitutionThreshold: 0.5

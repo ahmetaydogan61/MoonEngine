@@ -64,7 +64,14 @@ namespace MoonEngine
 		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
 		Renderer::Begin();
 
-		Scene->UpdateRuntime(EditorLayer::State() == EditorLayer::EditorState::Play);
+		//SpriteRenderer
+		{
+			auto view = registry.view<const TransformComponent, const SpriteComponent>();
+			for (auto [entity, transform, sprite] : view.each())
+			{
+				Renderer::DrawEntity(transform, sprite, (int)entity);
+			}
+		}
 
 		Renderer::End();
 		m_Gamebuffer->Unbind();

@@ -297,7 +297,7 @@ namespace MoonEngine
 
 			RenderProp("Restitution", [&]
 			{
-				ImGui::DragFloat("##rt", &component.Restitution, dragSliderSpeed * 0.1f, 0.01f, 0.1f, "%.2f");
+				ImGui::DragFloat("##rt", &component.Restitution, dragSliderSpeed * 0.1f, 0.01f, 1.0f, "%.2f");
 			});
 			
 			RenderProp("Restitution Threshold", [&]
