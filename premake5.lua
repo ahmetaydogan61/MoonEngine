@@ -17,14 +17,20 @@ includeYaml = "%{wks.location}/Externals/yaml-cpp/include"
 includeIconFont = "%{wks.location}/Externals/IconFontCppHeaders"
 includeUuidv4 = "%{wks.location}/Externals/uuid_v4"
 includeImGuizmo = "%{wks.location}/Externals/ImGuizmo"
+includeBox2D = "%{wks.location}/Externals/Box2D/include"
 
+group "Externals"
 include "Externals/GLFW/GLFWPremake.lua"
 include "Externals/Glad/GladPremake.lua"
 include "Externals/ImGui/ImGuiPremake.lua"
 include "Externals/yaml-cpp/YamlPremake.lua"
+include "Externals/Box2D/Box2DPremake.lua"
+group ""
 
+group "MoonEngine2D"
 include "MoonEngine/MoonEnginePremake.lua"
 includeMoonEngine = "%{wks.location}/MoonEngine/Source"
-
 include "MoonEditor/MoonEditorPremake.lua"
 includeMoonEditor = "%{wks.location}/MoonEditor/Source"
+group ""
+

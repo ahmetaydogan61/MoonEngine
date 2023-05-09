@@ -34,11 +34,13 @@ project "MoonEngine"
         includeYaml,
         includeIconFont,
         includeUuidv4,
-        includeImGuizmo
+        includeImGuizmo,
+        includeBox2D
     }
 
     links
     {
+        "Box2D",
         "GLFW",
         "Glad",
         "opengl32.lib",

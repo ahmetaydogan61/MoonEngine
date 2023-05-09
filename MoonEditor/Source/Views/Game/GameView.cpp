@@ -1,5 +1,6 @@
 #include <mpch.h>
 #include "GameView.h"
+#include "Editor/EditorLayer.h"
 
 #include <Engine/Components.h>
 
@@ -63,11 +64,7 @@ namespace MoonEngine
 		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
 		Renderer::Begin();
 
-		auto view = registry.view<const TransformComponent, const SpriteComponent>();
-		for (auto [entity, transform, sprite] : view.each())
-		{
-			Renderer::DrawEntity(transform, sprite, (int)entity);
-		}
+		Scene->UpdateRuntime(EditorLayer::State() == EditorLayer::EditorState::Play);
 
 		Renderer::End();
 		m_Gamebuffer->Unbind();
@@ -81,7 +78,7 @@ namespace MoonEngine
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin(Name.c_str(), &Enabled, Flags);
-		
+
 		OnWindowBegin();
 
 		ImGui::Image((void*)m_Gamebuffer->GetTexID(), { ViewSize.x, ViewSize.y }, { 0, 1 }, { 1, 0 });

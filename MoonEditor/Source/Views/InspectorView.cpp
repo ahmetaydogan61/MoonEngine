@@ -250,9 +250,67 @@ namespace MoonEngine
 			EndDrawProp();
 		}, selectedEntity);
 
+
+		ShowComponent<RigidbodyComponent>("Rigidbody", [&](RigidbodyComponent& component)
+		{
+			BeginDrawProp("##Rigidbody");
+
+			RenderProp("Type", [&]
+			{
+				int currentStlye = (int)component.Type;
+				if (ImGui::Combo("##Type", &currentStlye, "Static\0Dynamic\0Kinematic\0"))
+					component.Type = (RigidbodyComponent::BodyType)currentStlye;
+			});
+
+			RenderProp("Freeze Rotation", [&]
+			{
+				ImGui::Checkbox("##fr", &component.FreezeRotation);
+			});
+
+			EndDrawProp();
+		}, selectedEntity);
+
+		float dragSliderSpeed = 0.1f;
+
+		ShowComponent<BoxColliderComponent>("Box Collider", [&](BoxColliderComponent& component)
+		{
+			BeginDrawProp("##BoxCollider");
+
+			RenderProp("Offset", [&]
+			{
+				ImGui::DragFloat2("##offset", &component.Offset[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+			});
+
+			RenderProp("Size", [&]
+			{
+				ImGui::DragFloat2("##siz", &component.Size[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+			});
+
+			RenderProp("Density", [&]
+			{
+				ImGui::DragFloat("##density", &component.Density, dragSliderSpeed * 0.1f, 0.0f, 1.0f, "%.2f");
+			});
+
+			RenderProp("Friction", [&]
+			{
+				ImGui::DragFloat("##friction", &component.Friction, dragSliderSpeed * 0.1f, 0.0f, 1.0f, "%.2f");
+			});
+
+			RenderProp("Restitution", [&]
+			{
+				ImGui::DragFloat("##rt", &component.Restitution, dragSliderSpeed * 0.1f, 0.01f, 0.1f, "%.2f");
+			});
+			
+			RenderProp("Restitution Threshold", [&]
+			{
+				ImGui::DragFloat("##rtth", &component.RestitutionThreshold, dragSliderSpeed * 0.1f, 0.01f, 1.0f, "%.2f");
+			});
+
+			EndDrawProp();
+		}, selectedEntity);
+
 		ShowComponent<ParticleComponent>("Particle System", [&](ParticleComponent& component)
 		{
-			float dragSliderSpeed = 0.1f;
 
 			bool isPlaying = component.ParticleSystem.IsPlaying();
 			const char* label = isPlaying ? "Pause" : "Play";
@@ -605,6 +663,14 @@ namespace MoonEngine
 					if (ImGui::MenuItem("Particle System"))
 						if (!selectedEntity.HasComponent<ParticleComponent>())
 							selectedEntity.AddComponent<ParticleComponent>();
+
+					if (ImGui::MenuItem("Rigidbody"))
+						if (!selectedEntity.HasComponent<RigidbodyComponent>())
+							selectedEntity.AddComponent<RigidbodyComponent>();
+
+					if (ImGui::MenuItem("Box Collider"))
+						if (!selectedEntity.HasComponent<BoxColliderComponent>())
+							selectedEntity.AddComponent<BoxColliderComponent>();
 					ImGui::EndPopup();
 				}
 			}//-Add Component Button

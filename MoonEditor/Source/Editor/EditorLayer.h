@@ -17,6 +17,7 @@ namespace MoonEngine
 
 	class EditorLayer : public ApplicationLayer
 	{
+	public:
 		enum class EditorState
 		{
 			Play,
@@ -24,7 +25,6 @@ namespace MoonEngine
 			Pause
 		};
 
-	public:
 		void Init();
 		void Update();
 		void DrawGui();
@@ -38,6 +38,7 @@ namespace MoonEngine
 		void DuplicateSelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity = m_Scene->DuplicateEntity(m_SelectedEntity); }
 		void DestroySelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity.Destroy(); m_SelectedEntity = {}; }
 
+		static EditorState State() { return s_EditorLayer->m_EditorState; }
 		static EditorLayer* Get() { if (s_EditorLayer) return s_EditorLayer; else return nullptr; }
 	private:
 		EditorState m_EditorState = EditorState::Edit;

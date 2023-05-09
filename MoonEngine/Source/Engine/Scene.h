@@ -3,6 +3,8 @@
 
 #include <entt.hpp>
 
+class b2World;
+
 namespace MoonEngine
 {
 	class Entity;
@@ -24,13 +26,13 @@ namespace MoonEngine
 			m_Renderer = renderer;
 		}
 
-		void StartPlay();
-		void StopPlay();
+		void StartRuntime();
+		void StopRuntime();
 
 		void StartEdit();
 		void StopEdit();
 
-		void UpdatePlay(const glm::vec2& gameViewSize, bool paused);
+		void UpdateRuntime(bool update);
 		void UpdateEdit(const Camera* camera);
 
 		static Shared<Scene> CopyScene(Shared<Scene> scene);
@@ -39,6 +41,8 @@ namespace MoonEngine
 
 		Shared<Renderer> m_Renderer;
 		Shared<Texture> m_CameraTexture;
+
+		b2World* m_PhysicsWorld = nullptr;
 
 		friend class Entity;
 		friend class SceneSerializer;

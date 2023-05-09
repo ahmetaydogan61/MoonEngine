@@ -46,6 +46,13 @@ namespace MoonEngine
 		}
 
 		template<typename T>
+		bool TryGetComponent(T& c)
+		{
+			if (m_Scene->m_Registry.any_of<T>(m_ID))
+				c = m_Scene->m_Registry.get<T>(m_ID);
+		}
+		
+		template<typename T>
 		void RemoveComponent()
 		{
 			m_Scene->m_Registry.remove<T>(m_ID);

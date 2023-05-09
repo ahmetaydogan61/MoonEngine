@@ -127,7 +127,7 @@ namespace MoonEngine
 	void EditorLayer::NewScene()
 	{
 		if (m_EditorState == EditorState::Play)
-			m_Scene->StopPlay();
+			m_Scene->StopRuntime();
 
 		m_EditorState = EditorState::Edit;
 		m_EditorScene = MakeShared<Scene>();
@@ -299,7 +299,7 @@ namespace MoonEngine
 						m_EditorState = EditorState::Play;
 						m_Scene->StopEdit();
 						m_Scene = Scene::CopyScene(m_EditorScene);
-						m_Scene->StartPlay();
+						m_Scene->StartRuntime();
 						OnSceneChange();
 					}
 					else if (m_EditorState == EditorState::Play)
@@ -311,7 +311,7 @@ namespace MoonEngine
 				if (m_EditorState != EditorState::Edit && ImGui::ImageButton((ImTextureID)EditorAssets::StopTexture->GetTextureId(), { buttonSize, height * 0.5f }))
 				{
 					m_EditorState = EditorState::Edit;
-					m_Scene->StopPlay();
+					m_Scene->StopRuntime();
 					m_Scene = m_EditorScene;
 					m_Scene->StartEdit();
 					OnSceneChange();
