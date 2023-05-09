@@ -380,7 +380,7 @@ namespace MoonEngine
 					{
 						ImGui::DragFloat3("##Scale", &component.Particle.ScaleStart[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 						if (!component.Particle.IsScaleConstant)
-							ImGui::DragFloat3("##Range", &component.Particle.ScaleStartRandom[0]), dragSliderSpeed, 0.0f, 0.0f, "%.2f";
+							ImGui::DragFloat3("##Range", &component.Particle.ScaleStartRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 					}
 					else
 					{
@@ -411,7 +411,7 @@ namespace MoonEngine
 					{
 						ImGui::DragFloat("##Scale", &component.Particle.ScaleEnd[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 						if (!component.Particle.IsScaleEndConstant)
-							ImGui::DragFloat("##Range", &component.Particle.ScaleEndRandom[0]), dragSliderSpeed, 0.0f, 0.0f, "%.2f";
+							ImGui::DragFloat("##Range", &component.Particle.ScaleEndRandom[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 					}
 				});
 			});

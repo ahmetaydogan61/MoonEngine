@@ -1,0 +1,47 @@
+Scene: BlueFireBall
+Entities:
+  - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
+    struct MoonEngine::IdentityComponent:
+      Name: BlueFireBall
+    struct MoonEngine::TransformComponent:
+      Position: [0, -0.343469918, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::ParticleComponent:
+      SortMode: 1
+      EmitterType: 1
+      Looping: true
+      Duration: 5
+      ParticlePerSecond: 1250
+      IsLifetimeConstant: false
+      Lifetime: [2, 4]
+      IsSpeedConstant: true
+      Speed: [1, 0]
+      SpawnPosition: [0, 0, 0]
+      SpawnRadius: [0.25, 0.25, 0]
+      RandomDirectionFactor: 0
+      DirectionRadiusFactor: 3.20000005
+      IsScale3D: false
+      IsScaleConstant: false
+      ScaleStart: [0.75, 1, 1]
+      ScaleStartRandom: [1.25, 1, 1]
+      IsScaleCycle: true
+      IsScaleEndConstant: true
+      ScaleEnd: [0, 0, 0]
+      ScaleEndRandom: [0, 0, 0]
+      IsRotation3D: false
+      IsRotationConstant: false
+      RotationStart: [0, 0, 0]
+      RotationStartRandom: [0, 0, 6.28318548]
+      IsRotationCycle: true
+      IsRotationEndConstant: false
+      RotationEnd: [0, 0, 6.28318548]
+      RotationEndRandom: [0, 0, -6.28318548]
+      Texture: "null"
+      IsColorConstant: true
+      ColorStart: [0, 0.710405111, 0.968481362, 1]
+      ColorStartRandom: [1, 0.784313738, 0, 1]
+      IsColorCycle: true
+      IsColorEndConstant: true
+      ColorEnd: [0.643137276, 0, 0, 0.482352942]
+      ColorEndRandom: [1, 0.274509817, 0, 1]
