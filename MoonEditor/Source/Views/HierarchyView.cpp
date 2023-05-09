@@ -9,6 +9,8 @@
 #include <IconsMaterialDesign.h>
 
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <misc/cpp/imgui_stdlib.cpp>
 
 namespace MoonEngine
 {
@@ -110,6 +112,14 @@ namespace MoonEngine
 
 		if (ImGui::BeginMenuBar())
 		{
+			std::string sceneName = Scene->SceneName;
+			ImGuiUtils::Label("Active Scene:");
+			if (ImGui::InputText("##scnn", &sceneName, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if(sceneName != "")
+					Scene->SceneName = sceneName;
+			}
+
 			const auto& contentRegion = ImGui::GetContentRegionAvail();
 			float buttonSize = ImGui::GetFontSize() + 5.0f;
 			ImGuiUtils::AddPadding(contentRegion.x - (buttonSize * 0.5f) - (ImGui::GetStyle().FramePadding.x * 2.0f), 0);

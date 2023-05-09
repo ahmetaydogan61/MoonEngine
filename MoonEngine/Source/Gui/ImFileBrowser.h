@@ -143,7 +143,7 @@ namespace ImGui
 		bool m_DoneFlag = false;
 		std::filesystem::path m_CurrentPath;
 		std::filesystem::path m_SelectedPath;
-		std::string m_CreateFilename;
+		std::string m_FilenameInput;
 		std::string m_FilteredExtension;
 
 		void DrawFileBrowser(const char* label, const ImGuiFilebrowserFlags& flags)
@@ -157,6 +157,8 @@ namespace ImGui
 					ClearBrowser();
 				if (flags & ImGuiFileBrowserFlags_ResetSelected)
 					m_SelectedPath.clear();
+
+				m_FilenameInput.clear();
 			}
 
 			if (m_DoneFlag)
@@ -349,7 +351,10 @@ namespace ImGui
 					else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 					{
 						if ((isDirectory && flags & ImGuiFileBrowserFlags_SelectDirectories) || (!isDirectory && flags & ImGuiFileBrowserFlags_SelectFiles))
+						{
 							m_SelectedPath = path;
+							m_FilenameInput = m_SelectedPath.filename().string();
+						}
 					}
 				}
 				ImGui::PopStyleColor();
@@ -398,61 +403,64 @@ namespace ImGui
 				bool entered = false;
 				if (m_SelectedPath.string() != "")
 				{
-					std::string selectedName = m_SelectedPath.filename().string();
-					if (ImGui::InputText("##renameFile", &selectedName, ImGuiInputTextFlags_EnterReturnsTrue))
+					if (ImGui::InputText("##renameFile", &m_FilenameInput, ImGuiInputTextFlags_EnterReturnsTrue))
 						entered = true;
 
-					if (entered || (m_DoneFlag && ImGuiFileBrowserFlags_OkayTriggersEnter))
+					if (entered || (m_DoneFlag && (flags & ImGuiFileBrowserFlags_OkayTriggersEnter)))
 					{
-						std::filesystem::path newPath = m_CurrentPath / selectedName;
+						std::filesystem::path newPath = m_CurrentPath / m_FilenameInput;
 						std::filesystem::rename(m_SelectedPath, newPath);
 
 						if (flags & ImGuiFileBrowserFlags_ClearSelectRenamedPath)
+						{
 							m_SelectedPath.clear();
+							m_FilenameInput.clear();
+						}
 						else
 							m_SelectedPath = newPath;
 					}
 				}
 				else
 				{
-					std::string selectedName;
-					if (ImGui::InputText("##createFile", &selectedName, ImGuiInputTextFlags_EnterReturnsTrue))
+					if (ImGui::InputText("##createFile", &m_FilenameInput, ImGuiInputTextFlags_EnterReturnsTrue))
 						entered = true;
 
-					if (entered || (m_DoneFlag && ImGuiFileBrowserFlags_OkayTriggersEnter))
+					if (entered || (m_DoneFlag && (flags & ImGuiFileBrowserFlags_OkayTriggersEnter)))
 					{
-						std::filesystem::path newPath = m_CurrentPath / selectedName;
+						std::filesystem::path newPath = m_CurrentPath / m_FilenameInput;
 						std::ofstream outfile(newPath);
 						outfile.close();
 
 						if (flags & ImGuiFileBrowserFlags_ClearSelectRenamedPath)
+						{
 							m_SelectedPath.clear();
+							m_FilenameInput.clear();
+						}
 						else
 							m_SelectedPath = newPath;
-
-						entered = true;
 					}
 				}
 
 				if (entered && flags & ImGuiFileBrowserFlags_DoneAfterCreateFile)
 					m_DoneFlag = true;
-
 			}
 			else if (flags & ImGuiFileBrowserFlags_AllowRename && m_SelectedPath != "")
 			{
 				bool entered = false;
 
-				std::string selectedName = m_SelectedPath.filename().string();
-				if (ImGui::InputText("##renameFile", &selectedName, ImGuiInputTextFlags_EnterReturnsTrue))
+				if (ImGui::InputText("##renameFile", &m_FilenameInput, ImGuiInputTextFlags_EnterReturnsTrue))
 					entered = true;
 
-				if (entered || (m_DoneFlag && ImGuiFileBrowserFlags_OkayTriggersEnter))
+				if (entered || (m_DoneFlag && (flags & ImGuiFileBrowserFlags_OkayTriggersEnter)))
 				{
-					std::filesystem::path newPath = m_CurrentPath / selectedName;
+					std::filesystem::path newPath = m_CurrentPath / m_FilenameInput;
 					std::filesystem::rename(m_SelectedPath, newPath);
 
 					if (flags & ImGuiFileBrowserFlags_ClearSelectRenamedPath)
+					{
 						m_SelectedPath.clear();
+						m_FilenameInput.clear();
+					}
 					else
 						m_SelectedPath = newPath;
 				}

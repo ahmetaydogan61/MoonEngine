@@ -295,6 +295,9 @@ namespace MoonEngine
 
 	void ViewportView::OnKeyEvent(Keycode key)
 	{
+		if (!ViewFocused)
+			return;
+
 		switch (key)
 		{
 			case Keycode::Q:

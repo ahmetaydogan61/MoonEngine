@@ -350,9 +350,7 @@ namespace MoonEngine
 			return;
 
 		std::string sceneName = data["Scene"].as<std::string>();
-		const std::string& sceneFileName = path.filename().string();
-		size_t lastindex = sceneFileName.find_last_of(".");
-		scene->SceneName = sceneFileName.substr(0, lastindex);
+		scene->SceneName = sceneName;
 
 		auto entities = data["Entities"];
 		if (entities)

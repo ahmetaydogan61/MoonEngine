@@ -2,7 +2,7 @@ Scene: Fire
 Entities:
   - Entity: 12c46f49-59d1-4d6f-a4a6-46fd555419dd
     struct MoonEngine::IdentityComponent:
-      Name: Particle
+      Name: SmokeParticle
     struct MoonEngine::TransformComponent:
       Position: [0, 1.08029056, 0]
       Rotation: [0, 0, 0]
@@ -58,7 +58,7 @@ Entities:
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
   - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
     struct MoonEngine::IdentityComponent:
-      Name: Particle
+      Name: FireParticle
     struct MoonEngine::TransformComponent:
       Position: [-0.0217508078, 0.616273344, 0]
       Rotation: [0, 0, 0]

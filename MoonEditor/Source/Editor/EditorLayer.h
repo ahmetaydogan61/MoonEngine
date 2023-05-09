@@ -33,6 +33,8 @@ namespace MoonEngine
 		void SaveScene(const std::string& path);
 		void LoadScene(const std::string& path);
 
+		void QuickSave();
+
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 		Entity& GetSelectedEntity() { return m_SelectedEntity; }
 		void DuplicateSelectedEntity() { if (!m_SelectedEntity) return; m_SelectedEntity = m_Scene->DuplicateEntity(m_SelectedEntity); }
@@ -43,6 +45,7 @@ namespace MoonEngine
 		EditorState m_EditorState = EditorState::Edit;
 		
 		Shared<Scene> m_Scene, m_EditorScene;
+		std::filesystem::path m_ScenePath;
 		Entity m_SelectedEntity = {};
 
 		Shared<AssetsView> m_AssetsView;
