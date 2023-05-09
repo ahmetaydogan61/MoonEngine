@@ -15,9 +15,6 @@
 
 namespace MoonEngine
 {
-	Shared<Texture> cameraTexture;
-	Shared<Texture> flareTexture;
-
 	ViewportView::ViewportView()
 	{
 		Name = ICON_MD_CAMERA;
@@ -30,9 +27,6 @@ namespace MoonEngine
 		FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::RED_INTEGER}, {FramebufferTextureFormat::DEPTH} };
 		Viewbuffer = MakeShared<Framebuffer>(props);
 		m_EditorCamera = MakeShared<EditorCamera>();
-
-		cameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
-		flareTexture = MakeShared<Texture>("Resource/EditorIcons/Flare.png");
 	}
 
 	void ViewportView::Update()
@@ -83,7 +77,7 @@ namespace MoonEngine
 				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));;
-				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, flareTexture, { 1.0f, 1.0f }, (int)entity);
+				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::FlareTexture, { 1.0f, 1.0f }, (int)entity);
 			}
 
 			Entity e{ entity, Scene };
@@ -141,7 +135,7 @@ namespace MoonEngine
 				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));
 
-				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, cameraTexture, { 1.0f, 1.0f }, (int)entity);
+				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::CameraTexture, { 1.0f, 1.0f }, (int)entity);
 			}
 
 			Renderer::End();

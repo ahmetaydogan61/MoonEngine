@@ -1,0 +1,55 @@
+Scene: NewScene
+Entities:
+  - Entity: d478dba7-c11b-496a-b7c3-6ac32a09264a
+    struct MoonEngine::IdentityComponent:
+      Name: Entity
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, -0.747000873]
+      Scale: [3, 3, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+  - Entity: cbb88ec4-2b47-428c-94d0-debfd004059e
+    struct MoonEngine::IdentityComponent:
+      Name: Camera
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::CameraComponent:
+      IsMain: false
+      Size: 5
+  - Entity: 25c1e621-743e-4b99-804d-ac2faddf3bb8
+    struct MoonEngine::IdentityComponent:
+      Name: Camera
+    struct MoonEngine::TransformComponent:
+      Position: [-3.56137443, -2.21856117, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::CameraComponent:
+      IsMain: true
+      Size: 10
+  - Entity: 222c2bae-b7ab-45de-9fc1-c19617d74736
+    struct MoonEngine::IdentityComponent:
+      Name: Entity
+    struct MoonEngine::TransformComponent:
+      Position: [0, 2.00448942, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 0, 0, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+  - Entity: b3dbde87-0748-4051-95a7-a73b45dd1c54
+    struct MoonEngine::IdentityComponent:
+      Name: Entity
+    struct MoonEngine::TransformComponent:
+      Position: [1.45957994, -1.39146626, 0]
+      Rotation: [0, 0, 0.801106155]
+      Scale: [0.999999464, 0.999999464, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [0.371016175, 0.41833812, 0.219357803, 1]
+      Tiling: [1, 1]
+      Texture: "null"

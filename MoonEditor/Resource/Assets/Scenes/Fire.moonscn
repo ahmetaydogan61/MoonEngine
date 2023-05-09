@@ -1,0 +1,103 @@
+Scene: NewScene
+Entities:
+  - Entity: 12c46f49-59d1-4d6f-a4a6-46fd555419dd
+    struct MoonEngine::IdentityComponent:
+      Name: Particle
+    struct MoonEngine::TransformComponent:
+      Position: [3.56350017, -0.732297421, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::ParticleComponent:
+      SortMode: 0
+      EmitterType: 1
+      Looping: true
+      Duration: 5
+      ParticlePerSecond: 100
+      IsLifetimeConstant: true
+      Lifetime: [2, 3.5]
+      IsSpeedConstant: false
+      Speed: [1, 2]
+      SpawnPosition: [0, 0, 0]
+      SpawnRadius: [1, 0, 0]
+      RandomDirectionFactor: 0
+      DirectionRadiusFactor: 1
+      IsScale3D: false
+      IsScaleConstant: true
+      ScaleStart: [1, 1, 1]
+      ScaleStartRandom: [1, 1, 1]
+      IsScaleCycle: true
+      IsScaleEndConstant: true
+      ScaleEnd: [0, 0, 0]
+      ScaleEndRandom: [0, 0, 0]
+      IsRotation3D: false
+      IsRotationConstant: false
+      RotationStart: [0, 0, 0]
+      RotationStartRandom: [0, 0, 6.28318548]
+      IsRotationCycle: false
+      IsRotationEndConstant: true
+      RotationEnd: [0, 0, 0]
+      RotationEndRandom: [0, 0, 0]
+      Texture: Resource\Assets\Textures\SmokeParticle\tile001.png
+      IsColorConstant: false
+      ColorStart: [0.494117647, 0.494117647, 0.494117647, 0]
+      ColorStartRandom: [0.301960796, 0.301960796, 0.301960796, 0]
+      IsColorCycle: true
+      IsColorEndConstant: false
+      ColorEnd: [1, 1, 1, 0.392156869]
+      ColorEndRandom: [0.733333349, 0.733333349, 0.733333349, 0.392156869]
+  - Entity: 266c382a-d508-4d0b-b778-c22e29165306
+    struct MoonEngine::IdentityComponent:
+      Name: Square
+    struct MoonEngine::TransformComponent:
+      Position: [3.52077675, -2.12868452, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1.25, 1.25, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+  - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
+    struct MoonEngine::IdentityComponent:
+      Name: Particle
+    struct MoonEngine::TransformComponent:
+      Position: [3.50268102, -1.46888995, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::ParticleComponent:
+      SortMode: 1
+      EmitterType: 1
+      Looping: true
+      Duration: 5
+      ParticlePerSecond: 250
+      IsLifetimeConstant: true
+      Lifetime: [2, 3.5]
+      IsSpeedConstant: false
+      Speed: [0.600000024, 0.899999976]
+      SpawnPosition: [0, 0, 0]
+      SpawnRadius: [1.20000005, 0, 0]
+      RandomDirectionFactor: 0
+      DirectionRadiusFactor: 1
+      IsScale3D: false
+      IsScaleConstant: true
+      ScaleStart: [0.25, 1, 1]
+      ScaleStartRandom: [1, 1, 1]
+      IsScaleCycle: true
+      IsScaleEndConstant: true
+      ScaleEnd: [0, 0, 0]
+      ScaleEndRandom: [0, 0, 0]
+      IsRotation3D: false
+      IsRotationConstant: false
+      RotationStart: [0, 0, 0]
+      RotationStartRandom: [0, 0, 0]
+      IsRotationCycle: true
+      IsRotationEndConstant: false
+      RotationEnd: [0, 0, 6.28318548]
+      RotationEndRandom: [0, 0, -6.28318548]
+      Texture: "null"
+      IsColorConstant: false
+      ColorStart: [1, 0.666666687, 0, 1]
+      ColorStartRandom: [1, 0.784313738, 0, 1]
+      IsColorCycle: true
+      IsColorEndConstant: false
+      ColorEnd: [1, 0.392156869, 0, 1]
+      ColorEndRandom: [1, 0.274509817, 0, 1]

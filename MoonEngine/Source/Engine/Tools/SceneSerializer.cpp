@@ -236,7 +236,7 @@ namespace MoonEngine
 				return *this;
 
 			auto vec = propNode.as<std::vector<float>>();
-			if (vec.size() == 4)
+			if (vec.size() == 1)
 				field = glm::vec4(vec[0]);
 			else if (vec.size() == 4)
 				field = glm::make_vec4(vec.data());

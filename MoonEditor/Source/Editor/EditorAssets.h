@@ -8,6 +8,7 @@ namespace MoonEngine
 	{
 		static Shared<Texture> PlayTexture, StopTexture, PauseTexture, SettingsTexture;
 		static Shared<Texture> SelectTexture, TranslateTexture, ResizeTexture, RotateTexture, TransformationTexture;
+		static Shared<Texture> CameraTexture, FlareTexture;
 
 		static void LoadTextures();
 	};

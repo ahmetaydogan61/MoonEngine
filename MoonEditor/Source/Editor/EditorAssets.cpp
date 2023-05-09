@@ -5,6 +5,7 @@ namespace MoonEngine
 {
 	Shared<Texture> EditorAssets::PlayTexture, EditorAssets::StopTexture, EditorAssets::PauseTexture, EditorAssets::SettingsTexture;
 	Shared<Texture> EditorAssets::SelectTexture, EditorAssets::TranslateTexture, EditorAssets::ResizeTexture, EditorAssets::RotateTexture, EditorAssets::TransformationTexture;
+	Shared<Texture> EditorAssets::CameraTexture, EditorAssets::FlareTexture;
 
 	void EditorAssets::LoadTextures()
 	{
@@ -18,5 +19,8 @@ namespace MoonEngine
 		ResizeTexture = MakeShared<Texture>("Resource/EditorIcons/Resize.png");
 		RotateTexture = MakeShared<Texture>("Resource/EditorIcons/Rotate.png");
 		TransformationTexture = MakeShared<Texture>("Resource/EditorIcons/Transformation.png");
+
+		CameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
+		FlareTexture = MakeShared<Texture>("Resource/EditorIcons/Flare.png");
 	}
 }
