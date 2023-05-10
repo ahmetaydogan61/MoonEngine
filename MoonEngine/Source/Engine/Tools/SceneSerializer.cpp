@@ -118,18 +118,18 @@ namespace MoonEngine
 		return out;
 	}
 
-	YAML::Emitter& operator<<(YAML::Emitter& out, RigidbodyComponent::BodyType bt)
+	YAML::Emitter& operator<<(YAML::Emitter& out, PhysicsBodyComponent::BodyType bt)
 	{
 		std::string btName;
 		switch (bt)
 		{
-			case MoonEngine::RigidbodyComponent::BodyType::Static:
+			case MoonEngine::PhysicsBodyComponent::BodyType::Static:
 				btName = "Static";
 				break;
-			case MoonEngine::RigidbodyComponent::BodyType::Dynamic:
+			case MoonEngine::PhysicsBodyComponent::BodyType::Dynamic:
 				btName = "Dynamic";
 				break;
-			case MoonEngine::RigidbodyComponent::BodyType::Kinematic:
+			case MoonEngine::PhysicsBodyComponent::BodyType::Kinematic:
 				btName = "Kinematic";
 				break;
 			default:
@@ -194,18 +194,18 @@ namespace MoonEngine
 			obj.reflect(*this);
 		}
 
-		YAMLDeserializer& operator()(const char* propertyID, RigidbodyComponent::BodyType& field) {
+		YAMLDeserializer& operator()(const char* propertyID, PhysicsBodyComponent::BodyType& field) {
 			auto propNode = Node[propertyID];
 			if (!propNode)
 				return *this;
 
 			auto type = propNode.as<std::string>();
 			if (type == "Static")
-				field = RigidbodyComponent::BodyType::Static;
+				field = PhysicsBodyComponent::BodyType::Static;
 			else if (type == "Dynamic")
-				field = RigidbodyComponent::BodyType::Dynamic;
+				field = PhysicsBodyComponent::BodyType::Dynamic;
 			else if (type == "Kinematic")
-				field = RigidbodyComponent::BodyType::Kinematic;
+				field = PhysicsBodyComponent::BodyType::Kinematic;
 
 			return *this;
 		}
@@ -314,8 +314,7 @@ namespace MoonEngine
 		SerializeIfExists<TransformComponent>(out, entity);
 		SerializeIfExists<SpriteComponent>(out, entity);
 		SerializeIfExists<CameraComponent>(out, entity);
-		SerializeIfExists<RigidbodyComponent>(out, entity);
-		SerializeIfExists<BoxColliderComponent>(out, entity);
+		SerializeIfExists<PhysicsBodyComponent>(out, entity);
 
 		if (entity.HasComponent<ParticleComponent>())
 		{
@@ -407,8 +406,7 @@ namespace MoonEngine
 				GetIfExists<TransformComponent>(entity, deserializedEntity);
 				GetIfExists<SpriteComponent>(entity, deserializedEntity);
 				GetIfExists<CameraComponent>(entity, deserializedEntity);
-				GetIfExists<RigidbodyComponent>(entity, deserializedEntity);
-				GetIfExists<BoxColliderComponent>(entity, deserializedEntity);
+				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
 
 				auto particleNode = entity[typeid(ParticleComponent).name()];
 				if (particleNode)

@@ -2,20 +2,16 @@
 
 namespace MoonEngine
 {
-	
-	struct RigidbodyComponent
+	struct PhysicsBodyComponent
 	{
+		//Body
 		enum class BodyType { Static, Dynamic, Kinematic };
 		BodyType Type = BodyType::Static;
 		bool FreezeRotation = false;
 
 		void* RuntimeBody = nullptr;
 
-		REFLECT(("Type", Type)("FreezeRotation", FreezeRotation))
-	};
-
-	struct BoxColliderComponent
-	{
+		//Fixture
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 0.5f, 0.5f };
 
@@ -25,10 +21,9 @@ namespace MoonEngine
 		float RestitutionThreshold = 0.5f;
 
 		REFLECT(
+			("Type", Type)("FreezeRotation", FreezeRotation)
 			("Offset", Offset)("Size", Size)
 			("Density", Density)("Friction", Friction)("Restitution", Restitution)("RestitutionThreshold", RestitutionThreshold)
 		)
-
-		void* RuntimeFixture = nullptr;
 	};
 }

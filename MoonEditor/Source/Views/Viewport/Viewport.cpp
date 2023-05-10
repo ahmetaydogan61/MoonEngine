@@ -144,15 +144,15 @@ namespace MoonEngine
 			//GIZMO_AllBoxCollider
 			if (m_GizmosData.ShowAllColliders)
 			{
-				auto boxCollView = registry.view<const TransformComponent, const BoxColliderComponent>();
-				for (auto [entity, transformComponent, boxCollComponent] : boxCollView.each())
+				auto pbView = registry.view<const TransformComponent, const PhysicsBodyComponent>();
+				for (auto [entity, transformComponent, pbComponent] : pbView.each())
 				{
 					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
 					glm::vec3 scale = glm::vec3(1.0f);
-					scale.x = boxCollComponent.Size.x * 2.0f * transformComponent.Scale.x;
-					scale.y = boxCollComponent.Size.y * 2.0f * transformComponent.Scale.y;
+					scale.x = pbComponent.Size.x * 2.0f * transformComponent.Scale.x;
+					scale.y = pbComponent.Size.y * 2.0f * transformComponent.Scale.y;
 					const glm::mat4& transform =
-						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(boxCollComponent.Offset, 0.0f))
+						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(pbComponent.Offset, 0.0f))
 						* rotationMat * glm::scale(glm::mat4(1.0f), scale);
 
 					Renderer::DrawRect(transform, { 0.5f, 0.9f, 0.5f, 1.0f });
@@ -173,15 +173,21 @@ namespace MoonEngine
 				if (m_GizmosData.HighlightSelected && !selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
 					Renderer::DrawRect(transform, m_GizmosData.GizmosColor);
 
-				if (selectedEntity.HasComponent<BoxColliderComponent>())
+				if (selectedEntity.HasComponent<PhysicsBodyComponent>())
 				{
-					const auto& boxCollComponent = selectedEntity.GetComponent<BoxColliderComponent>();
-					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+					const auto& pbComponent = selectedEntity.GetComponent<PhysicsBodyComponent>();
+					
+					glm::vec3 position = transformComponent.Position;
+					position.x += pbComponent.Offset.x;
+					position.y += pbComponent.Offset.y;
+
 					glm::vec3 scale = glm::vec3(1.0f);
-					scale.x = boxCollComponent.Size.x * 2.0f * transformComponent.Scale.x;
-					scale.y = boxCollComponent.Size.y * 2.0f * transformComponent.Scale.y;
+					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+
+					scale.x = pbComponent.Size.x * 2.0f * transformComponent.Scale.x;
+					scale.y = pbComponent.Size.y * 2.0f * transformComponent.Scale.y;
 					const glm::mat4& transform =
-						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(boxCollComponent.Offset, 0.0f))
+						glm::translate(glm::mat4(1.0f), position)
 						* rotationMat * glm::scale(glm::mat4(1.0f), scale);
 
 					Renderer::DrawRect(transform, { 0.0f, 1.0f, 0.0f, 1.0f });

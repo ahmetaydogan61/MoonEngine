@@ -10,77 +10,30 @@
 #include "Renderer/Camera.h"
 #include "Renderer/Renderer.h"
 
-#include <box2d/b2_world.h>
-#include <box2d/b2_body.h>
-#include <box2d/b2_fixture.h>
-#include <box2d/b2_polygon_shape.h>
-
 namespace MoonEngine
 {
 	Scene::Scene()
 	{
-		m_CameraTexture = MakeShared<Texture>("Resource/EditorIcons/Camera.png");
-	}
-
-	static b2BodyType ConvertBodyType(RigidbodyComponent::BodyType type)
-	{
-		switch (type)
-		{
-			case MoonEngine::RigidbodyComponent::BodyType::Static: return b2_staticBody;
-			case MoonEngine::RigidbodyComponent::BodyType::Dynamic: return b2_dynamicBody;
-			case MoonEngine::RigidbodyComponent::BodyType::Kinematic: return b2_kinematicBody;
-		}
-
-		ME_ASSERT(false, "Invalid body type!");
-		return b2_staticBody;
 	}
 
 	void Scene::StartRuntime()
 	{
 		ME_LOG("Runtime Started");
 
-		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
+		m_PhysicsWorld.BeginWorld();
 
-		auto view = m_Registry.view<const TransformComponent, RigidbodyComponent>();
-		for (auto [e, transform, rb] : view.each())
+		auto view = m_Registry.view<const TransformComponent, PhysicsBodyComponent>();
+		for (auto [e, transform, pb] : view.each())
 		{
 			Entity entity{ e, this };
-
-			b2BodyDef bodyDef;
-			bodyDef.type = ConvertBodyType(rb.Type);
-			bodyDef.position.Set(transform.Position.x, transform.Position.y);
-			bodyDef.angle = transform.Rotation.z;
-
-			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
-			body->SetFixedRotation(rb.FreezeRotation);
-
-			rb.RuntimeBody = body;
-
-			if (entity.HasComponent<BoxColliderComponent>())
-			{
-				auto& boxColl = entity.GetComponent<BoxColliderComponent>();
-
-				b2PolygonShape boxShape;
-				boxShape.SetAsBox(transform.Scale.x * boxColl.Size.x, transform.Scale.y * boxColl.Size.y);
-
-				b2FixtureDef fixtureDef;
-				fixtureDef.shape = &boxShape;
-				fixtureDef.density = boxColl.Density;
-				fixtureDef.friction = boxColl.Friction;
-				fixtureDef.restitution = boxColl.Restitution;
-				fixtureDef.restitutionThreshold = boxColl.RestitutionThreshold;
-
-				body->CreateFixture(&fixtureDef);
-			}
+			m_PhysicsWorld.RegisterPhysicsBody(entity, transform, pb);
 		}
 	}
 
 	void Scene::StopRuntime()
 	{
 		ME_LOG("Runtime Stopped");
-
-		delete m_PhysicsWorld;
-		m_PhysicsWorld = nullptr;
+		m_PhysicsWorld.EndWorld();
 	}
 
 	void Scene::StartEdit()
@@ -104,22 +57,11 @@ namespace MoonEngine
 		{
 			//PhysicsWorld
 			{
-				const int32_t velocityIterations = 6;
-				const int32_t positionIterations = 2;
-				m_PhysicsWorld->Step(Time::DeltaTime(), velocityIterations, positionIterations);
+				m_PhysicsWorld.StepWorld(Time::DeltaTime());
 
-				auto view = m_Registry.view<TransformComponent, RigidbodyComponent>();
-				for (auto [e, transform, rigidbody] : view.each())
-				{
-					Entity entity{ e, this };
-
-					auto* body = (b2Body*)rigidbody.RuntimeBody;
-					const auto& position = body->GetPosition();
-
-					transform.Position.x = position.x;
-					transform.Position.y = position.y;
-					transform.Rotation.z = body->GetAngle();
-				}
+				auto view = m_Registry.view<TransformComponent, const PhysicsBodyComponent>();
+				for (auto [e, transform, physicsBody] : view.each())
+					m_PhysicsWorld.UpdatePhysicsBodies(Entity{ e, this }, transform, physicsBody);
 			}
 		}
 	}
@@ -134,6 +76,16 @@ namespace MoonEngine
 		}
 	}
 
+	template<typename T>
+	static void RemoveIfExists(Entity removeFrom)
+	{
+		if (removeFrom.HasComponent<T>())
+		{
+			T component = removeFrom.GetComponent<T>();
+			removeFrom.RemoveComponent<T>();
+		}
+	}
+
 	Entity Scene::CreateEntity()
 	{
 		Entity entity = { m_Registry.create(), this };
@@ -141,6 +93,17 @@ namespace MoonEngine
 		entity.AddComponent<IdentityComponent>();
 		entity.AddComponent<TransformComponent>();
 		return entity;
+	}
+
+	void Scene::DestroyEntity(Entity e)
+	{
+		RemoveIfExists<UUIDComponent>(e);
+		RemoveIfExists<IdentityComponent>(e);
+		RemoveIfExists<TransformComponent>(e);
+		RemoveIfExists<SpriteComponent>(e);
+		RemoveIfExists<ParticleComponent>(e);
+		RemoveIfExists<PhysicsBodyComponent>(e);
+		m_Registry.destroy(e.m_ID);
 	}
 
 	Entity Scene::DuplicateEntity(Entity& entity)
@@ -151,8 +114,7 @@ namespace MoonEngine
 		CopyIfExists<TransformComponent>(e, entity);
 		CopyIfExists<SpriteComponent>(e, entity);
 		CopyIfExists<ParticleComponent>(e, entity);
-		CopyIfExists<RigidbodyComponent>(e, entity);
-		CopyIfExists<BoxColliderComponent>(e, entity);
+		CopyIfExists<PhysicsBodyComponent>(e, entity);
 		return e;
 	}
 
@@ -171,9 +133,56 @@ namespace MoonEngine
 			CopyIfExists<SpriteComponent>(copyTo, copyFrom);
 			CopyIfExists<CameraComponent>(copyTo, copyFrom);
 			CopyIfExists<ParticleComponent>(copyTo, copyFrom);
-			CopyIfExists<RigidbodyComponent>(copyTo, copyFrom);
-			CopyIfExists<BoxColliderComponent>(copyTo, copyFrom);
+			CopyIfExists<PhysicsBodyComponent>(copyTo, copyFrom);
 		});
 		return tempScene;
+	}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, UUIDComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, UUIDComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, IdentityComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, IdentityComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, TransformComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, TransformComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, SpriteComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, SpriteComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, CameraComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, ParticleComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, ParticleComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, PhysicsBodyComponent& component) 
+	{
+	
+	}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, PhysicsBodyComponent& component)
+	{
+		m_PhysicsWorld.UnregisterPhysicsBody(entity, component);
 	}
 }

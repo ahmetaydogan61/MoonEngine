@@ -3,7 +3,7 @@
 
 #include <entt.hpp>
 
-class b2World;
+#include "Physics/PhysicsWorld.h"
 
 namespace MoonEngine
 {
@@ -19,13 +19,9 @@ namespace MoonEngine
 		std::string SceneName = "New Scene";
 
 		Entity CreateEntity();
+		void DestroyEntity(Entity e);
 		Entity DuplicateEntity(Entity& entity);
-
-		void SetRenderer(const Shared<Renderer>& renderer)
-		{
-			m_Renderer = renderer;
-		}
-
+		  
 		void StartRuntime();
 		void StopRuntime();
 
@@ -39,15 +35,18 @@ namespace MoonEngine
 	private:
 		entt::registry m_Registry;
 
-		Shared<Renderer> m_Renderer;
-		Shared<Texture> m_CameraTexture;
+		PhysicsWorld m_PhysicsWorld;
 
-		b2World* m_PhysicsWorld = nullptr;
+		template<typename T>
+		void OnAddComponent(Entity entity, T& component);
+		template<typename T>
+		void OnRemoveComponent(Entity entity, T& component);
 
 		friend class Entity;
 		friend class SceneSerializer;
+		friend class PhysicsWorld;
 
-		friend class EditorLayer;
 		friend struct BasicView;
+		friend class EditorLayer;
 	};
 }

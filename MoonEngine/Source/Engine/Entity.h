@@ -29,6 +29,7 @@ namespace MoonEngine
 		T& AddComponent(Args&&... args)
 		{
 			T& component = m_Scene->m_Registry.emplace<T>(m_ID, std::forward<Args>(args)...);
+			m_Scene->OnAddComponent<T>(*this, component);
 			return component;
 		}
 
@@ -48,16 +49,19 @@ namespace MoonEngine
 		template<typename T>
 		void RemoveComponent()
 		{
+			m_Scene->OnRemoveComponent<T>(*this, GetComponent<T>());
 			m_Scene->m_Registry.remove<T>(m_ID);
 		}
 
 		void Destroy()
 		{
-			m_Scene->m_Registry.destroy(m_ID);
+			m_Scene->DestroyEntity(*this);
 		}
 
 	private:
 		entt::entity m_ID = entt::null;
 		Scene* m_Scene = nullptr;
+		
+		friend class Scene;
 	};
 }

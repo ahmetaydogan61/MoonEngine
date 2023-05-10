@@ -20,12 +20,14 @@ namespace MoonEngine
 
 	void BeginDrawProp(const char* label)
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_CellPadding, { 8.0f, 2.0f });
 		ImGui::BeginTable(label, 2, ImGuiTableFlags_::ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable);
 	}
 
 	void EndDrawProp()
 	{
 		ImGui::EndTable();
+		ImGui::PopStyleVar();
 	}
 
 	void RenderProp(const char* label, std::function<void()> func)
@@ -33,6 +35,7 @@ namespace MoonEngine
 		ImGui::PushID(label);
 		ImGui::TableNextColumn();
 		ImGuiUtils::Label(label, false);
+		ImGuiUtils::AddPadding(0.0f, 5.0f);
 		ImGui::TableNextColumn();
 		func();
 		ImGui::PopID();
@@ -180,6 +183,8 @@ namespace MoonEngine
 
 	void RenderComponents(Entity& selectedEntity)
 	{
+		float dragSliderSpeed = 0.1f;
+
 		ShowComponent<SpriteComponent>("Sprite", [&](SpriteComponent& component)
 		{
 			BeginDrawProp("##Sprite");
@@ -250,15 +255,19 @@ namespace MoonEngine
 		}, selectedEntity);
 
 
-		ShowComponent<RigidbodyComponent>("Rigidbody", [&](RigidbodyComponent& component)
+		ShowComponent<PhysicsBodyComponent>("Physics Body", [&](PhysicsBodyComponent& component)
 		{
-			BeginDrawProp("##Rigidbody");
+			BeginDrawProp("##pb");
+			RenderProp("Body", [&]
+			{
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+			});
 
 			RenderProp("Type", [&]
 			{
 				int currentStlye = (int)component.Type;
 				if (ImGui::Combo("##Type", &currentStlye, "Static\0Dynamic\0Kinematic\0"))
-					component.Type = (RigidbodyComponent::BodyType)currentStlye;
+					component.Type = (PhysicsBodyComponent::BodyType)currentStlye;
 			});
 
 			RenderProp("Freeze Rotation", [&]
@@ -266,14 +275,10 @@ namespace MoonEngine
 				ImGui::Checkbox("##fr", &component.FreezeRotation);
 			});
 
-			EndDrawProp();
-		}, selectedEntity);
-
-		float dragSliderSpeed = 0.1f;
-
-		ShowComponent<BoxColliderComponent>("Box Collider", [&](BoxColliderComponent& component)
-		{
-			BeginDrawProp("##BoxCollider");
+			RenderProp("Fixture", [&]
+			{
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+			});
 
 			RenderProp("Offset", [&]
 			{
@@ -299,7 +304,7 @@ namespace MoonEngine
 			{
 				ImGui::DragFloat("##rt", &component.Restitution, dragSliderSpeed * 0.1f, 0.01f, 1.0f, "%.2f");
 			});
-			
+
 			RenderProp("Restitution Threshold", [&]
 			{
 				ImGui::DragFloat("##rtth", &component.RestitutionThreshold, dragSliderSpeed * 0.1f, 0.01f, 1.0f, "%.2f");
@@ -663,13 +668,10 @@ namespace MoonEngine
 						if (!selectedEntity.HasComponent<ParticleComponent>())
 							selectedEntity.AddComponent<ParticleComponent>();
 
-					if (ImGui::MenuItem("Rigidbody"))
-						if (!selectedEntity.HasComponent<RigidbodyComponent>())
-							selectedEntity.AddComponent<RigidbodyComponent>();
+					if (ImGui::MenuItem("Physics Body"))
+						if (!selectedEntity.HasComponent<PhysicsBodyComponent>())
+							selectedEntity.AddComponent<PhysicsBodyComponent>();
 
-					if (ImGui::MenuItem("Box Collider"))
-						if (!selectedEntity.HasComponent<BoxColliderComponent>())
-							selectedEntity.AddComponent<BoxColliderComponent>();
 					ImGui::EndPopup();
 				}
 			}//-Add Component Button
