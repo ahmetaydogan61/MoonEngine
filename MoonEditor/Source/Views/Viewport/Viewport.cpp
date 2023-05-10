@@ -66,11 +66,10 @@ namespace MoonEngine
 		//ParticleSystem
 		auto particleSystemView = registry.view<const TransformComponent, ParticleComponent>();
 		float dt = Time::DeltaTime();
+		bool isEditorPlaying = EditorLayer::State() == EditorLayer::EditorState::Play;
+
 		for (auto [entity, transformComponent, particle] : particleSystemView.each())
 		{
-			particle.ParticleSystem.Update(dt, particle.Particle, transformComponent.Position);
-			particle.ParticleSystem.UpdateParticles(dt, (int)entity);
-
 			//GIZMO_ParticleSystem
 			if (m_GizmosData.ShowGizmos && !particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
 			{
@@ -83,6 +82,15 @@ namespace MoonEngine
 			Entity e{ entity, Scene };
 			if (selectedEntity == e)
 			{
+				if (!isEditorPlaying)
+				{
+					if (particle.ParticleSystem.IsPaused())
+						particle.ParticleSystem.Play();
+
+					particle.ParticleSystem.UpdateEmitter(dt, particle.Particle, transformComponent.Position);
+					particle.ParticleSystem.UpdateParticles(dt);
+				}
+
 				switch (particle.ParticleSystem.EmitterType)
 				{
 					case EmitterType::Box:
@@ -122,6 +130,13 @@ namespace MoonEngine
 						break;
 				}
 			}
+			else
+			{
+				if (particle.ParticleSystem.IsPlaying() && !isEditorPlaying)
+					particle.ParticleSystem.Pause();
+			}
+
+			particle.ParticleSystem.DrawParticles((int)entity);
 		}
 
 		Renderer::End();
@@ -160,7 +175,7 @@ namespace MoonEngine
 			}
 
 			Renderer::End();
-			
+
 			//GIZMO_SELECT
 			if (selectedEntity)
 			{
@@ -168,7 +183,6 @@ namespace MoonEngine
 				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
 				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
-			
 
 				if (m_GizmosData.HighlightSelected && !selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
 					Renderer::DrawRect(transform, m_GizmosData.GizmosColor);
@@ -176,7 +190,7 @@ namespace MoonEngine
 				if (selectedEntity.HasComponent<PhysicsBodyComponent>())
 				{
 					const auto& pbComponent = selectedEntity.GetComponent<PhysicsBodyComponent>();
-					
+
 					glm::vec3 position = transformComponent.Position;
 					position.x += pbComponent.Offset.x;
 					position.y += pbComponent.Offset.y;
@@ -273,23 +287,23 @@ namespace MoonEngine
 
 				ImGuiUtils::Label("Icon Size: ");
 				ImGui::SliderFloat("##is", &m_GizmosData.IconSize, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-				
+
 				ImGuiUtils::Label("Outline Width: ");
 				ImGui::SliderFloat("##ow", &m_GizmosData.LineWidth, 1.0f, 5.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 
 				ImGuiUtils::Label("Color: ");
 				ImGui::ColorEdit4("##t", &m_GizmosData.GizmosColor[0]);
-				
+
 				ImGuiUtils::Label("Show All Colliders: ");
 				ImGui::Checkbox("##sac", &m_GizmosData.ShowAllColliders);
-				
+
 				ImGuiUtils::Label("Highlight Selected: ");
 				ImGui::Checkbox("##hs", &m_GizmosData.HighlightSelected);
 
 				ImGui::EndGroup();
 
 				ImGuiUtils::AddPadding(fontSize * 0.25f, fontSize * 0.25f);
-				
+
 				ImGui::EndPopup();
 			}
 			ImGui::SameLine(ImGui::GetContentRegionAvail().x - padY - buttonSize * 4.0f);

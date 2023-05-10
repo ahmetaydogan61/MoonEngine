@@ -140,3 +140,13 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
+  - Entity: 5d9dd7e1-1bf3-480f-a68d-c55d9326690c
+    struct MoonEngine::IdentityComponent:
+      Name: Camera
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::CameraComponent:
+      IsMain: true
+      Size: 8.39999962

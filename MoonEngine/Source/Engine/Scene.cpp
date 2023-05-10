@@ -28,12 +28,25 @@ namespace MoonEngine
 			Entity entity{ e, this };
 			m_PhysicsWorld.RegisterPhysicsBody(entity, transform, pb);
 		}
+
+		auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
+		for (auto [entity, transformComponent, particle] : particleSystemView.each())
+		{
+			particle.ParticleSystem.Stop();
+			if (particle.ParticleSystem.PlayOnAwake)
+				particle.ParticleSystem.Play();
+
+		}
 	}
 
 	void Scene::StopRuntime()
 	{
 		ME_LOG("Runtime Stopped");
 		m_PhysicsWorld.EndWorld();
+
+		auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
+		for (auto [entity, transformComponent, particle] : particleSystemView.each())
+			particle.ParticleSystem.Stop();
 	}
 
 	void Scene::StartEdit()
@@ -53,15 +66,24 @@ namespace MoonEngine
 
 	void Scene::UpdateRuntime(bool update)
 	{
+		float dt = Time::DeltaTime();
+
 		if (update)
 		{
 			//PhysicsWorld
 			{
-				m_PhysicsWorld.StepWorld(Time::DeltaTime());
+				m_PhysicsWorld.StepWorld(dt);
 
 				auto view = m_Registry.view<TransformComponent, const PhysicsBodyComponent>();
 				for (auto [e, transform, physicsBody] : view.each())
 					m_PhysicsWorld.UpdatePhysicsBodies(Entity{ e, this }, transform, physicsBody);
+			}
+
+			auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
+			for (auto [entity, transformComponent, particle] : particleSystemView.each())
+			{
+				particle.ParticleSystem.UpdateEmitter(dt, particle.Particle, transformComponent.Position);
+				particle.ParticleSystem.UpdateParticles(dt);
 			}
 		}
 	}
@@ -175,14 +197,16 @@ namespace MoonEngine
 	void Scene::OnRemoveComponent(Entity entity, ParticleComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent(Entity entity, PhysicsBodyComponent& component) 
+	void Scene::OnAddComponent(Entity entity, PhysicsBodyComponent& component)
 	{
-	
+		if (m_PhysicsWorld.WorldExists())
+			m_PhysicsWorld.RegisterPhysicsBody(entity, entity.GetComponent<TransformComponent>(), component, true);
 	}
 
 	template<>
 	void Scene::OnRemoveComponent(Entity entity, PhysicsBodyComponent& component)
 	{
-		m_PhysicsWorld.UnregisterPhysicsBody(entity, component);
+		if (m_PhysicsWorld.WorldExists())
+			m_PhysicsWorld.UnregisterPhysicsBody(component, true);
 	}
 }

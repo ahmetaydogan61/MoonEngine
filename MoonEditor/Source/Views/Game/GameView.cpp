@@ -68,9 +68,14 @@ namespace MoonEngine
 		{
 			auto view = registry.view<const TransformComponent, const SpriteComponent>();
 			for (auto [entity, transform, sprite] : view.each())
-			{
 				Renderer::DrawEntity(transform, sprite, (int)entity);
-			}
+		}
+
+		//ParticleSystem
+		{
+			auto view = registry.view<ParticleComponent>();
+			for (auto [entity, particle] : view.each())
+				particle.ParticleSystem.DrawParticles((int)entity);
 		}
 
 		Renderer::End();

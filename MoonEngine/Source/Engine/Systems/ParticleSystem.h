@@ -112,12 +112,14 @@ namespace MoonEngine
 		ParticleSystem();
 		~ParticleSystem() = default;
 
-		void Update(float dt, const ParticleBody& particle, const glm::vec3& position);
+		void UpdateEmitter(float dt, const ParticleBody& particle, const glm::vec3& position);
 		void Spawn(const ParticleBody& particle, const glm::vec3& position);
-		void UpdateParticles(float dt, int entityId);
+		void UpdateParticles(float dt);
+		void DrawParticles(int entityId);
 
 		SortMode SortMode = SortMode::YoungestInFront;
 		EmitterType EmitterType = EmitterType::Cone;
+		bool PlayOnAwake = true;
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;
@@ -129,7 +131,7 @@ namespace MoonEngine
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
 
-		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond))
+		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("PlayOnAwake", PlayOnAwake)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond))
 	private:
 		bool m_IsPlaying = false;
 		bool m_IsPaused = false;
@@ -142,7 +144,5 @@ namespace MoonEngine
 		uint32_t m_PoolSize = 1000;
 		uint32_t m_PoolIndex = 0;
 		uint32_t m_AliveParticles = 0;
-
-		void SortedUpdate(float dt, int i, int entityId);
 	};
 }

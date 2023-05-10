@@ -16,7 +16,7 @@ namespace MoonEngine
 		m_Particles.resize(m_PoolSize);
 	}
 
-	void ParticleSystem::Update(float dt, const ParticleBody& particle, const glm::vec3& position)
+	void ParticleSystem::UpdateEmitter(float dt, const ParticleBody& particle, const glm::vec3& position)
 	{
 		if (!m_IsPlaying)
 			return;
@@ -42,7 +42,7 @@ namespace MoonEngine
 		m_SpawnCount = 0;
 	}
 
-	void ParticleSystem::UpdateParticles(float dt, int entityId)
+	void ParticleSystem::UpdateParticles(float dt)
 	{
 		if (!m_IsPlaying && !m_IsPaused)
 			return;
@@ -52,47 +52,55 @@ namespace MoonEngine
 		if (m_PoolSize <= 0)
 			return;
 
+		for (int i = 0; i < m_PoolSize; i++)
+		{
+			Particle& particle = m_Particles[i];
+
+			if (!particle.IsActive)
+				continue;
+
+			if (!m_IsPaused)
+			{
+				float normalizedLife = particle.LifeElapsed / particle.Lifetime;
+
+				particle.Position += particle.Direction * particle.Speed * dt;
+				particle.Scale = Maths::Lerp(particle.ScaleStart, particle.ScaleEnd, normalizedLife);
+				particle.Rotation = Maths::Lerp(particle.RotationStart, particle.RotationEnd, normalizedLife);
+				particle.Color = Maths::Lerp(particle.ColorStart, particle.ColorEnd, normalizedLife);
+
+				particle.LifeElapsed += dt;
+				if (particle.LifeElapsed >= particle.Lifetime)
+				{
+					particle.LifeElapsed = particle.Lifetime;
+					particle.IsActive = false;
+				}
+			}
+			m_AliveParticles++;
+		}
+	}
+
+	void ParticleSystem::DrawParticles(int entityId)
+	{
 		if (SortMode == SortMode::YoungestInFront)
 		{
 			for (uint32_t i = 0; i < m_PoolSize; i++)
 			{
-				SortedUpdate(dt, i, entityId);
+				Particle& particle = m_Particles[i];
+				if (!particle.IsActive)
+					continue;
+				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
 			}
 		}
 		else if (SortMode == SortMode::OldestInFront)
 		{
 			for (uint32_t i = m_PoolSize - 1; i > 0; i--)
 			{
-				SortedUpdate(dt, i, entityId);
+				Particle& particle = m_Particles[i];
+				if (!particle.IsActive)
+					continue;
+				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
 			}
 		}
-	}
-
-	void ParticleSystem::SortedUpdate(float dt, int i, int entityId)
-	{
-		Particle& particle = m_Particles[i];
-
-		if (!particle.IsActive)
-			return;
-
-		if (!m_IsPaused)
-		{
-			float normalizedLife = particle.LifeElapsed / particle.Lifetime;
-
-			particle.Position += particle.Direction * particle.Speed * dt;
-			particle.Scale = Maths::Lerp(particle.ScaleStart, particle.ScaleEnd, normalizedLife);
-			particle.Rotation = Maths::Lerp(particle.RotationStart, particle.RotationEnd, normalizedLife);
-			particle.Color = Maths::Lerp(particle.ColorStart, particle.ColorEnd, normalizedLife);
-
-			particle.LifeElapsed += dt;
-			if (particle.LifeElapsed >= particle.Lifetime)
-			{
-				particle.LifeElapsed = particle.Lifetime;
-				particle.IsActive = false;
-			}
-		}
-		m_AliveParticles++;
-		Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
 	}
 
 	void ParticleSystem::Spawn(const ParticleBody& p, const glm::vec3& position)

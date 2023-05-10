@@ -315,7 +315,6 @@ namespace MoonEngine
 
 		ShowComponent<ParticleComponent>("Particle System", [&](ParticleComponent& component)
 		{
-
 			bool isPlaying = component.ParticleSystem.IsPlaying();
 			const char* label = isPlaying ? "Pause" : "Play";
 			if (ImGuiUtils::ButtonSelectable(label, 0, 0, isPlaying, ImGui::GetStyle().Colors[ImGuiCol_::ImGuiCol_Button]))
@@ -338,6 +337,11 @@ namespace MoonEngine
 
 			DrawTreeProp("System", [&]
 			{
+				RenderProp("Play On Awake", [&]
+				{
+					ImGui::Checkbox("##POA", &component.ParticleSystem.PlayOnAwake);
+				});
+
 				RenderProp("Looping", [&]
 				{
 					ImGui::Checkbox("##Loop", &component.ParticleSystem.Looping);

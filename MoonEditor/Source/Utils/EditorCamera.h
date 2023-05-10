@@ -7,17 +7,6 @@ namespace MoonEngine
 {
 	class EditorCamera : public CameraOrthographic
 	{
-	private:
-		float m_CurrentSpeed = 0.0f;
-		float m_CurrentPanSpeed = 0.0f;
-		float m_CurrentZoomSpeed = 0.0f;
-
-		glm::vec3 m_Position = glm::vec3(0.0f);
-		glm::vec2 m_MouseLastPos = glm::vec2(0.0f);
-
-		float SpeedFactor() const { return GetSize() * 0.25f; }
-
-		bool m_IsPanning = false, m_Focused = false, m_Hovered = false;
 	public:
 		EditorCamera()
 		{
@@ -35,5 +24,18 @@ namespace MoonEngine
 
 		void Update(bool focused, bool hovered);
 		void ZoomEvent(float amount);
+
+		const glm::vec3& GetPosition() const { return m_Position; }
+	private:
+		float m_CurrentSpeed = 0.0f;
+		float m_CurrentPanSpeed = 0.0f;
+		float m_CurrentZoomSpeed = 0.0f;
+
+		glm::vec3 m_Position = glm::vec3(0.0f);
+		glm::vec2 m_MouseLastPos = glm::vec2(0.0f);
+
+		float SpeedFactor() const { return GetSize() * 0.25f; }
+
+		bool m_IsPanning = false, m_Focused = false, m_Hovered = false;
 	};
 }

@@ -10,6 +10,26 @@
 
 namespace MoonEngine
 {
+	struct RegisterGroup
+	{
+		Entity e;
+		const TransformComponent& t;
+		PhysicsBodyComponent& pb;
+
+		RegisterGroup(Entity e, const TransformComponent& t, PhysicsBodyComponent& pb) :e(e), t(t), pb(pb) {}
+	};
+
+	struct UnregisterGroup
+	{
+		Entity e;
+		PhysicsBodyComponent& pb;
+
+		UnregisterGroup(Entity e, PhysicsBodyComponent& pb) :e(e), pb(pb) {}
+	};
+
+	std::vector<RegisterGroup> m_AddRegistry;
+	std::vector<PhysicsBodyComponent> m_RemoveRegistry;
+
 	float PhysicsWorld::Gravity = -9.8f;
 
 	static b2BodyType ConvertBodyType(PhysicsBodyComponent::BodyType type)
@@ -30,8 +50,15 @@ namespace MoonEngine
 		m_PhysicsWorld = new b2World({ 0.0f, Gravity });
 	}
 
-	void PhysicsWorld::RegisterPhysicsBody(Entity& entity, const TransformComponent& transform, PhysicsBodyComponent& pb)
+	void PhysicsWorld::RegisterPhysicsBody(Entity entity, const TransformComponent& transform, PhysicsBodyComponent& pb, bool toRegistry)
 	{
+		if (toRegistry)
+		{
+			RegisterGroup rg(entity, transform, pb);
+			m_AddRegistry.push_back(rg);
+			return;
+		}
+
 		b2BodyDef bodyDef;
 		bodyDef.type = ConvertBodyType(pb.Type);
 		bodyDef.position.Set(transform.Position.x + pb.Offset.x, transform.Position.y + pb.Offset.y);
@@ -55,8 +82,14 @@ namespace MoonEngine
 		body->ResetMassData();
 	}
 
-	void PhysicsWorld::UnregisterPhysicsBody(Entity& e, PhysicsBodyComponent& pb)
+	void PhysicsWorld::UnregisterPhysicsBody(PhysicsBodyComponent& pb, bool toRegistry)
 	{
+		if (toRegistry)
+		{
+			m_RemoveRegistry.push_back(pb);
+			return;
+		}
+
 		b2Body* node = (b2Body*)pb.RuntimeBody;
 		m_PhysicsWorld->DestroyBody(node);
 		pb.RuntimeBody = nullptr;
@@ -68,7 +101,7 @@ namespace MoonEngine
 
 		//Update Body Properties
 		body->SetType(ConvertBodyType(physicsBody.Type));
-		
+
 		auto* fixture = body->GetFixtureList();
 
 		b2PolygonShape* boxShape = (b2PolygonShape*)fixture->GetShape();
@@ -88,6 +121,23 @@ namespace MoonEngine
 
 	void PhysicsWorld::StepWorld(float dt)
 	{
+		if (m_AddRegistry.size() > 0)
+		{
+			for (int i = 0; i < m_AddRegistry.size(); i++)
+			{
+				const RegisterGroup& rg = m_AddRegistry[i];
+				RegisterPhysicsBody(rg.e, rg.t, rg.pb);
+			}
+			m_AddRegistry.clear();
+		}
+
+		if (m_RemoveRegistry.size() > 0)
+		{
+			for (int i = 0; i < m_RemoveRegistry.size(); i++)
+				UnregisterPhysicsBody(m_RemoveRegistry[i]);
+			m_RemoveRegistry.clear();
+		}
+
 		m_PhysicsWorld->Step(dt, m_VelocityIterations, m_PositionIterations);
 	}
 

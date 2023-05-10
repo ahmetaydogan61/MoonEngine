@@ -10,6 +10,7 @@ Entities:
     struct MoonEngine::ParticleComponent:
       SortMode: 0
       EmitterType: 1
+      PlayOnAwake: true
       Looping: true
       Duration: 5
       ParticlePerSecond: 100
@@ -66,6 +67,7 @@ Entities:
     struct MoonEngine::ParticleComponent:
       SortMode: 1
       EmitterType: 1
+      PlayOnAwake: true
       Looping: true
       Duration: 5
       ParticlePerSecond: 250
@@ -101,3 +103,13 @@ Entities:
       IsColorEndConstant: false
       ColorEnd: [1, 0.392156869, 0, 1]
       ColorEndRandom: [1, 0.274509817, 0, 1]
+  - Entity: 1e8bb1e0-0729-4146-bfe5-4c616259e53a
+    struct MoonEngine::IdentityComponent:
+      Name: Camera
+    struct MoonEngine::TransformComponent:
+      Position: [0, 1.50260997, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::CameraComponent:
+      IsMain: true
+      Size: 3.5999999
