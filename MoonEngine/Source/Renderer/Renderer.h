@@ -71,7 +71,6 @@ namespace MoonEngine
 		LineVertex* LineVertices;
 
 		Shared<Shader> LineShader;
-		float LineWidth = 3.0f;
 	};
 
 	class Renderer

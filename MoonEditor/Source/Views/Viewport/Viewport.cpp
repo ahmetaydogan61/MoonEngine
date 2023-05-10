@@ -128,6 +128,8 @@ namespace MoonEngine
 
 		if (m_GizmosData.ShowGizmos)
 		{
+			Renderer::SetLineWidth(m_GizmosData.LineWidth);
+
 			//GIZMO_CameraComponent
 			auto cameraView = registry.view<const TransformComponent, const CameraComponent>();
 			for (auto [entity, transformComponent, cameraComponent] : cameraView.each())
@@ -138,10 +140,27 @@ namespace MoonEngine
 				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::CameraTexture, { 1.0f, 1.0f }, (int)entity);
 			}
 
+
+			//GIZMO_AllBoxCollider
+			if (m_GizmosData.ShowAllColliders)
+			{
+				auto boxCollView = registry.view<const TransformComponent, const BoxColliderComponent>();
+				for (auto [entity, transformComponent, boxCollComponent] : boxCollView.each())
+				{
+					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+					glm::vec3 scale = glm::vec3(1.0f);
+					scale.x = boxCollComponent.Size.x * 2.0f * transformComponent.Scale.x;
+					scale.y = boxCollComponent.Size.y * 2.0f * transformComponent.Scale.y;
+					const glm::mat4& transform =
+						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(boxCollComponent.Offset, 0.0f))
+						* rotationMat * glm::scale(glm::mat4(1.0f), scale);
+
+					Renderer::DrawRect(transform, { 0.5f, 0.75f, 0.25f, 1.0f });
+				}
+			}
+
 			Renderer::End();
-
-			Renderer::SetLineWidth(4.0f);
-
+			
 			//GIZMO_SELECT
 			if (selectedEntity)
 			{
@@ -149,9 +168,24 @@ namespace MoonEngine
 				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
 				const glm::mat4& transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
 					* rotationMat * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
+			
 
-				if (!selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
+				if (m_GizmosData.HighlightSelected && !selectedEntity.HasComponent<CameraComponent>() && !selectedEntity.HasComponent<ParticleComponent>())
 					Renderer::DrawRect(transform, m_GizmosData.GizmosColor);
+
+				if (selectedEntity.HasComponent<BoxColliderComponent>())
+				{
+					const auto& boxCollComponent = selectedEntity.GetComponent<BoxColliderComponent>();
+					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+					glm::vec3 scale = glm::vec3(1.0f);
+					scale.x = boxCollComponent.Size.x * 2.0f * transformComponent.Scale.x;
+					scale.y = boxCollComponent.Size.y * 2.0f * transformComponent.Scale.y;
+					const glm::mat4& transform =
+						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(boxCollComponent.Offset, 0.0f))
+						* rotationMat * glm::scale(glm::mat4(1.0f), scale);
+
+					Renderer::DrawRect(transform, { 0.0f, 1.0f, 0.0f, 1.0f });
+				}
 			}
 
 			Renderer::End();
@@ -227,10 +261,29 @@ namespace MoonEngine
 
 			if (ImGui::BeginPopup("GizmoSettingsPopup", ImGuiWindowFlags_NoMove))
 			{
+				ImGuiUtils::AddPadding(fontSize * 0.25f, fontSize * 0.25f);
+
+				ImGui::BeginGroup();
+
 				ImGuiUtils::Label("Icon Size: ");
 				ImGui::SliderFloat("##is", &m_GizmosData.IconSize, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+				
+				ImGuiUtils::Label("Outline Width: ");
+				ImGui::SliderFloat("##ow", &m_GizmosData.LineWidth, 1.0f, 5.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
 				ImGuiUtils::Label("Color: ");
 				ImGui::ColorEdit4("##t", &m_GizmosData.GizmosColor[0]);
+				
+				ImGuiUtils::Label("Show All Colliders: ");
+				ImGui::Checkbox("##sac", &m_GizmosData.ShowAllColliders);
+				
+				ImGuiUtils::Label("Highlight Selected: ");
+				ImGui::Checkbox("##hs", &m_GizmosData.HighlightSelected);
+
+				ImGui::EndGroup();
+
+				ImGuiUtils::AddPadding(fontSize * 0.25f, fontSize * 0.25f);
+				
 				ImGui::EndPopup();
 			}
 			ImGui::SameLine(ImGui::GetContentRegionAvail().x - padY - buttonSize * 4.0f);
@@ -295,7 +348,7 @@ namespace MoonEngine
 
 	void ViewportView::OnKeyEvent(Keycode key)
 	{
-		if (!ViewFocused)
+		if (!ViewHovered)
 			return;
 
 		switch (key)

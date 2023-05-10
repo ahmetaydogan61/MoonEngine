@@ -47,7 +47,7 @@ Entities:
       Name: Square
     struct MoonEngine::TransformComponent:
       Position: [1.26757383, -1.65707004, 0]
-      Rotation: [0, 0, 0.543946743]
+      Rotation: [0, 0, 0.52359879]
       Scale: [5, 1, 1]
     struct MoonEngine::SpriteComponent:
       Color: [1, 1, 1, 1]
@@ -67,8 +67,8 @@ Entities:
     struct MoonEngine::IdentityComponent:
       Name: Square
     struct MoonEngine::TransformComponent:
-      Position: [-2.94397736, -2.43617868, 0]
-      Rotation: [0, 0, -0.1648871]
+      Position: [-2.93280387, -2.20871687, 0]
+      Rotation: [0, 0, -0.261799484]
       Scale: [5.00000477, 1, 1]
     struct MoonEngine::SpriteComponent:
       Color: [1, 1, 1, 1]
@@ -104,4 +104,46 @@ Entities:
       Density: 0.200000003
       Friction: 0.25
       Restitution: 0.189999998
+      RestitutionThreshold: 0.5
+  - Entity: fc2fb391-85bb-4aa1-acf7-6d1453d19d82
+    struct MoonEngine::IdentityComponent:
+      Name: DynamicBox
+    struct MoonEngine::TransformComponent:
+      Position: [0.839019179, 4.50690508, 0]
+      Rotation: [0, 0, -0.779985905]
+      Scale: [0.99999994, 0.99999994, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Dynamic
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 0.200000003
+      Friction: 0.25
+      Restitution: 0.189999998
+      RestitutionThreshold: 0.5
+  - Entity: 8c73c2fc-73fb-498c-8276-c7c5500fd78f
+    struct MoonEngine::IdentityComponent:
+      Name: Square
+    struct MoonEngine::TransformComponent:
+      Position: [1.3729049, 3.10629225, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+    struct MoonEngine::RigidbodyComponent:
+      Type: Static
+      FreezeRotation: false
+    struct MoonEngine::BoxColliderComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
       RestitutionThreshold: 0.5

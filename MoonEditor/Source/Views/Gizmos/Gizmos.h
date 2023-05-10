@@ -15,7 +15,11 @@ namespace MoonEngine
 	{
 		bool ShowGizmos = false;
 		float IconSize = 0.5f;
+		float LineWidth = 3.0f;
 		glm::vec4 GizmosColor = glm::vec4(1.0f);
+
+		bool HighlightSelected = true;
+		bool ShowAllColliders = false;
 
 		//Translation
 		GizmoSelection GizmoSelection = GizmoSelection::TRANSLATE;
