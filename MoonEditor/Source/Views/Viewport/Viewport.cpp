@@ -155,7 +155,7 @@ namespace MoonEngine
 						glm::translate(glm::mat4(1.0f), transformComponent.Position + glm::vec3(boxCollComponent.Offset, 0.0f))
 						* rotationMat * glm::scale(glm::mat4(1.0f), scale);
 
-					Renderer::DrawRect(transform, { 0.5f, 0.75f, 0.25f, 1.0f });
+					Renderer::DrawRect(transform, { 0.5f, 0.9f, 0.5f, 1.0f });
 				}
 			}
 

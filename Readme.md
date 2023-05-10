@@ -13,9 +13,10 @@ Note that you can create a new solution and use "MoonEngine" features like Scene
 <h2><b>Features</b></h2>
 <ul>
    <li>Batch Renderer</li>
-   <li>Entity Component System</li>
    <li>Particle System</li>
    <li>Scene Serializer/Deserializer with simple Reflection</li>
+   <li>Entity Component System wrapper for entt</li>
+   <li>Box2D Physics</li>
 </ul>
 
 <h2><b>The Editor</b></h2>
