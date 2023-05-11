@@ -184,9 +184,8 @@ namespace MoonEngine
 		Collision* cA = (Collision*)collisionA;
 		Collision* cB = (Collision*)collisionB;
 
-
-		Entity entityA{ (entt::entity)cA->EntityId, this };
-		Entity entityB{ (entt::entity)cB->EntityId, this };
+		if (!cB || !cA)
+			return;
 
 		cA->PhysicsBody->OnCollisionEnter.Invoke(cB);
 		cB->PhysicsBody->OnCollisionEnter.Invoke(cA);
@@ -197,8 +196,8 @@ namespace MoonEngine
 		Collision* cA = (Collision*)collisionA;
 		Collision* cB = (Collision*)collisionB;
 
-		Entity entityA{ (entt::entity)cA->EntityId, this };
-		Entity entityB{ (entt::entity)cB->EntityId, this };
+		if (!cB || !cA)
+			return;
 
 		cA->PhysicsBody->OnCollisionExit.Invoke(cB);
 		cB->PhysicsBody->OnCollisionExit.Invoke(cA);
