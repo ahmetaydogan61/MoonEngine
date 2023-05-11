@@ -27,6 +27,11 @@ namespace MoonEngine
 		float Restitution = 0.0f;
 		float RestitutionThreshold = 0.5f;
 
+		void AddForce(const glm::vec2& force, const glm::vec2& position);
+		void AddImpulse(const glm::vec2& force, const glm::vec2& position);
+		void AddTorque(float torque);
+		void AddAngularImpulse(float impulse);
+
 		REFLECT(
 			("Type", Type)("FreezeRotation", FreezeRotation)("ContinuousDetection", IsContinuousDetection)("IsTrigger", IsTrigger)
 			("LinearDamping", LinearDamping)("AngularDamping", AngularDamping)("GravityScale", GravityScale)
