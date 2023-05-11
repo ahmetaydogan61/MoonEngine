@@ -265,14 +265,39 @@ namespace MoonEngine
 
 			RenderProp("Type", [&]
 			{
-				int currentStlye = (int)component.Type;
-				if (ImGui::Combo("##Type", &currentStlye, "Static\0Dynamic\0Kinematic\0"))
-					component.Type = (PhysicsBodyComponent::BodyType)currentStlye;
+				int currentType = (int)component.Type;
+				if (ImGui::Combo("##Type", &currentType, "Static\0Dynamic\0Kinematic\0"))
+					component.Type = (PhysicsBodyComponent::BodyType)currentType;
 			});
 
 			RenderProp("Freeze Rotation", [&]
 			{
-				ImGui::Checkbox("##fr", &component.FreezeRotation);
+				ImGui::Checkbox("##frot", &component.FreezeRotation);
+			});
+
+			RenderProp("Continuous Detection", [&]
+			{
+				ImGui::Checkbox("##ccd", &component.IsContinuousDetection);
+			});
+
+			RenderProp("Is Trigger", [&]
+			{
+				ImGui::Checkbox("##iTrig", &component.IsTrigger);
+			});
+
+			RenderProp("Linear Damping", [&]
+			{
+				ImGui::DragFloat("##ldamp", &component.LinearDamping, dragSliderSpeed * 0.1f, 0.0f, FLT_MAX, "%.2f");
+			});
+
+			RenderProp("Angular Damping", [&]
+			{
+				ImGui::DragFloat("##adamp", &component.AngularDamping, dragSliderSpeed * 0.1f, 0.0f, FLT_MAX, "%.2f");
+			});
+
+			RenderProp("Gravity Scale", [&]
+			{
+				ImGui::DragFloat("##adamp", &component.GravityScale, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 			});
 
 			RenderProp("Fixture", [&]

@@ -18,8 +18,6 @@ namespace MoonEngine
 
 	void Scene::StartRuntime()
 	{
-		ME_LOG("Runtime Started");
-
 		m_PhysicsWorld.BeginWorld();
 
 		auto view = m_Registry.view<const TransformComponent, PhysicsBodyComponent>();
@@ -41,7 +39,6 @@ namespace MoonEngine
 
 	void Scene::StopRuntime()
 	{
-		ME_LOG("Runtime Stopped");
 		m_PhysicsWorld.EndWorld();
 
 		auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
@@ -51,12 +48,10 @@ namespace MoonEngine
 
 	void Scene::StartEdit()
 	{
-		ME_LOG("Edit Started");
 	}
 
 	void Scene::StopEdit()
 	{
-		ME_LOG("Edit Stopped");
 	}
 
 	void Scene::UpdateEdit(const Camera* camera)
@@ -72,9 +67,14 @@ namespace MoonEngine
 		{
 			//PhysicsWorld
 			{
-				m_PhysicsWorld.StepWorld(dt);
-
 				auto view = m_Registry.view<TransformComponent, const PhysicsBodyComponent>();
+				
+				m_PhysicsWorld.StepWorld(dt,[&]
+				{
+					for (auto [e, transform, physicsBody] : view.each())
+						m_PhysicsWorld.ResetPhysicsBodies(Entity{ e, this }, transform, physicsBody);
+				});
+
 				for (auto [e, transform, physicsBody] : view.each())
 					m_PhysicsWorld.UpdatePhysicsBodies(Entity{ e, this }, transform, physicsBody);
 			}
