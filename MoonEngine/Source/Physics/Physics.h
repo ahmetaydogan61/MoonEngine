@@ -1,4 +1,6 @@
 #pragma once
+#include "Event/Action.h"
+#include "Physics/Collision.h"
 
 namespace MoonEngine
 {
@@ -31,6 +33,9 @@ namespace MoonEngine
 		void AddImpulse(const glm::vec2& force, const glm::vec2& position);
 		void AddTorque(float torque);
 		void AddAngularImpulse(float impulse);
+
+		Action<Collision*> OnCollisionEnter;
+		Action<Collision*> OnCollisionExit;
 
 		REFLECT(
 			("Type", Type)("FreezeRotation", FreezeRotation)("ContinuousDetection", IsContinuousDetection)("IsTrigger", IsTrigger)

@@ -58,10 +58,15 @@ namespace MoonEngine
 			m_Scene->DestroyEntity(*this);
 		}
 
+
+		const std::string GetUUID() { return GetComponent<UUIDComponent>().ID.str(); }
+		const std::string Name() { return GetComponent<IdentityComponent>().Name; }
+
 	private:
 		entt::entity m_ID = entt::null;
 		Scene* m_Scene = nullptr;
 		
 		friend class Scene;
+		friend class PhysicsWorld;
 	};
 }

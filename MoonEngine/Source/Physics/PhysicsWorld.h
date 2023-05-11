@@ -3,6 +3,9 @@
 
 class b2World;
 
+#define BIND_LISTENER(func) std::bind(&func, this, std::placeholders::_1, std::placeholders::_2)
+
+
 namespace MoonEngine
 {
 	class Entity;
@@ -26,6 +29,9 @@ namespace MoonEngine
 
 		void UpdatePhysicsBodies(Entity e, TransformComponent& tc, const PhysicsBodyComponent& pb);
 		void ResetPhysicsBodies(Entity e, TransformComponent& tc, const PhysicsBodyComponent& pb);
+
+		//Call after BeginWorld(), pass callbacks to gather body userdata pointer from the colliding two objects.
+		void SetContactListeners(std::function<void(void*, void*)> begin, std::function<void(void*, void*)> end);
 
 		static float Gravity;
 		static int32_t VelocityIterations;

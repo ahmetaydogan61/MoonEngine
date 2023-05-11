@@ -3,17 +3,18 @@
 
 #include "Engine/Entity.h"
 
-#include "Core/Time.h"
+#include "Physics/Collision.h"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
+#include <box2d/b2_contact.h>
 #include <box2d/b2_fixture.h>
 #include <box2d/b2_polygon_shape.h>
 
 namespace MoonEngine
 {
 #pragma region Static Field
-	
+
 	float PhysicsWorld::Gravity = -9.8f, PhysicsWorld::FixedTimestep = 1 / 60.0f;
 	int32_t PhysicsWorld::VelocityIterations = 8, PhysicsWorld::PositionIterations = 3, PhysicsWorld::MaxSteps = 5;
 
@@ -46,6 +47,46 @@ namespace MoonEngine
 	std::vector<RegisterGroup> m_AddRegistry;
 	std::vector<PhysicsBodyComponent> m_RemoveRegistry;
 
+#pragma endregion
+
+#pragma region CollisionListener
+
+	class ContactListener : public b2ContactListener
+	{
+	public:
+		std::function<void(void*, void*)> OnContactBegin;
+		std::function<void(void*, void*)> m_OnContactEnd;
+
+		void BeginContact(b2Contact* contact) override {
+			b2Fixture* fixtureA = contact->GetFixtureA();
+			b2Fixture* fixtureB = contact->GetFixtureB();
+
+			// Get the bodies associated with the fixtures
+			b2Body* bodyA = fixtureA->GetBody();
+			b2Body* bodyB = fixtureB->GetBody();
+
+			if (OnContactBegin)
+				OnContactBegin(bodyA->GetUserData().pointer, bodyB->GetUserData().pointer);
+		}
+
+		void EndContact(b2Contact* contact) override {
+			b2Fixture* fixtureA = contact->GetFixtureA();
+			b2Fixture* fixtureB = contact->GetFixtureB();
+
+			// Get the bodies associated with the fixtures
+			b2Body* bodyA = fixtureA->GetBody();
+			b2Body* bodyB = fixtureB->GetBody();
+
+			if (m_OnContactEnd)
+				m_OnContactEnd(bodyA->GetUserData().pointer, bodyB->GetUserData().pointer);
+		}
+	};
+
+	static ContactListener* s_ContactListener;
+
+#pragma endregion
+
+
 	void PhysicsWorld::RegisterPhysicsBody(Entity entity, const TransformComponent& transform, PhysicsBodyComponent& pb, bool toRegistry)
 	{
 		if (toRegistry)
@@ -66,6 +107,10 @@ namespace MoonEngine
 
 		b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 		body->SetFixedRotation(pb.FreezeRotation);
+		
+		Collision* c = new Collision((int)entity.m_ID, &transform, &pb);
+
+		body->GetUserData().pointer = static_cast<void*>(c);
 
 		pb.RuntimeBody = body;
 
@@ -91,11 +136,13 @@ namespace MoonEngine
 		}
 
 		b2Body* node = (b2Body*)pb.RuntimeBody;
+
+		delete node->GetUserData().pointer;
+		node->GetUserData().pointer = nullptr;
+
 		m_PhysicsWorld->DestroyBody(node);
 		pb.RuntimeBody = nullptr;
 	}
-
-#pragma endregion
 
 	void PhysicsWorld::ResetPhysicsBodies(Entity e, TransformComponent& transform, const PhysicsBodyComponent& physicsBody)
 	{
@@ -109,6 +156,7 @@ namespace MoonEngine
 		body->SetGravityScale(physicsBody.GravityScale);
 		body->SetBullet(physicsBody.IsContinuousDetection);
 
+		//Uodate Fixture Properties
 		auto* fixture = body->GetFixtureList();
 		b2PolygonShape* boxShape = (b2PolygonShape*)fixture->GetShape();
 		boxShape->SetAsBox(transform.Scale.x * physicsBody.Size.x, transform.Scale.y * physicsBody.Size.y);
@@ -117,6 +165,7 @@ namespace MoonEngine
 		fixture->SetRestitution(physicsBody.Restitution);
 		fixture->SetRestitutionThreshold(physicsBody.RestitutionThreshold);
 		fixture->SetSensor(physicsBody.IsTrigger);
+
 		body->ResetMassData();
 
 		if (body->GetType() == b2_staticBody)
@@ -151,6 +200,20 @@ namespace MoonEngine
 	void PhysicsWorld::BeginWorld()
 	{
 		m_PhysicsWorld = new b2World({ 0.0f, Gravity });
+		m_Accumulator = 0.0f;
+		m_AccumulatorRatio = 0.0f;
+	}
+
+	void PhysicsWorld::SetContactListeners(std::function<void(void*, void*)> begin, std::function<void(void*, void*)> end)
+	{
+		if (m_PhysicsWorld)
+		{
+			s_ContactListener = new ContactListener();
+			s_ContactListener->OnContactBegin = begin;
+			s_ContactListener->m_OnContactEnd = end;
+
+			m_PhysicsWorld->SetContactListener(s_ContactListener);
+		}
 	}
 
 	void PhysicsWorld::StepWorld(float dt, std::function<void()> resetFunction)
@@ -195,5 +258,8 @@ namespace MoonEngine
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
+
+		delete s_ContactListener;
+		s_ContactListener = nullptr;
 	}
 }

@@ -32,10 +32,15 @@ namespace MoonEngine
 		void UpdateEdit(const Camera* camera);
 
 		static Shared<Scene> CopyScene(Shared<Scene> scene);
+
+		Entity FindEntityWithUUID(const std::string& uuid);
 	private:
 		entt::registry m_Registry;
+		std::unordered_map<std::string, entt::entity> m_UUIDRegistry;
 
 		PhysicsWorld m_PhysicsWorld;
+		void OnCollisionBegin(void*, void*);
+		void OnCollisionEnd(void*, void*);
 
 		template<typename T>
 		void OnAddComponent(Entity entity, T& component);

@@ -7,6 +7,8 @@
 #include "Engine/Entity.h"
 #include "Engine/Scene.h"
 
+#include "Physics/Collision.h"
+
 #include "Renderer/Camera.h"
 #include "Renderer/Renderer.h"
 
@@ -19,6 +21,7 @@ namespace MoonEngine
 	void Scene::StartRuntime()
 	{
 		m_PhysicsWorld.BeginWorld();
+		m_PhysicsWorld.SetContactListeners(BIND_LISTENER(Scene::OnCollisionBegin), BIND_LISTENER(Scene::OnCollisionEnd));
 
 		auto view = m_Registry.view<const TransformComponent, PhysicsBodyComponent>();
 		for (auto [e, transform, pb] : view.each())
@@ -33,7 +36,6 @@ namespace MoonEngine
 			particle.ParticleSystem.Stop();
 			if (particle.ParticleSystem.PlayOnAwake)
 				particle.ParticleSystem.Play();
-
 		}
 	}
 
@@ -68,8 +70,8 @@ namespace MoonEngine
 			//PhysicsWorld
 			{
 				auto view = m_Registry.view<TransformComponent, const PhysicsBodyComponent>();
-				
-				m_PhysicsWorld.StepWorld(dt,[&]
+
+				m_PhysicsWorld.StepWorld(dt, [&]
 				{
 					for (auto [e, transform, physicsBody] : view.each())
 						m_PhysicsWorld.ResetPhysicsBodies(Entity{ e, this }, transform, physicsBody);
@@ -110,8 +112,12 @@ namespace MoonEngine
 
 	Entity Scene::CreateEntity()
 	{
-		Entity entity = { m_Registry.create(), this };
-		entity.AddComponent<UUIDComponent>();
+		entt::entity entt = m_Registry.create();
+		Entity entity = { entt, this };
+
+		const std::string& uuid = entity.AddComponent<UUIDComponent>().ID.str();
+		m_UUIDRegistry[uuid] = entt;
+
 		entity.AddComponent<IdentityComponent>();
 		entity.AddComponent<TransformComponent>();
 		return entity;
@@ -119,18 +125,21 @@ namespace MoonEngine
 
 	void Scene::DestroyEntity(Entity e)
 	{
+		m_UUIDRegistry.erase(e.GetUUID());
+
 		RemoveIfExists<UUIDComponent>(e);
 		RemoveIfExists<IdentityComponent>(e);
 		RemoveIfExists<TransformComponent>(e);
 		RemoveIfExists<SpriteComponent>(e);
 		RemoveIfExists<ParticleComponent>(e);
 		RemoveIfExists<PhysicsBodyComponent>(e);
+
 		m_Registry.destroy(e.m_ID);
 	}
 
 	Entity Scene::DuplicateEntity(Entity& entity)
 	{
-		Entity e{ m_Registry.create(), this };
+		Entity e = CreateEntity();
 		e.AddComponent<UUIDComponent>();
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
@@ -144,6 +153,7 @@ namespace MoonEngine
 	{
 		Shared<Scene> tempScene = MakeShared<Scene>();
 		tempScene->SceneName = scene->SceneName;
+		tempScene->m_UUIDRegistry = scene->m_UUIDRegistry;
 
 		scene->m_Registry.each_reverse([&](auto entityID)
 		{
@@ -158,6 +168,40 @@ namespace MoonEngine
 			CopyIfExists<PhysicsBodyComponent>(copyTo, copyFrom);
 		});
 		return tempScene;
+	}
+
+	Entity Scene::FindEntityWithUUID(const std::string& uuid)
+	{
+		if (m_UUIDRegistry.find(uuid) != m_UUIDRegistry.end())
+			return { m_UUIDRegistry.at(uuid), this };
+
+		ME_LOG("Entity with this UUID not found!");
+		return {};
+	}
+
+	void Scene::OnCollisionBegin(void* collisionA, void* collisionB)
+	{
+		Collision* cA = (Collision*)collisionA;
+		Collision* cB = (Collision*)collisionB;
+
+
+		Entity entityA{ (entt::entity)cA->EntityId, this };
+		Entity entityB{ (entt::entity)cB->EntityId, this };
+
+		cA->PhysicsBody->OnCollisionEnter.Invoke(cB);
+		cB->PhysicsBody->OnCollisionEnter.Invoke(cA);
+	}
+
+	void Scene::OnCollisionEnd(void* collisionA, void* collisionB)
+	{
+		Collision* cA = (Collision*)collisionA;
+		Collision* cB = (Collision*)collisionB;
+
+		Entity entityA{ (entt::entity)cA->EntityId, this };
+		Entity entityB{ (entt::entity)cB->EntityId, this };
+
+		cA->PhysicsBody->OnCollisionExit.Invoke(cB);
+		cB->PhysicsBody->OnCollisionExit.Invoke(cA);
 	}
 
 	template<>
