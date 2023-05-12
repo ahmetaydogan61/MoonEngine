@@ -199,6 +199,11 @@ namespace MoonEngine
 				ImGui::DragFloat2("##Tiling", &component.Tiling[0], 0.1f, 0.0f, 0.0f, "%.2f");
 			});
 
+			RenderProp("Layer", [&]
+			{
+				ImGui::DragInt("##Layer", &component.Layer);
+			});
+
 			RenderProp("Texture", [&]
 			{
 				if (component.Texture)

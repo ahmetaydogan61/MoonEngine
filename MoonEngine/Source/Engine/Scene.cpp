@@ -123,6 +123,23 @@ namespace MoonEngine
 		return entity;
 	}
 
+	Entity Scene::DuplicateEntity(Entity& entity)
+	{
+		entt::entity entt = m_Registry.create();
+		Entity e = { entt, this };
+
+		const std::string& uuid = e.AddComponent<UUIDComponent>().ID.str();
+		m_UUIDRegistry[uuid] = entt;
+
+		CopyIfExists<IdentityComponent>(e, entity);
+		CopyIfExists<TransformComponent>(e, entity);
+		CopyIfExists<SpriteComponent>(e, entity);
+		CopyIfExists<ParticleComponent>(e, entity);
+		CopyIfExists<PhysicsBodyComponent>(e, entity);
+
+		return e;
+	}
+
 	void Scene::DestroyEntity(Entity e)
 	{
 		m_UUIDRegistry.erase(e.GetUUID());
@@ -135,18 +152,6 @@ namespace MoonEngine
 		RemoveIfExists<PhysicsBodyComponent>(e);
 
 		m_Registry.destroy(e.m_ID);
-	}
-
-	Entity Scene::DuplicateEntity(Entity& entity)
-	{
-		Entity e = CreateEntity();
-		e.AddComponent<UUIDComponent>();
-		CopyIfExists<IdentityComponent>(e, entity);
-		CopyIfExists<TransformComponent>(e, entity);
-		CopyIfExists<SpriteComponent>(e, entity);
-		CopyIfExists<ParticleComponent>(e, entity);
-		CopyIfExists<PhysicsBodyComponent>(e, entity);
-		return e;
 	}
 
 	Shared<Scene> Scene::CopyScene(Shared<Scene> scene)

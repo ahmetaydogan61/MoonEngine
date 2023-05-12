@@ -40,6 +40,7 @@ namespace MoonEngine
 		glm::vec4 Color = glm::vec4(1.0f);
 		glm::vec2 Tiling = glm::vec2(1.0f);
 		Shared<Texture> Texture = nullptr;
+		int Layer;
 		
 		REFLECT(("Color", Color)("Tiling", Tiling)("Texture", Texture))
 	};
