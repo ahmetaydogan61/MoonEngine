@@ -201,7 +201,8 @@ namespace MoonEngine
 
 			RenderProp("Layer", [&]
 			{
-				ImGui::DragInt("##Layer", &component.Layer);
+				ImGui::DragInt("##Layer", &component.Layer, dragSliderSpeed, 0, Renderer::GetStats().MaxLayers- 1, "%d", ImGuiSliderFlags_AlwaysClamp);
+
 			});
 
 			RenderProp("Texture", [&]
@@ -619,6 +620,13 @@ namespace MoonEngine
 						}
 						ImGui::EndDragDropTarget();
 					}
+				});
+
+				ImGuiUtils::AddPadding(0.0f, 5.0f);
+
+				RenderProp("Layer", [&]
+				{
+					ImGui::DragInt("##Layer", &component.ParticleSystem.Layer, dragSliderSpeed, 0, Renderer::GetStats().MaxLayers - 1, "%d", ImGuiSliderFlags_AlwaysClamp);
 				});
 
 				ImGuiUtils::AddPadding(0.0f, 5.0f);

@@ -88,7 +88,7 @@ namespace MoonEngine
 				Particle& particle = m_Particles[i];
 				if (!particle.IsActive)
 					continue;
-				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
+				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
 			}
 		}
 		else if (SortMode == SortMode::OldestInFront)
@@ -98,7 +98,7 @@ namespace MoonEngine
 				Particle& particle = m_Particles[i];
 				if (!particle.IsActive)
 					continue;
-				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, { 1.0f, 1.0f }, entityId);
+				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
 			}
 		}
 	}

@@ -241,8 +241,8 @@ namespace MoonEngine
 		const auto& renderStats = Renderer::GetStats();
 		ImGui::Text("Viewport Renderer Data");
 		ImGui::Text("Draw Calls: %d", renderStats.DrawCalls);
-		ImGui::Text("Vertex Count: %d", renderStats.VertexCount);
-		ImGui::Text("Quad Count: %d", renderStats.QuadCount);
+		//ImGui::Text("Vertex Count: %d", renderStats.VertexCount);
+		//ImGui::Text("Quad Count: %d", renderStats.QuadCount);
 
 		ImGui::Separator();
 		ImGuiUtils::AddPadding(0.0f, 10.0f);

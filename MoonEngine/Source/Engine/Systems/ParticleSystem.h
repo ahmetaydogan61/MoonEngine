@@ -75,7 +75,8 @@ namespace MoonEngine
 			("IsRotation3D", IsRotation3D)("IsRotationConstant", IsRotationConstant)("RotationStart", RotationStart)("RotationStartRandom", RotationStartRandom)
 			("IsRotationCycle", IsRotationCycle)("IsRotationEndConstant", IsRotationEndConstant)("RotationEnd", RotationEnd)("RotationEndRandom", RotationEndRandom)
 
-			("Texture", Texture)("IsColorConstant", IsColorConstant)("ColorStart", ColorStart)("ColorStartRandom", ColorStartRandom)
+			("Texture", Texture)
+			("IsColorConstant", IsColorConstant)("ColorStart", ColorStart)("ColorStartRandom", ColorStartRandom)
 			("IsColorCycle", IsColorCycle)("IsColorEndConstant", IsColorEndConstant)("ColorEnd", ColorEnd)("ColorEndRandom", ColorEndRandom)
 		)
 	};
@@ -123,6 +124,7 @@ namespace MoonEngine
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;
+		int Layer = 0;
 
 		bool IsPlaying() { return m_IsPlaying; }
 		bool IsPaused() { return m_IsPaused; }
@@ -131,7 +133,7 @@ namespace MoonEngine
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
 
-		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("PlayOnAwake", PlayOnAwake)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond))
+		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("PlayOnAwake", PlayOnAwake)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond)("Layer", Layer))
 	private:
 		bool m_IsPlaying = false;
 		bool m_IsPaused = false;

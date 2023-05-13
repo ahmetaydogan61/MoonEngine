@@ -42,7 +42,7 @@ namespace MoonEngine
 		Shared<Texture> Texture = nullptr;
 		int Layer;
 		
-		REFLECT(("Color", Color)("Tiling", Tiling)("Texture", Texture))
+		REFLECT(("Color", Color)("Tiling", Tiling)("Texture", Texture)("Layer", Layer))
 	};
 
 	struct CameraComponent

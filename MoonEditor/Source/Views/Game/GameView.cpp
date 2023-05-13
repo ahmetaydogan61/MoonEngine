@@ -60,9 +60,8 @@ namespace MoonEngine
 		//+Render Game
 		m_Gamebuffer->Bind();
 
-		Renderer::SetRenderData(viewProjection);
 		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f });
-		Renderer::Begin();
+		Renderer::Begin(viewProjection);
 
 		//SpriteRenderer
 		{
