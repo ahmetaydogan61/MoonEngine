@@ -77,6 +77,32 @@ namespace MoonEngine
 
 		ImGuiUtils::AddPadding(0.0f, 5.0f);
 
+		if (ImGui::BeginMenu("Phyics"))
+		{
+			if (ImGui::MenuItem("Dynamic Square"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Dynamic Square";
+				entity.AddComponent<SpriteComponent>();
+				auto& pb = entity.AddComponent<PhysicsBodyComponent>();
+				pb.Type = PhysicsBodyComponent::BodyType::Dynamic;
+				editor.SetSelectedEntity(entity);
+			}
+
+			if (ImGui::MenuItem("Static Square"))
+			{
+				Entity entity = Scene->CreateEntity();
+				entity.GetComponent<IdentityComponent>().Name = "Static Square";
+				entity.AddComponent<SpriteComponent>();
+				auto& pb = entity.AddComponent<PhysicsBodyComponent>();
+				pb.Type = PhysicsBodyComponent::BodyType::Static;
+				editor.SetSelectedEntity(entity);
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGuiUtils::AddPadding(0.0f, 5.0f);
+
 		if (ImGui::BeginMenu("Effects"))
 		{
 			if (ImGui::MenuItem("Particle"))

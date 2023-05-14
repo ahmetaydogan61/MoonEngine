@@ -28,13 +28,29 @@ namespace MoonEngine
 			return;
 		}
 
-		m_PerSecondTimer += dt;
-		float spawnPerSecond = 1.0f / ParticlePerSecond;
-		if (m_PerSecondTimer >= spawnPerSecond)
+		if (ParticlePerSecond > 0.0f)
 		{
-			m_SpawnCount++;
-			m_PerSecondTimer = 0.0f;
+			m_PerSecondTimer += dt;
+			float spawnPerSecond = 1.0f / ParticlePerSecond;
+			if (m_PerSecondTimer >= spawnPerSecond)
+			{
+				m_SpawnCount++;
+				m_PerSecondTimer = 0.0f;
+			}
 		}
+		else
+			m_PerSecondTimer = 0.0f;
+
+		if (ParticlePerUnit > 0)
+		{
+			float distance = glm::distance(m_LastPosition, position);
+			float spawnPerUnit = 1 / ParticlePerUnit;
+
+			if (distance >= spawnPerUnit)
+				m_SpawnCount++;
+		}
+
+		m_LastPosition = position;
 
 		for (uint32_t i = 0; i < m_SpawnCount; i++)
 			Spawn(particle, position);
@@ -81,6 +97,9 @@ namespace MoonEngine
 
 	void ParticleSystem::DrawParticles(int entityId)
 	{
+		if (!m_IsPlaying && !m_IsPaused)
+			return;
+
 		if (SortMode == SortMode::YoungestInFront)
 		{
 			for (uint32_t i = 0; i < m_PoolSize; i++)
@@ -88,7 +107,7 @@ namespace MoonEngine
 				Particle& particle = m_Particles[i];
 				if (!particle.IsActive)
 					continue;
-				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
+				Renderer::DrawEntity(particle.Position, particle.Scale, particle.Rotation, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
 			}
 		}
 		else if (SortMode == SortMode::OldestInFront)
@@ -98,7 +117,7 @@ namespace MoonEngine
 				Particle& particle = m_Particles[i];
 				if (!particle.IsActive)
 					continue;
-				Renderer::DrawEntity(particle.Position, particle.Rotation, particle.Scale, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
+				Renderer::DrawEntity(particle.Position, particle.Scale, particle.Rotation, particle.Color, particle.Texture, Layer, { 1.0f, 1.0f }, entityId);
 			}
 		}
 	}
@@ -306,6 +325,21 @@ namespace MoonEngine
 		if (m_PoolIndex >= m_PoolSize)
 			m_PoolIndex = 0;
 	}
+
+	void ParticleSystem::Resize(uint32_t newSize)
+	{
+		bool wasPlaying = m_IsPlaying;
+		bool wasPaused = m_IsPaused;
+
+		m_PoolSize = newSize;
+		Stop();
+
+		if (wasPlaying)
+			Play();
+		if (wasPaused)
+			Pause();
+	}
+
 
 	void ParticleSystem::Stop()
 	{

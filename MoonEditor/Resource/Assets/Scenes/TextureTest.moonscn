@@ -1,0 +1,32 @@
+Scene: TextureTest
+Entities:
+  - Entity: 45bb09da-bcc5-489c-a7d8-ac39307c8215
+    struct MoonEngine::IdentityComponent:
+      Name: Character
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [0, 0, 0, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\spritesheet.png
+      Layer: 1
+      SpriteCoords: [0, 1]
+      SpriteSize: [128, 128]
+      HasSpriteSheet: true
+  - Entity: e0358be6-f1bd-41de-bec1-34a321188842
+    struct MoonEngine::IdentityComponent:
+      Name: Bg
+    struct MoonEngine::TransformComponent:
+      Position: [0.0352325067, -0.0430618078, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 0, 0, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\smoke.png
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false

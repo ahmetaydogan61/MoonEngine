@@ -21,7 +21,6 @@ namespace MoonEngine
 		Name = ICON_MD_CAMERA;
 		Name += "Viewport";
 		Flags = ImGuiWindowFlags_NoScrollbar;
-		Enabled = false;
 
 		m_GizmosData.ShowGizmos = true;
 		m_GizmosData.GizmosColor = { 0.0f, 0.6f, 1.0f, 1.0f };
@@ -71,15 +70,6 @@ namespace MoonEngine
 
 		for (auto [entity, transformComponent, particle] : particleSystemView.each())
 		{
-			//GIZMO_ParticleSystem
-			if (m_GizmosData.ShowGizmos && !particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
-			{
-				const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
-					* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));;
-				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::FlareTexture, 0, { 1.0f, 1.0f }, (int)entity);
-			}
-
 			Entity e{ entity, Scene };
 			if (selectedEntity == e)
 			{
@@ -156,6 +146,18 @@ namespace MoonEngine
 				Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::CameraTexture, 0, { 1.0f, 1.0f }, (int)entity);
 			}
 
+			//GIZMO_ParticleSystem
+			auto particleSystemView = registry.view<const TransformComponent, ParticleComponent>();
+			for (auto [entity, transformComponent, particle] : particleSystemView.each())
+			{
+				if (!particle.ParticleSystem.IsPlaying() && !particle.ParticleSystem.IsPaused())
+				{
+					const glm::mat4& rotationMat = glm::toMat4(glm::quat(transformComponent.Rotation));
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position)
+						* glm::scale(glm::mat4(1.0f), glm::vec3(m_GizmosData.IconSize, m_GizmosData.IconSize, 0.0f));;
+					Renderer::DrawEntity(transform, { 1.0f, 1.0f, 1.0f, 1.0f }, EditorAssets::FlareTexture, 0, { 1.0f, 1.0f }, (int)entity);
+				}
+			}
 
 			//GIZMO_AllBoxCollider
 			if (m_GizmosData.ShowAllColliders)

@@ -4,6 +4,7 @@
 
 #include "Renderer/Camera.h"
 #include "Renderer/Texture.h"
+#include "Renderer/TextureSheet.h"
 
 #include <uuid/uuid_v4.h>
 
@@ -39,10 +40,47 @@ namespace MoonEngine
 	{
 		glm::vec4 Color = glm::vec4(1.0f);
 		glm::vec2 Tiling = glm::vec2(1.0f);
-		Shared<Texture> Texture = nullptr;
 		int Layer;
-		
-		REFLECT(("Color", Color)("Tiling", Tiling)("Texture", Texture)("Layer", Layer))
+		glm::vec2 SpriteCoords;
+		glm::vec2 SpriteSize;
+
+		void SetTexture(Shared<Texture> texture) 
+		{ 
+			m_Texture = texture;
+
+			if (m_TextureSheet)
+				GenerateSpriteSheet();
+		}
+
+		void DeleteTexture() { m_Texture = nullptr; if (m_TextureSheet) DeleteSpriteSheet(); }
+		const Shared<Texture>& GetTexture() const { return m_Texture; }
+
+		void GenerateSpriteSheet()
+		{
+			if (!m_Texture)
+				return;
+
+			m_TextureSheet = MakeShared<TextureSheet>();
+			m_TextureSheet->Create(m_Texture);
+			m_TextureSheet->Resize(SpriteSize);
+			m_TextureSheet->SetCoordinate(SpriteCoords);
+			m_HasSpriteSheet = true;
+		}
+
+		void DeleteSpriteSheet() { m_TextureSheet = nullptr; m_HasSpriteSheet = false; }
+		const Shared<TextureSheet>& GetTextureSheet() const { return m_TextureSheet; }
+		bool HasSpriteSheet() const { return m_HasSpriteSheet; }
+
+		REFLECT
+		(
+			("Color", Color)("Tiling", Tiling)("Texture", m_Texture)("Layer", Layer)
+			("SpriteCoords", SpriteCoords)("SpriteSize", SpriteSize)("HasSpriteSheet", m_HasSpriteSheet)
+		)
+
+	private:
+		Shared<Texture> m_Texture = nullptr;
+		Shared<TextureSheet> m_TextureSheet;
+		bool m_HasSpriteSheet = false;
 	};
 
 	struct CameraComponent

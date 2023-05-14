@@ -19,7 +19,7 @@ namespace MoonEngine
 	struct TextureProps
 	{
 		WrapMode WrapMode = WrapMode::Repeat;
-		FilterType FilterType = FilterType::Linear;
+		FilterType FilterType = FilterType::Nearest;
 		bool GenerateMipmap = false;
 	};
 
@@ -48,7 +48,7 @@ namespace MoonEngine
 		uint32_t m_Height = 0;
 		uint32_t m_Channels = 0;
 
-		void CreateTexture(void* data);
+		void SetTexture(void* data);
 		void GenerateTextureProps();
 	};
 }

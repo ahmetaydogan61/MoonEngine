@@ -113,8 +113,10 @@ namespace MoonEngine
 		ParticleSystem();
 		~ParticleSystem() = default;
 
-		void UpdateEmitter(float dt, const ParticleBody& particle, const glm::vec3& position);
+
 		void Spawn(const ParticleBody& particle, const glm::vec3& position);
+		
+		void UpdateEmitter(float dt, const ParticleBody& particle, const glm::vec3& position);
 		void UpdateParticles(float dt);
 		void DrawParticles(int entityId);
 
@@ -124,11 +126,14 @@ namespace MoonEngine
 		bool Looping = true;
 		float Duration = 5.0f;
 		float ParticlePerSecond = 5.0f;
+		float ParticlePerUnit = 0.0f;
 		int Layer = 0;
 
 		bool IsPlaying() { return m_IsPlaying; }
 		bool IsPaused() { return m_IsPaused; }
+		uint32_t Size() { return m_PoolSize; }
 
+		void Resize(uint32_t newSize);
 		void Play() { m_IsPlaying = true; m_IsPaused = false; }
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
@@ -146,5 +151,7 @@ namespace MoonEngine
 		uint32_t m_PoolSize = 1000;
 		uint32_t m_PoolIndex = 0;
 		uint32_t m_AliveParticles = 0;
+
+		glm::vec3 m_LastPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	};
 }

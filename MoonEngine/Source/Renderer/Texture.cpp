@@ -15,7 +15,7 @@ namespace MoonEngine
 		m_Height = 1;
 		m_Channels = 4;
 		uint32_t data = 0xffffffff;
-		CreateTexture(&data);
+		SetTexture(&data);
 	}
 
 	Texture::Texture(uint32_t width, uint32_t height, TextureProps props)
@@ -43,7 +43,7 @@ namespace MoonEngine
 			m_Width = width;
 			m_Height = height;
 			m_Channels = channels;
-			CreateTexture(data);
+			SetTexture(data);
 		}
 		else
 			ME_SYS_WAR("Texture Creation Failed!");
@@ -51,7 +51,7 @@ namespace MoonEngine
 		stbi_image_free(data);
 	}
 
-	void Texture::CreateTexture(void* data)
+	void Texture::SetTexture(void* data)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureId);
 
@@ -95,6 +95,7 @@ namespace MoonEngine
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				break;
+
 			case FilterType::Nearest:
 				if (m_Props.GenerateMipmap)
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);

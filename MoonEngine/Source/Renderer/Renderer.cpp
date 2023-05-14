@@ -5,6 +5,7 @@
 
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
+#include "Renderer/TextureSheet.h"
 
 #include <glad/glad.h>
 
@@ -51,8 +52,8 @@ namespace MoonEngine
 
 	struct RenderData
 	{
-		const static uint32_t MaxLayers = 16;
-		const static uint32_t MaxQuads = 256;
+		const static uint32_t MaxLayers = 25;
+		const static uint32_t MaxQuads = 750;
 		const static uint32_t MaxVertices = MaxQuads * 4;
 		const static uint32_t MaxIndices = MaxQuads * 6;
 
@@ -238,10 +239,30 @@ namespace MoonEngine
 		}
 	}
 
-	void Renderer::RenderIndexed()
+	void Renderer::RenderIndexed(int layer)
 	{
 		glBindVertexArray(s_Data->QuadVertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, s_Data->QuadVertexBuffer);
+
+		if (layer > -1 && layer < s_Data->MaxLayers)
+		{
+			s_Data->QuadShader->Bind();
+			s_Data->QuadShader->SetMat4("uVP", s_Data->ViewProjection);
+			s_Data->QuadShader->SetIntArray("uTexture", 32, s_Data->TextureIds);
+			s_Data->QuadTexture->Bind(0);
+
+			if (s_Data->QLayerArray[layer].QuadVertexIndex >= 4)
+			{
+				uint32_t quadQuadVertexIndex = s_Data->QLayerArray[layer].QuadVertexIndex;
+
+				glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(QuadVertex) * quadQuadVertexIndex, s_Data->QLayerArray[layer].QuadVertices);
+				glDrawElements(GL_TRIANGLES, quadQuadVertexIndex * 1.5f, GL_UNSIGNED_INT, 0);
+				s_Stats->DrawCalls++;
+			}
+			s_Data->QLayerArray[layer].QuadVertexIndex = 0;
+
+			return;
+		}
 
 		for (uint32_t i = 0; i < s_Data->MaxLayers; i++)
 		{
@@ -275,7 +296,11 @@ namespace MoonEngine
 		const glm::mat4& rotationMat = glm::toMat4(glm::quat(tC.Rotation));
 		const glm::mat4& transform = glm::translate(glm::mat4(1.0f), tC.Position) * rotationMat * glm::scale(glm::mat4(1.0f), tC.Scale);
 
-		DrawEntity(transform, sC.Color, sC.Texture, sC.Layer, sC.Tiling, entityId);
+		if(!sC.GetTextureSheet())
+			DrawEntity(transform, sC.Color, sC.GetTexture(), sC.Layer, sC.Tiling, entityId);
+		else
+			DrawEntity(transform, sC.Color, sC.GetTextureSheet(), sC.Layer, sC.Tiling, entityId);
+
 	}
 
 	void Renderer::DrawEntity(const glm::vec3& position, const glm::vec3& scale, const glm::vec3& rotation, const glm::vec4& color, const Shared<Texture>& texture, int layer, const glm::vec2& tiling, int entityId)
@@ -302,8 +327,10 @@ namespace MoonEngine
 		}
 
 		uint32_t vertexIndex = s_Data->QLayerArray[layer].QuadVertexIndex;
-
 		const QuadLayerArray& layerArray = s_Data->QLayerArray[layer];
+		int32_t textureId = 0;
+		if (texture)
+			textureId = s_Data->GetTextureFromCache(texture);
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -312,11 +339,50 @@ namespace MoonEngine
 			layerArray.QuadVertices[vertexIndex + i].TextureCoord = TexCoords[i];
 			layerArray.QuadVertices[vertexIndex + i].Tiling = tiling;
 			layerArray.QuadVertices[vertexIndex + i].EntityId = entityId;
+			layerArray.QuadVertices[vertexIndex + i].TextureId = textureId;
+		}
+
+		s_Data->QLayerArray[layer].QuadVertexIndex += 4;
+	}
+
+	void Renderer::DrawEntity(const glm::mat4& transform, const glm::vec4& color, const Shared<TextureSheet>& spriteSheet, int layer, const glm::vec2& tiling, int entityId)
+	{
+		bool layerException = layer < 0 || layer >= s_Data->MaxLayers;
+		ME_ASSERT(!layerException, "Layer out of bounds!");
+
+		if (s_Data->QLayerArray[layer].QuadVertexIndex >= s_Data->MaxVertices)
+			End();
+
+		if (s_Data->TextureIndex >= 32)
+		{
+			End();
+			s_Data->TextureCache.clear();
+			s_Data->TextureIndex = 0;
+		}
+
+		uint32_t vertexIndex = s_Data->QLayerArray[layer].QuadVertexIndex;
+
+		const QuadLayerArray& layerArray = s_Data->QLayerArray[layer];
+
+		int32_t textureId = 0;
+		if (spriteSheet)
+		{
+			Shared<Texture> texture = spriteSheet->GetTexture();
 
 			if (texture)
-				layerArray.QuadVertices[vertexIndex + i].TextureId = s_Data->GetTextureFromCache(texture);
-			else
-				layerArray.QuadVertices[vertexIndex + i].TextureId = 0;
+				textureId = s_Data->GetTextureFromCache(texture);
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			layerArray.QuadVertices[vertexIndex + i].Position = transform * VertexPositions[i];
+			layerArray.QuadVertices[vertexIndex + i].Color = color;
+			layerArray.QuadVertices[vertexIndex + i].Tiling = tiling;
+			layerArray.QuadVertices[vertexIndex + i].EntityId = entityId;
+			layerArray.QuadVertices[vertexIndex + i].TextureId = textureId;
+
+			if (spriteSheet)
+				layerArray.QuadVertices[vertexIndex + i].TextureCoord = spriteSheet->GetTexCoord(i);
 		}
 
 		s_Data->QLayerArray[layer].QuadVertexIndex += 4;

@@ -355,7 +355,7 @@ namespace MoonEngine
 	}
 
 	template<typename T>
-	void GetIfExists(YAML::Node& node, Entity& entity)
+	T* GetIfExists(YAML::Node& node, Entity& entity)
 	{
 		auto componentNode = node[typeid(T).name()];
 		if (componentNode)
@@ -365,13 +365,16 @@ namespace MoonEngine
 			{
 				T& component = entity.GetComponent<T>();
 				deserializer.Deserialize(component);
+				return &component;
 			}
 			else
 			{
 				T& component = entity.AddComponent<T>();
 				deserializer.Deserialize(component);
+				return &component;
 			}
 		}
+		return nullptr;
 	}
 
 	void SceneSerializer::Deserialize(const Shared<Scene>& scene, const std::filesystem::path& path)
@@ -404,7 +407,11 @@ namespace MoonEngine
 
 				GetIfExists<IdentityComponent>(entity, deserializedEntity);
 				GetIfExists<TransformComponent>(entity, deserializedEntity);
-				GetIfExists<SpriteComponent>(entity, deserializedEntity);
+				
+				SpriteComponent* spriteComponent = GetIfExists<SpriteComponent>(entity, deserializedEntity);
+				if (spriteComponent && spriteComponent->HasSpriteSheet())
+					spriteComponent->GenerateSpriteSheet();
+				
 				GetIfExists<CameraComponent>(entity, deserializedEntity);
 				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
 

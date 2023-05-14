@@ -14,6 +14,7 @@ Entities:
       Looping: true
       Duration: 5
       ParticlePerSecond: 100
+      Layer: 0
       IsLifetimeConstant: true
       Lifetime: [2, 3.5]
       IsSpeedConstant: false
@@ -57,6 +58,7 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+      Layer: 1
   - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
     struct MoonEngine::IdentityComponent:
       Name: FireParticle
@@ -71,6 +73,7 @@ Entities:
       Looping: true
       Duration: 5
       ParticlePerSecond: 250
+      Layer: 0
       IsLifetimeConstant: true
       Lifetime: [2, 3.5]
       IsSpeedConstant: false

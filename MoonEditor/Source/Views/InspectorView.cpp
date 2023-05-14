@@ -128,10 +128,10 @@ namespace MoonEngine
 			TransformComponent& component = selectedEntity.GetComponent<TransformComponent>();
 			glm::vec3& position = component.Position;
 			UtilVectorColumn("Position", component.Position);
+			UtilVectorColumn("Size", component.Scale, 1.0f);
 			glm::vec3 rotation = glm::degrees(component.Rotation);
 			UtilVectorColumn("Rotation", rotation);
 			component.Rotation = glm::radians(rotation);
-			UtilVectorColumn("Size", component.Scale, 1.0f);
 
 			ImGuiUtils::AddPadding(0.0f, 10.0f);
 			ImGui::Separator();
@@ -196,31 +196,32 @@ namespace MoonEngine
 
 			RenderProp("Tiling {x:y}", [&]
 			{
-				ImGui::DragFloat2("##Tiling", &component.Tiling[0], 0.1f, 0.0f, 0.0f, "%.2f");
+				ImGui::DragFloat2("##Tiling", &component.Tiling[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 			});
 
 			RenderProp("Layer", [&]
 			{
-				ImGui::DragInt("##Layer", &component.Layer, dragSliderSpeed, 0, Renderer::GetStats().MaxLayers- 1, "%d", ImGuiSliderFlags_AlwaysClamp);
+				ImGui::DragInt("##Layer", &component.Layer, dragSliderSpeed, 0, Renderer::GetStats().MaxLayers - 1, "%d", ImGuiSliderFlags_AlwaysClamp);
 
 			});
 
+			bool hasSpriteSheet = component.GetTextureSheet() != nullptr;
 			RenderProp("Texture", [&]
 			{
-				if (component.Texture)
+				if (component.GetTexture())
 				{
 					bool reset = false;
 					if (ImGui::Button(" X "))
 						reset = true;
 
 					ImGui::SameLine();
-					ImGui::Text(component.Texture->GetPath().filename().string().c_str());
+					ImGui::Text(component.GetTexture()->GetPath().filename().string().c_str());
 					if (ImGui::IsItemHovered())
 					{
-						ImGui::SetTooltip(component.Texture->GetPath().string().c_str());
+						ImGui::SetTooltip(component.GetTexture()->GetPath().string().c_str());
 					}
 					if (reset)
-						component.Texture = nullptr;
+						component.DeleteTexture();
 				}
 				else
 					ImGui::Text("None");
@@ -233,14 +234,44 @@ namespace MoonEngine
 						std::filesystem::path texturePath = path;
 						Shared<Texture> texture = MakeShared<Texture>(texturePath.string());
 						if (texture)
-							component.Texture = texture;
+						{
+							component.SetTexture(texture);
+							if (component.GetTextureSheet())
+								component.GenerateSpriteSheet();
+						}
 						else
 							ME_ERR("Failed to load Texture! Path: {}", texturePath.string().c_str());
 					}
 					ImGui::EndDragDropTarget();
 				}
+
+				ImGuiUtils::AddPadding(0.0f, 2.5f);
+
+				if (ImGui::Button(hasSpriteSheet ? "Delete Sprite Sheet" : "Generate Sprite Sheet"))
+					hasSpriteSheet ? component.DeleteSpriteSheet() : component.GenerateSpriteSheet();
 			});
+
 			EndDrawProp();
+
+			if (!hasSpriteSheet)
+				return;
+
+			DrawTreeProp("Sprite Sheet", [&]
+			{
+				RenderProp("Size", [&]
+				{
+					if (ImGui::DragFloat2("##siz", &component.SpriteSize[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f"))
+						component.GetTextureSheet()->Resize(component.SpriteSize);
+				});
+
+				RenderProp("Coordinates", [&]
+				{
+					if (ImGui::DragFloat2("##coords", &component.SpriteCoords[0], dragSliderSpeed, 0.0f, 0.0f, "%.2f"))
+						component.GetTextureSheet()->SetCoordinate(component.SpriteCoords);
+				});
+			});
+
+
 		}, selectedEntity);
 
 		ShowComponent<CameraComponent>("Camera", [&](CameraComponent& component)
@@ -254,7 +285,7 @@ namespace MoonEngine
 
 			RenderProp("Size", [&]
 			{
-				ImGui::DragFloat("##Size", &component.Size, 0.1f, 0.0f, FLT_MAX, "%.2f");
+				ImGui::DragFloat("##Size", &component.Size, dragSliderSpeed, 0.0f, FLT_MAX, "%.2f");
 			});
 
 			EndDrawProp();
@@ -368,6 +399,13 @@ namespace MoonEngine
 
 			DrawTreeProp("System", [&]
 			{
+				RenderProp("Pool Size", [&]
+				{
+					int32_t size = (int32_t)component.ParticleSystem.Size();
+					if (ImGui::DragInt("##psiz", &size, 0.1f, 0, FLT_MAX, "%d", ImGuiInputTextFlags_EnterReturnsTrue | ImGuiSliderFlags_AlwaysClamp))
+						component.ParticleSystem.Resize(size);
+				});
+
 				RenderProp("Play On Awake", [&]
 				{
 					ImGui::Checkbox("##POA", &component.ParticleSystem.PlayOnAwake);
@@ -390,6 +428,11 @@ namespace MoonEngine
 				RenderProp("Particles Per Second", [&]
 				{
 					ImGui::DragFloat("##PPS", &component.ParticleSystem.ParticlePerSecond, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
+				});
+
+				RenderProp("Particles Per Unit", [&]
+				{
+					ImGui::DragFloat("##PPU", &component.ParticleSystem.ParticlePerUnit, dragSliderSpeed, 0.0f, 0.0f, "%.2f");
 				});
 
 				ImGuiUtils::AddPadding(0.0f, 5.0f);
