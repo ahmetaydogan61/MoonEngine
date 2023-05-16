@@ -1,7 +1,7 @@
 project "ImGui"
     kind "StaticLib"
     language "C++"
-    staticruntime "On"
+    staticruntime "on"
     systemversion "latest"
 
     targetdir(dirTarget)

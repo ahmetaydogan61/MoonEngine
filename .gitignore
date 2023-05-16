@@ -1,8 +1,15 @@
+**/bin/
+
 Build/
 **/Build/
+intermediate/
 
 .vs/
 **.sln
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+
+**.csproj
+**.csproj.user
+**.csproj.filters

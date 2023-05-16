@@ -1,7 +1,7 @@
 project "Glad"
 	kind "StaticLib"
 	language "C"
-	staticruntime "On"
+	staticruntime "off"
 	systemversion "latest"
 
     targetdir(dirTarget)

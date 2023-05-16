@@ -6,6 +6,7 @@
 #include "Core/Time.h"
 
 #include "Renderer/Renderer.h"
+#include "Scripting/ScriptEngine.h"
 
 #include <GLFW/glfw3.h>
 #include <yaml-cpp/yaml.h>
@@ -45,6 +46,9 @@ namespace MoonEngine
 		Renderer::Init();
 		ME_SYS_SUC("Renderer Initialized...");
 
+		ScriptEngine::Init();
+		ME_SYS_SUC("Script Engine Initialized...");
+
 		m_ImGuiLayer = new ImGuiLayer();
 		m_ImGuiLayer->Init();
 		ME_SYS_SUC("ImGui Initialized...");
@@ -76,6 +80,8 @@ namespace MoonEngine
 			Input::Update();
 			m_Window->Update();
 		}
+
+		Terminate();
 	}
 
 	void Application::SavePrefs()
@@ -143,7 +149,11 @@ namespace MoonEngine
 			layer->Terminate();
 		ME_SYS_LOG("Application Layers Terminated...");
 
+		ScriptEngine::Shutdown();
+		ME_SYS_LOG("Script Engine Terminated...");
+
 		Renderer::Terminate();
+		ME_SYS_LOG("Renderer Terminated...");
 
 		ME_SYS_LOG("Application Termination Completed..");
 		Debug::Terminate();

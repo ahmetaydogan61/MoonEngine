@@ -1,7 +1,7 @@
 project "MoonEngine"
     kind "StaticLib"
     language "C++"
-    staticruntime "On"
+    staticruntime "Off"
 
     targetdir(dirTarget)
     objdir(dirObj)
@@ -35,7 +35,8 @@ project "MoonEngine"
         includeIconFont,
         includeUuidv4,
         includeImGuizmo,
-        includeBox2D
+        includeBox2D,
+        includeMono
     }
 
     links
@@ -45,7 +46,9 @@ project "MoonEngine"
         "Glad",
         "opengl32.lib",
         "ImGui",
-        "yaml-cpp"
+        "yaml-cpp",
+
+        "%{Library.mono}"
     }
 
     filter "files:Includes/ImGuizmo/imguizmo/**.cpp"
@@ -55,6 +58,14 @@ project "MoonEngine"
         cppdialect "C++20"
         systemversion "latest"
         defines { "ENGINE_PLATFORM_WIN" }
+
+        links
+        {
+            "%{Library.WinSock}",
+            "%{Library.Winmm}",
+            "%{Library.WinVer}",
+            "%{Library.Bcrypt}"
+        }
 
     filter "configurations:Debug"
         defines { "ENGINE_DEBUG" }

@@ -1,7 +1,7 @@
 project "MoonEditor"
     kind "ConsoleApp"
     language "C++"
-    staticruntime "On"
+    staticruntime "off"
 
     targetdir(dirTarget)
     objdir(dirObj)
