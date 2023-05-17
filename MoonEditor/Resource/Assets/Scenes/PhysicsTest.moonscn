@@ -44,6 +44,8 @@ Entities:
       SpriteCoords: [0, 0]
       SpriteSize: [0, 0]
       HasSpriteSheet: false
+    struct MoonEngine::ScriptComponent:
+      ClassName: Game.Player
     struct MoonEngine::PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: false

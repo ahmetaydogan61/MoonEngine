@@ -6,6 +6,7 @@ extern "C"
 	typedef struct _MonoObject MonoObject;
 	typedef struct _MonoMethod MonoMethod;
 	typedef struct _MonoAssembly MonoAssembly;
+	typedef struct _MonoImage MonoImage;
 }
 
 namespace MoonEngine
@@ -62,6 +63,7 @@ namespace MoonEngine
 		static bool CheckEntityClass(const std::string& fullName);
 		static std::unordered_map<std::string, Shared<ScriptClass>> GetEntityClasses();
 
+		static MonoImage* GetScripterImage();
 		static Scene* GetRuntimeScene();
 	private:
 		static void InitMono();
@@ -70,6 +72,7 @@ namespace MoonEngine
 		static void LoadAssemblyClasses(MonoAssembly* assembly);
 
 		static MonoObject* InstantiateClass(MonoClass* monoClass);
+
 
 		friend class ScriptClass;
 	};

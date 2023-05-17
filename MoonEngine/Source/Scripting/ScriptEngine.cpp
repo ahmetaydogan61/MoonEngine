@@ -106,6 +106,7 @@ namespace MoonEngine
 		LoadAssemblyClasses(s_Data->ScripterAssembly);
 
 		ScriptDepot::InitializeScripts();
+		ScriptDepot::RegisterComponents();
 
 		s_Data->EntityClass = ScriptClass("MoonEngine", "Entity");
 	}
@@ -225,6 +226,11 @@ namespace MoonEngine
 		return s_Data->EntityClasses;
 	}
 
+	MonoImage* ScriptEngine::GetScripterImage()
+	{
+		return s_Data->ScripterImage;
+	}
+
 	Scene* ScriptEngine::GetRuntimeScene()
 	{
 		return s_Data->RuntimeScene;
@@ -275,12 +281,16 @@ namespace MoonEngine
 
 	void ScriptInstance::InvokeAwake()
 	{
-		m_ScriptClass->InvokeMethod(m_Instance, m_AwakeMethod);
+		if (m_AwakeMethod)
+			m_ScriptClass->InvokeMethod(m_Instance, m_AwakeMethod);
 	}
 
 	void ScriptInstance::InvokeUpdate(float dt)
 	{
-		void* param = &dt;
-		m_ScriptClass->InvokeMethod(m_Instance, m_UpdateMethod, &param);
+		if (m_UpdateMethod)
+		{
+			void* param = &dt;
+			m_ScriptClass->InvokeMethod(m_Instance, m_UpdateMethod, &param);
+		}
 	}
 }

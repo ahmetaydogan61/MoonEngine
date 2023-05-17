@@ -6,5 +6,6 @@ namespace MoonEngine
 	{
 	public:
 		static void InitializeScripts();
+		static void RegisterComponents();
 	};
 }

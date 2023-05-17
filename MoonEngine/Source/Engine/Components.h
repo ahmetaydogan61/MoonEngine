@@ -30,8 +30,8 @@ namespace MoonEngine
 	struct TransformComponent
 	{
 		glm::vec3 Position = glm::vec3(0.0f);
-		glm::vec3 Rotation = glm::vec3(0.0f);
 		glm::vec3 Scale = glm::vec3(1.0f);
+		glm::vec3 Rotation = glm::vec3(0.0f);
 
 		REFLECT(("Position", Position)("Rotation", Rotation)("Scale", Scale))
 	};
@@ -136,4 +136,12 @@ namespace MoonEngine
 		ParticleBody Particle;
 		ParticleSystem ParticleSystem;
 	};
+
+	template<typename... Component>
+	struct ComponentGroup
+	{
+	};
+
+	using AllComponents = ComponentGroup
+		<TransformComponent, SpriteComponent, CameraComponent, ScriptComponent, PhysicsBodyComponent, ParticleComponent>;
 }
