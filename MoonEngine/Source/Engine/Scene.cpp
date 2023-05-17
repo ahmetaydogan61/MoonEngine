@@ -9,6 +9,8 @@
 
 #include "Physics/Collision.h"
 
+#include "Scripting/ScriptEngine.h"
+
 #include "Renderer/Camera.h"
 #include "Renderer/Renderer.h"
 
@@ -37,6 +39,20 @@ namespace MoonEngine
 			if (particle.ParticleSystem.PlayOnAwake)
 				particle.ParticleSystem.Play();
 		}
+
+		//+ScriptComponents
+		{
+			ScriptEngine::StartRuntime(this);
+
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto [e, script] : view.each())
+			{
+				Entity entity = { e, this };
+				ScriptEngine::CreateEntity(entity, script);
+			}
+
+		}
+		//-ScriptComponents
 	}
 
 	void Scene::StopRuntime()
@@ -46,6 +62,8 @@ namespace MoonEngine
 		auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
 		for (auto [entity, transformComponent, particle] : particleSystemView.each())
 			particle.ParticleSystem.Stop();
+
+		ScriptEngine::StopRuntime();
 	}
 
 	void Scene::StartEdit()
@@ -67,6 +85,13 @@ namespace MoonEngine
 
 		if (update)
 		{
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto [e, script] : view.each())
+			{
+				Entity entity = { e, this };
+				ScriptEngine::UpdateEntity(entity, script, dt);
+			}
+
 			//PhysicsWorld
 			{
 				auto view = m_Registry.view<TransformComponent, const PhysicsBodyComponent>();
@@ -134,6 +159,7 @@ namespace MoonEngine
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
 		CopyIfExists<SpriteComponent>(e, entity);
+		CopyIfExists<ScriptComponent>(e, entity);
 		CopyIfExists<ParticleComponent>(e, entity);
 		CopyIfExists<PhysicsBodyComponent>(e, entity);
 
@@ -148,6 +174,7 @@ namespace MoonEngine
 		RemoveIfExists<IdentityComponent>(e);
 		RemoveIfExists<TransformComponent>(e);
 		RemoveIfExists<SpriteComponent>(e);
+		RemoveIfExists<ScriptComponent>(e);
 		RemoveIfExists<ParticleComponent>(e);
 		RemoveIfExists<PhysicsBodyComponent>(e);
 
@@ -168,6 +195,7 @@ namespace MoonEngine
 			CopyIfExists<IdentityComponent>(copyTo, copyFrom);
 			CopyIfExists<TransformComponent>(copyTo, copyFrom);
 			CopyIfExists<SpriteComponent>(copyTo, copyFrom);
+			CopyIfExists<ScriptComponent>(copyTo, copyFrom);
 			CopyIfExists<CameraComponent>(copyTo, copyFrom);
 			CopyIfExists<ParticleComponent>(copyTo, copyFrom);
 			CopyIfExists<PhysicsBodyComponent>(copyTo, copyFrom);
@@ -237,6 +265,12 @@ namespace MoonEngine
 
 	template<>
 	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) {}
+
+	template<>
+	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component) {}
 
 	template<>
 	void Scene::OnAddComponent(Entity entity, ParticleComponent& component) {}

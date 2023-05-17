@@ -1,0 +1,19 @@
+Scene: Scripting Test
+Entities:
+  - Entity: b33f9655-ec0b-48de-8075-fec887826bb2
+    struct MoonEngine::IdentityComponent:
+      Name: Entity
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: "null"
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
+    struct MoonEngine::ScriptComponent:
+      ClassName: Game.Player

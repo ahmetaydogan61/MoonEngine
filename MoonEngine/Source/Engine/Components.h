@@ -123,6 +123,14 @@ namespace MoonEngine
 		REFLECT(("IsMain", IsMain)("Size", Size))
 	};
 
+	struct ScriptComponent
+	{
+		std::string ClassName;
+		bool HasValidClass = false;
+
+		REFLECT(("ClassName", ClassName))
+	};
+
 	struct ParticleComponent
 	{
 		ParticleBody Particle;

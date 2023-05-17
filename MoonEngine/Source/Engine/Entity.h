@@ -68,5 +68,6 @@ namespace MoonEngine
 		
 		friend class Scene;
 		friend class PhysicsWorld;
+		friend class ScriptInstance;
 	};
 }

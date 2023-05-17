@@ -312,8 +312,9 @@ namespace MoonEngine
 
 		SerializeIfExists<IdentityComponent>(out, entity);
 		SerializeIfExists<TransformComponent>(out, entity);
-		SerializeIfExists<SpriteComponent>(out, entity);
 		SerializeIfExists<CameraComponent>(out, entity);
+		SerializeIfExists<SpriteComponent>(out, entity);
+		SerializeIfExists<ScriptComponent>(out, entity);
 		SerializeIfExists<PhysicsBodyComponent>(out, entity);
 
 		if (entity.HasComponent<ParticleComponent>())
@@ -413,6 +414,7 @@ namespace MoonEngine
 					spriteComponent->GenerateSpriteSheet();
 				
 				GetIfExists<CameraComponent>(entity, deserializedEntity);
+				GetIfExists<ScriptComponent>(entity, deserializedEntity);
 				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
 
 				auto particleNode = entity[typeid(ParticleComponent).name()];

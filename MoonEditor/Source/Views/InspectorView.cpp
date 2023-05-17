@@ -4,8 +4,9 @@
 
 #include <Engine/Components.h>
 #include <Gui/ImGuiUtils.h>
-#include <IconsMaterialDesign.h>
+#include <Scripting/ScriptEngine.h>
 
+#include <IconsMaterialDesign.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
@@ -185,6 +186,23 @@ namespace MoonEngine
 	{
 		float dragSliderSpeed = 0.1f;
 
+		ShowComponent<CameraComponent>("Camera", [&](CameraComponent& component)
+		{
+			BeginDrawProp("##Camera");
+
+			RenderProp("Is Main", [&]
+			{
+				ImGui::Checkbox("##IsMain", &component.IsMain);
+			});
+
+			RenderProp("Size", [&]
+			{
+				ImGui::DragFloat("##Size", &component.Size, dragSliderSpeed, 0.0f, FLT_MAX, "%.2f");
+			});
+
+			EndDrawProp();
+		}, selectedEntity);
+
 		ShowComponent<SpriteComponent>("Sprite", [&](SpriteComponent& component)
 		{
 			BeginDrawProp("##Sprite");
@@ -274,23 +292,29 @@ namespace MoonEngine
 
 		}, selectedEntity);
 
-		ShowComponent<CameraComponent>("Camera", [&](CameraComponent& component)
+		ShowComponent<ScriptComponent>("Script", [&](ScriptComponent& component)
 		{
-			BeginDrawProp("##Camera");
+			BeginDrawProp("##Script");
 
-			RenderProp("Is Main", [&]
+			std::string& name = component.ClassName;
+			bool hasNoClass = !component.HasValidClass;
+
+			if (hasNoClass)
+				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.25f, 0.15f, 1.0f });
+
+			RenderProp("Class", [&]
 			{
-				ImGui::Checkbox("##IsMain", &component.IsMain);
+				if (ImGui::InputText("##class", &name, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					const auto& entityClasses = ScriptEngine::GetEntityClasses();
+					component.HasValidClass = ScriptEngine::CheckEntityClass(component.ClassName);
+				}
 			});
 
-			RenderProp("Size", [&]
-			{
-				ImGui::DragFloat("##Size", &component.Size, dragSliderSpeed, 0.0f, FLT_MAX, "%.2f");
-			});
-
+			if (hasNoClass)
+				ImGui::PopStyleColor();
 			EndDrawProp();
 		}, selectedEntity);
-
 
 		ShowComponent<PhysicsBodyComponent>("Physics Body", [&](PhysicsBodyComponent& component)
 		{
@@ -744,6 +768,10 @@ namespace MoonEngine
 					if (ImGui::MenuItem("Sprite"))
 						if (!selectedEntity.HasComponent<SpriteComponent>())
 							selectedEntity.AddComponent<SpriteComponent>();
+
+					if (ImGui::MenuItem("Script"))
+						if (!selectedEntity.HasComponent<ScriptComponent>())
+							selectedEntity.AddComponent<ScriptComponent>();
 
 					if (ImGui::MenuItem("Camera"))
 						if (!selectedEntity.HasComponent<CameraComponent>())

@@ -4,13 +4,17 @@ Entities:
     struct MoonEngine::IdentityComponent:
       Name: DynamicBox
     struct MoonEngine::TransformComponent:
-      Position: [-2.31383538, 11.9726257, 0]
+      Position: [-2.6155715, 9.87793064, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     struct MoonEngine::SpriteComponent:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: false
@@ -36,6 +40,10 @@ Entities:
       Color: [0.641833782, 0.641833782, 0.641833782, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: false
@@ -61,6 +69,10 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [5, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Static
       FreezeRotation: false
@@ -86,6 +98,10 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [5, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Static
       FreezeRotation: false
@@ -111,6 +127,10 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: false
@@ -136,6 +156,10 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: false
@@ -161,6 +185,10 @@ Entities:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
     struct MoonEngine::PhysicsBodyComponent:
       Type: Static
       FreezeRotation: false
