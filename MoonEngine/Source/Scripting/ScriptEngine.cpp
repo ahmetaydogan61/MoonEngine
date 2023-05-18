@@ -165,6 +165,8 @@ namespace MoonEngine
 		std::unordered_map<std::string, Shared<ScriptClass>> EntityClasses;
 		std::unordered_map<std::string, Shared<ScriptInstance>> EntityInstances;
 
+		std::unordered_map<std::string, ScriptFieldMap> EntityScriptFields;
+
 		Scene* RuntimeScene;
 	};
 
@@ -309,8 +311,15 @@ namespace MoonEngine
 	{
 		if (CheckEntityClass(scriptComponent.ClassName))
 		{
+			const auto& uuid = entity.GetUUID();
 			Shared<ScriptInstance> instance = MakeShared<ScriptInstance>(s_Data->EntityClasses[scriptComponent.ClassName], entity);
-			s_Data->EntityInstances[entity.GetUUID()] = instance;
+			s_Data->EntityInstances[uuid] = instance;
+
+			ME_ASSERT(s_Data->EntityScriptFields.contains(uuid), "Entity does not contain script field!");
+			const ScriptFieldMap& fieldMap = s_Data->EntityScriptFields.at(uuid);
+
+			for (const auto& [name, fieldInstance] : fieldMap)
+				instance->SetFieldValue(name, fieldInstance.GetData());
 
 			instance->InvokeAwake();
 		}
@@ -329,6 +338,22 @@ namespace MoonEngine
 	std::unordered_map<std::string, Shared<ScriptClass>> ScriptEngine::GetEntityClasses()
 	{
 		return s_Data->EntityClasses;
+	}
+
+	Shared<ScriptClass> ScriptEngine::GetEntityClass(const std::string& name)
+	{
+		if (s_Data->EntityClasses.find(name) == s_Data->EntityClasses.end())
+			return nullptr;
+
+		return s_Data->EntityClasses.at(name);
+	}
+
+	ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity e)
+	{
+		ME_ASSERT(e, "Entity is null!");
+
+		const std::string& uuid = e.GetUUID();
+		return s_Data->EntityScriptFields[uuid];
 	}
 
 	Shared<ScriptInstance> ScriptEngine::GetEntityScriptInstance(const std::string& entityId)
@@ -408,7 +433,7 @@ namespace MoonEngine
 		}
 	}
 
-	bool ScriptInstance::GetFieldValueInternal(const std::string& name, void* valueBuffer)
+	bool ScriptInstance::GetFieldValue(const std::string& name, void* valueBuffer)
 	{
 		const auto& fields = m_ScriptClass->GetFields();
 		auto it = fields.find(name);
@@ -422,7 +447,7 @@ namespace MoonEngine
 		return true;
 	}
 
-	bool ScriptInstance::SetFieldValueInternal(const std::string& name, const void* valueBuffer)
+	bool ScriptInstance::SetFieldValue(const std::string& name, const void* valueBuffer)
 	{
 		const auto& fields = m_ScriptClass->GetFields();
 		auto it = fields.find(name);

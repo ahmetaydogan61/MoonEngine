@@ -253,10 +253,16 @@ namespace MoonEngine
 		float fontSize = ImGui::GetFontSize();
 		float padY = fontSize * 0.1f;
 		float buttonSize = fontSize * 0.8f + 2.0f;
-		ImGuiUtils::AddPadding(fontSize * 0.3f, padY * 2.0f);
 
-		ImGui::BeginGroup();
+		float x = ImGui::GetContentRegionAvail().x;
+
+		int childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_::ImGuiWindowFlags_NoDecoration;
+
+		ImGui::BeginChild("Chil Window", {0.0f, buttonSize * 2.0f}, false, childFlags);
 		{//Gizmo Button Group
+
+			ImGuiUtils::AddPadding(fontSize * 0.3f, buttonSize * 0.35f);
+
 			ImGui::BeginGroup();
 
 			if (ImGuiUtils::ButtonSelectable((ImTextureID)EditorAssets::SelectTexture->GetTextureId(), buttonSize, buttonSize, m_GizmosData.GizmoSelection == GizmoSelection::NONE))
@@ -320,7 +326,7 @@ namespace MoonEngine
 			ImGui::EndGroup();
 			ImGuiUtils::AddPadding(0.0f, padY);
 		}
-		ImGui::EndGroup();
+		ImGui::EndChild();
 
 		OnWindowBegin();
 

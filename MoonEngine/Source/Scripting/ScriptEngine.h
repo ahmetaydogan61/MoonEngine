@@ -33,6 +33,36 @@ namespace MoonEngine
 		MonoClassField* MonoField;
 	};
 
+	struct ScriptFieldInstance
+	{
+		ScriptField Field;
+
+		ScriptFieldInstance()
+		{
+			memset(m_Data, 0, sizeof(m_Data));
+		}
+
+		template<typename T>
+		T GetValue() 
+		{ 
+			static_assert(sizeof(T) <= 8, "Type to large!");
+			return *(T*)m_Data;
+		}
+
+		template<typename T>
+		void SetValue(T valueBuffer)
+		{
+			static_assert(sizeof(T) <= 8, "Type to large!");
+			memcpy(m_Data, &valueBuffer, sizeof(T));
+		}
+
+		const uint8_t* GetData() const { return m_Data; }
+	private:
+		uint8_t m_Data[8];
+	};
+
+	using ScriptFieldMap = std::unordered_map<std::string, ScriptFieldInstance>;
+
 	class ScriptClass
 	{
 	public:
@@ -65,21 +95,8 @@ namespace MoonEngine
 
 		Shared<ScriptClass> GetScriptClass() { return m_ScriptClass; }
 
-		template<typename T>
-		T GetFieldValue(const std::string& name)
-		{
-			bool foundValue = GetFieldValueInternal(name, s_FieldValueBuffer);
-			if (!foundValue)
-				return T();
-
-			return *(T*)s_FieldValueBuffer;
-		}
-
-		template<typename T>
-		void SetFieldValue(const std::string& name, const T& value)
-		{
-			bool foundValue = SetFieldValueInternal(name, &value);
-		}
+		bool GetFieldValue(const std::string& name, void* valueBuffer);
+		bool SetFieldValue(const std::string& name, const void* valueBuffer);
 	private:
 		Shared<ScriptClass> m_ScriptClass;
 
@@ -87,11 +104,6 @@ namespace MoonEngine
 		MonoMethod* m_Constructor = nullptr;
 		MonoMethod* m_AwakeMethod = nullptr;
 		MonoMethod* m_UpdateMethod = nullptr;
-
-		bool GetFieldValueInternal(const std::string& name, void* valueBuffer);
-		bool SetFieldValueInternal(const std::string& name, const void* valueBuffer);
-
-		inline static char s_FieldValueBuffer[8];
 	};
 
 	class ScriptEngine
@@ -111,6 +123,8 @@ namespace MoonEngine
 
 		static bool CheckEntityClass(const std::string& fullName);
 		static std::unordered_map<std::string, Shared<ScriptClass>> GetEntityClasses();
+		static Shared<ScriptClass> GetEntityClass(const std::string& name);
+		static ScriptFieldMap& GetScriptFieldMap(Entity entity);
 		static Shared<ScriptInstance> GetEntityScriptInstance(const std::string& entityId);
 
 		static MonoImage* GetScripterImage();
