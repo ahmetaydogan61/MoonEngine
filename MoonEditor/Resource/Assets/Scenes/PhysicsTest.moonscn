@@ -215,3 +215,5 @@ Entities:
     struct MoonEngine::CameraComponent:
       IsMain: true
       Size: 8.39999962
+    struct MoonEngine::ScriptComponent:
+      ClassName: Game.Camera

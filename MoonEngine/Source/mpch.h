@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
 template<typename T>

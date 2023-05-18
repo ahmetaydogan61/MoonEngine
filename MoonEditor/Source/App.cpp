@@ -1,6 +1,7 @@
 #include "mpch.h"
 #include "Editor/EditorLayer.h"
 #include "Editor/EditorAssets.h"
+
 #include <Core/Application.h>
 
 int main()

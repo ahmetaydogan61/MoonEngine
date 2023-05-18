@@ -3,10 +3,13 @@ using MoonEngine;
 
 namespace Game
 {
-    internal class Player : Entity
+    public class Player : Entity
     {
         private TransformComponent m_Transform;
         private PhysicsBodyComponent m_PhysicsBody;
+
+        public float Speed = 2500.0f;
+        public Entity MyEntity;
 
         void Awake()
         {
@@ -22,7 +25,7 @@ namespace Game
 
         void Update(float dt)
         {
-            float speed = 2500.0f;
+            float speed = Speed;
             Vector2 velocity = Vector2.Zero;
 
             if (Input.GetKey(Keycode.W))

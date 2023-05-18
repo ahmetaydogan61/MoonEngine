@@ -8,7 +8,7 @@
 #include "mono/jit/jit.h"
 #include "mono/metadata/assembly.h"
 #include "mono/metadata/object.h"
-
+#include "mono/metadata/tabledefs.h"
 
 namespace MoonEngine
 {
@@ -79,6 +79,76 @@ namespace MoonEngine
 		}
 	}
 
+	static std::unordered_map<std::string, ScriptFieldType> s_ScriptFieldTypeMap =
+	{
+		{ "System.Boolean", ScriptFieldType::Bool },
+		{ "System.Single", ScriptFieldType::Float },
+		{ "System.Double", ScriptFieldType::Double },
+
+		{ "System.Byte", ScriptFieldType::Byte },
+		{ "System.Char", ScriptFieldType::Char },
+		{ "System.Int16", ScriptFieldType::Short },
+		{ "System.Int32", ScriptFieldType::Int },
+		{ "System.Int64", ScriptFieldType::Long },
+
+		{ "System.UByte", ScriptFieldType::UByte },
+		{ "System.UInt16", ScriptFieldType::UShort },
+		{ "System.UInt32", ScriptFieldType::UInt },
+		{ "System.UInt64", ScriptFieldType::ULong },
+
+		{ "MoonEngine.Vector2", ScriptFieldType::Vector2 },
+		{ "MoonEngine.Vector3", ScriptFieldType::Vector3 },
+		{ "MoonEngine.Vector4", ScriptFieldType::Vector4 },
+
+		{ "MoonEngine.Entity", ScriptFieldType::Entity},
+		{ "MoonEngine.TransformComponent", ScriptFieldType::TransformComponent },
+		{ "MoonEngine.PhysicsBodyComponent", ScriptFieldType::PhysicsBodyComponent },
+	};
+
+	ScriptFieldType MonoTypeToScriptFieldType(MonoType* type)
+	{
+		std::string typeName = mono_type_get_name(type);
+
+		auto it = s_ScriptFieldTypeMap.find(typeName);
+		if (it == s_ScriptFieldTypeMap.end())
+		{
+			ME_SYS_ERR("Unknown Type: {}", typeName);
+			return ScriptFieldType::None;
+		}
+
+		return it->second;
+	}
+
+	const char* ScriptFieldTypeToString(ScriptFieldType fieldType)
+	{
+		switch (fieldType)
+		{
+			case MoonEngine::ScriptFieldType::Bool: return "Bool";
+			case MoonEngine::ScriptFieldType::Char: return "Char";
+			case MoonEngine::ScriptFieldType::Float: return "Float";
+			case MoonEngine::ScriptFieldType::Double: return "Double";
+
+			case MoonEngine::ScriptFieldType::Byte: return "Byte";
+			case MoonEngine::ScriptFieldType::Short: return "Short";
+			case MoonEngine::ScriptFieldType::Int: return "Int";
+			case MoonEngine::ScriptFieldType::Long: return "Long";
+
+			case MoonEngine::ScriptFieldType::UByte: return "UByte";
+			case MoonEngine::ScriptFieldType::UShort: return "UShort";
+			case MoonEngine::ScriptFieldType::UInt: return "UInt";
+			case MoonEngine::ScriptFieldType::ULong: return "ULong";
+
+			case MoonEngine::ScriptFieldType::Vector2: return "Vector2";
+			case MoonEngine::ScriptFieldType::Vector3: return "Vector3";
+			case MoonEngine::ScriptFieldType::Vector4: return "Vector4";
+
+			case MoonEngine::ScriptFieldType::Entity: return "Entity";
+			case MoonEngine::ScriptFieldType::TransformComponent: return "TransformComponent";
+			case MoonEngine::ScriptFieldType::PhysicsBodyComponent: return "PhysicsBodyComponent";
+		}
+		return "Invalid";
+	}
+
 	struct ScriptEngineData
 	{
 		MonoDomain* RootDomain = nullptr;
@@ -86,6 +156,9 @@ namespace MoonEngine
 
 		MonoAssembly* ScripterAssembly = nullptr;
 		MonoImage* ScripterImage = nullptr;
+
+		MonoAssembly* AppAssembly = nullptr;
+		MonoImage* AppImage = nullptr;
 
 		ScriptClass EntityClass;
 
@@ -103,12 +176,13 @@ namespace MoonEngine
 
 		InitMono();
 		LoadAssembly("Resource/Scripts/MoonScripter.dll");
-		LoadAssemblyClasses(s_Data->ScripterAssembly);
+		LoadAppAssembly("TemplateProject/Build/Template.dll");
+		LoadAssemblyClasses();
 
 		ScriptDepot::InitializeScripts();
 		ScriptDepot::RegisterComponents();
 
-		s_Data->EntityClass = ScriptClass("MoonEngine", "Entity");
+		s_Data->EntityClass = ScriptClass("MoonEngine", "Entity", true);
 	}
 
 	void ScriptEngine::InitMono()
@@ -129,12 +203,17 @@ namespace MoonEngine
 		s_Data->ScripterImage = mono_assembly_get_image(s_Data->ScripterAssembly);
 	}
 
-	void ScriptEngine::LoadAssemblyClasses(MonoAssembly* assembly)
+	void ScriptEngine::LoadAppAssembly(const std::filesystem::path& path)
+	{
+		s_Data->AppAssembly = LoadMonoAssembly(path);
+		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
+	}
+
+	void ScriptEngine::LoadAssemblyClasses()
 	{
 		s_Data->EntityClasses.clear();
 
-		MonoImage* image = mono_assembly_get_image(assembly);
-		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->AppImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 
 		MonoClass* entityClass = mono_class_from_name(s_Data->ScripterImage, "MoonEngine", "Entity");
@@ -144,27 +223,53 @@ namespace MoonEngine
 			uint32_t cols[MONO_TYPEDEF_SIZE];
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
 
-			const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
+			const char* nameSpace = mono_metadata_string_heap(s_Data->AppImage, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* className = mono_metadata_string_heap(s_Data->AppImage, cols[MONO_TYPEDEF_NAME]);
 
-			MonoClass* monoClass = mono_class_from_name(s_Data->ScripterImage, nameSpace, name);
+			MonoClass* monoClass = mono_class_from_name(s_Data->AppImage, nameSpace, className);
 
 			if (monoClass == entityClass)
 				continue;
 
 			std::string fullName = "";
 			if (nameSpace != "")
-				fullName = fmt::format("{}.{}", nameSpace, name);
+				fullName = fmt::format("{}.{}", nameSpace, className);
 			else
-				fullName = name;
+				fullName = className;
 
 			bool isEntity = mono_class_is_subclass_of(monoClass, entityClass, false);
 
-			if (isEntity)
-				s_Data->EntityClasses[fullName] = MakeShared<ScriptClass>(nameSpace, name);
+			if (!isEntity)
+				continue;
 
-			ME_SYS_LOG("Assembly Types: {}.{}", nameSpace, name);
+			Shared<ScriptClass> scriptClass = MakeShared<ScriptClass>(nameSpace, className);
+			s_Data->EntityClasses[fullName] = scriptClass;
+
+			int fieldCount = mono_class_num_fields(monoClass);
+			void* iterator = nullptr;
+
+			ME_SYS_LOG("{} Fields Of '{}'", fieldCount, className);
+			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
+			{
+				const char* fieldName = mono_field_get_name(field);
+				uint32_t flags = mono_field_get_flags(field);
+				if (flags & FIELD_ATTRIBUTE_PUBLIC)
+				{
+					MonoType* type = mono_field_get_type(field);
+					ScriptFieldType fieldType = MonoTypeToScriptFieldType(type);
+					const char* typeName = ScriptFieldTypeToString(fieldType);
+
+					ME_SYS_LOG("Name: {} - Type: {}", fieldName, typeName);
+
+					scriptClass->m_Fields[fieldName] = { fieldType, fieldName, field };
+				}
+			}
+
+			ME_SYS_LOG("Assembly Types: {}.{}", nameSpace, className);
 		}
+
+		auto& entityClasses = s_Data->EntityClasses;
+
 	}
 
 	void ScriptEngine::Shutdown()
@@ -221,9 +326,18 @@ namespace MoonEngine
 		instance->InvokeUpdate(dt);
 	}
 
-	std::unordered_map<std::string, Shared<ScriptClass>> MoonEngine::ScriptEngine::GetEntityClasses()
+	std::unordered_map<std::string, Shared<ScriptClass>> ScriptEngine::GetEntityClasses()
 	{
 		return s_Data->EntityClasses;
+	}
+
+	Shared<ScriptInstance> ScriptEngine::GetEntityScriptInstance(const std::string& entityId)
+	{
+		auto it = s_Data->EntityInstances.find(entityId);
+		if (it == s_Data->EntityInstances.end())
+			return nullptr;
+
+		return it->second;
 	}
 
 	MonoImage* ScriptEngine::GetScripterImage()
@@ -243,10 +357,10 @@ namespace MoonEngine
 		return instance;
 	}
 
-	ScriptClass::ScriptClass(const std::string& nspace, const std::string& className)
+	ScriptClass::ScriptClass(const std::string& nspace, const std::string& className, bool fromScripter)
 		:m_Namespace(nspace), m_ClassName(className)
 	{
-		m_MonoClass = mono_class_from_name(s_Data->ScripterImage, nspace.c_str(), className.c_str());
+		m_MonoClass = mono_class_from_name(fromScripter ? s_Data->ScripterImage : s_Data->AppImage, nspace.c_str(), className.c_str());
 	}
 
 	MonoObject* ScriptClass::Instantiate()
@@ -292,5 +406,33 @@ namespace MoonEngine
 			void* param = &dt;
 			m_ScriptClass->InvokeMethod(m_Instance, m_UpdateMethod, &param);
 		}
+	}
+
+	bool ScriptInstance::GetFieldValueInternal(const std::string& name, void* valueBuffer)
+	{
+		const auto& fields = m_ScriptClass->GetFields();
+		auto it = fields.find(name);
+
+		if (it == fields.end())
+			return false;
+
+		const ScriptField& field = it->second;
+
+		mono_field_get_value(m_Instance, field.MonoField, valueBuffer);
+		return true;
+	}
+
+	bool ScriptInstance::SetFieldValueInternal(const std::string& name, const void* valueBuffer)
+	{
+		const auto& fields = m_ScriptClass->GetFields();
+		auto it = fields.find(name);
+
+		if (it == fields.end())
+			return false;
+
+		const ScriptField& field = it->second;
+
+		mono_field_set_value(m_Instance, field.MonoField, (void*)valueBuffer);
+		return true;
 	}
 }
