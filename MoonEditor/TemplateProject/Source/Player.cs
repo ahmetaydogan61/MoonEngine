@@ -5,7 +5,6 @@ namespace Game
 {
     public class Player : Entity
     {
-        private TransformComponent m_Transform;
         private PhysicsBodyComponent m_PhysicsBody;
 
         public float Speed = 2500.0f;
@@ -13,14 +12,7 @@ namespace Game
 
         void Awake()
         {
-            m_Transform = GetComponent<TransformComponent>();
             m_PhysicsBody = GetComponent<PhysicsBodyComponent>();
-
-            bool hasTransform = HasComponent<TransformComponent>();
-            Console.WriteLine($"Has Transfrom Component - {hasTransform}");
-
-            Console.WriteLine($"Player Awaken - {ID}");
-        
         }
 
         void Update(float dt)

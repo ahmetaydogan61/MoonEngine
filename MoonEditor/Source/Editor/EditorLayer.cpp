@@ -70,6 +70,7 @@ namespace MoonEngine
 		m_HierarchyView = MakeShared<HierarchyView>();
 
 		NewScene();
+		LoadScene("Resource/Assets/Scenes/TestScene.moonscn");
 	}
 
 	void EditorLayer::KeyEvents(KeyPressEvent& e)
@@ -147,6 +148,7 @@ namespace MoonEngine
 	void EditorLayer::LoadScene(const std::string& path)
 	{
 		NewScene();
+		m_ScenePath = path;
 		SceneSerializer::Deserialize(m_Scene, path);
 	}
 

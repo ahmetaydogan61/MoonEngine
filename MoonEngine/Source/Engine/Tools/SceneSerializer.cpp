@@ -5,6 +5,8 @@
 #include "Engine/Entity.h"
 #include "Engine/Scene.h"
 
+#include "Scripting/ScriptEngine.h"
+
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/dll.h>
 
@@ -84,10 +86,41 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<MoonEngine::Entity>
+	{
+		static Node encode(MoonEngine::Entity& ent)
+		{
+			Node node;
+			node.push_back(ent.GetUUID());
+			return node;
+		}
+
+		static bool decode(const Node& node, MoonEngine::Entity& ent)
+		{
+			const auto& val = node[0].as<std::string>();
+			ent.GetComponent<MoonEngine::UUIDComponent>().ID.fromStr(val.c_str());
+			return true;
+		}
+	};
 }
 
 namespace MoonEngine
 {
+#define WRITE_SCRIPT_FIELD_TYPE(FieldType, Type) \
+		case ScriptFieldType::FieldType:		 \
+			out << scriptField.GetValue<Type>(); \
+			break
+
+#define READ_SCRIPT_FIELD_TYPE(FieldType, Type)			\
+		case ScriptFieldType::FieldType:				\
+		{												\
+			Type data = scriptField["Value"].as<Type>(); \
+			fieldInstance.SetValue(data);				\
+			break;										\
+		}
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
 		out << YAML::Flow;
@@ -314,9 +347,67 @@ namespace MoonEngine
 		SerializeIfExists<TransformComponent>(out, entity);
 		SerializeIfExists<CameraComponent>(out, entity);
 		SerializeIfExists<SpriteComponent>(out, entity);
-		SerializeIfExists<ScriptComponent>(out, entity);
-		SerializeIfExists<PhysicsBodyComponent>(out, entity);
 
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			YAMLSerializer parser(out);
+			ScriptComponent& c = entity.GetComponent<ScriptComponent>();
+			parser.BeginParse(typeid(ScriptComponent).name());
+			parser.Serialize(c);
+
+			Shared<ScriptClass> entityClass = ScriptEngine::GetEntityClass(c.ClassName);
+			const auto& fields = entityClass->GetFields();
+
+			if (fields.size() > 0)
+			{
+				out << YAML::Key << "Fields" << YAML::Value;
+				out << YAML::BeginSeq;
+
+				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+				for (const auto& [name, field] : fields)
+				{
+					if (entityFields.find(name) == entityFields.end())
+						continue;
+
+					ScriptFieldInstance& scriptField = entityFields.at(name);
+
+					out << YAML::BeginMap;
+					out << YAML::Key << "Name" << YAML::Value << name;
+					out << YAML::Key << "Type" << YAML::Value << ScriptFieldTypeToString(field.Type);
+					out << YAML::Key << "Value" << YAML::Value;
+
+					switch (field.Type)
+					{
+						WRITE_SCRIPT_FIELD_TYPE(Bool, bool);
+						WRITE_SCRIPT_FIELD_TYPE(Char, char);
+						WRITE_SCRIPT_FIELD_TYPE(Float, float);
+						WRITE_SCRIPT_FIELD_TYPE(Double, double);
+
+						WRITE_SCRIPT_FIELD_TYPE(Byte, int8_t);
+						WRITE_SCRIPT_FIELD_TYPE(Short, int16_t);
+						WRITE_SCRIPT_FIELD_TYPE(Int, int32_t);
+						WRITE_SCRIPT_FIELD_TYPE(Long, int64_t);
+
+						WRITE_SCRIPT_FIELD_TYPE(UByte, uint8_t);
+						WRITE_SCRIPT_FIELD_TYPE(UShort, uint16_t);
+						WRITE_SCRIPT_FIELD_TYPE(UInt, uint32_t);
+						WRITE_SCRIPT_FIELD_TYPE(ULong, uint64_t);
+
+						WRITE_SCRIPT_FIELD_TYPE(Vector2, glm::vec2);
+						WRITE_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
+						WRITE_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
+
+						WRITE_SCRIPT_FIELD_TYPE(Entity, int64_t);
+					}
+					out << YAML::EndMap;
+				}
+
+				out << YAML::EndSeq;
+			}
+			parser.EndParse();
+		}
+
+		SerializeIfExists<PhysicsBodyComponent>(out, entity);
 		if (entity.HasComponent<ParticleComponent>())
 		{
 			YAMLSerializer parser(out);
@@ -408,31 +499,85 @@ namespace MoonEngine
 
 				GetIfExists<IdentityComponent>(entity, deserializedEntity);
 				GetIfExists<TransformComponent>(entity, deserializedEntity);
-				
+
 				SpriteComponent* spriteComponent = GetIfExists<SpriteComponent>(entity, deserializedEntity);
 				if (spriteComponent && spriteComponent->HasSpriteSheet())
 					spriteComponent->GenerateSpriteSheet();
-				
+
 				GetIfExists<CameraComponent>(entity, deserializedEntity);
 				GetIfExists<ScriptComponent>(entity, deserializedEntity);
 				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
+
+				auto scriptNode = entity[typeid(ScriptComponent).name()];
+				if (scriptNode)
+				{
+					YAMLDeserializer deserializer(scriptNode);
+					ScriptComponent& component = deserializedEntity.HasComponent<ScriptComponent>() ?
+						deserializedEntity.GetComponent<ScriptComponent>() : deserializedEntity.AddComponent<ScriptComponent>();
+
+					deserializer.Deserialize(component);
+
+					auto scriptFields = scriptNode["Fields"];
+					if (scriptFields)
+					{
+						Shared<ScriptClass> entityClass = ScriptEngine::GetEntityClass(component.ClassName);
+						ME_ASSERT(entityClass, "Class Not Found!");
+						const auto& fields = entityClass->GetFields();
+						auto& entityFields = ScriptEngine::GetScriptFieldMap(deserializedEntity);
+
+						for (auto scriptField : scriptFields)
+						{
+							std::string name = scriptField["Name"].as<std::string>();
+							std::string typeName = scriptField["Type"].as<std::string>();
+							ScriptFieldType type = ScriptFieldTypeFromString(typeName);
+
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+
+							bool hasFields = fields.find(name) != fields.end();
+							//TODO: Should be a log message to the editor.
+							ME_ASSERT(hasFields, "Fields Not Found!");
+
+							if (!hasFields)
+								continue;
+
+							fieldInstance.Field = fields.at(name);
+
+							switch (type)
+							{
+								READ_SCRIPT_FIELD_TYPE(Bool, bool);
+								READ_SCRIPT_FIELD_TYPE(Char, char);
+								READ_SCRIPT_FIELD_TYPE(Float, float);
+								READ_SCRIPT_FIELD_TYPE(Double, double);
+
+								READ_SCRIPT_FIELD_TYPE(Byte, int8_t);
+								READ_SCRIPT_FIELD_TYPE(Short, int16_t);
+								READ_SCRIPT_FIELD_TYPE(Int, int32_t);
+								READ_SCRIPT_FIELD_TYPE(Long, int64_t);
+
+								READ_SCRIPT_FIELD_TYPE(UByte, uint8_t);
+								READ_SCRIPT_FIELD_TYPE(UShort, uint16_t);
+								READ_SCRIPT_FIELD_TYPE(UInt, uint32_t);
+								READ_SCRIPT_FIELD_TYPE(ULong, uint64_t);
+
+								READ_SCRIPT_FIELD_TYPE(Vector2, glm::vec2);
+								READ_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
+								READ_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
+
+								READ_SCRIPT_FIELD_TYPE(Entity, Entity);
+							}
+						}
+					}
+				}
 
 				auto particleNode = entity[typeid(ParticleComponent).name()];
 				if (particleNode)
 				{
 					YAMLDeserializer deserializer(particleNode);
-					if (deserializedEntity.HasComponent<ParticleComponent>())
-					{
-						ParticleComponent& component = deserializedEntity.GetComponent<ParticleComponent>();
-						deserializer.Deserialize(component.ParticleSystem);
-						deserializer.Deserialize(component.Particle);
-					}
-					else
-					{
-						ParticleComponent& component = deserializedEntity.AddComponent<ParticleComponent>();
-						deserializer.Deserialize(component.ParticleSystem);
-						deserializer.Deserialize(component.Particle);
-					}
+					ParticleComponent& component = deserializedEntity.HasComponent<ParticleComponent>() ?
+						deserializedEntity.GetComponent<ParticleComponent>() : deserializedEntity.AddComponent<ParticleComponent>();
+
+					deserializer.Deserialize(component.ParticleSystem);
+					deserializer.Deserialize(component.Particle);
 				}
 			}
 		}

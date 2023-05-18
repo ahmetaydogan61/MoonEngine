@@ -302,23 +302,21 @@ namespace MoonEngine
 			if (hasNoClass)
 				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.25f, 0.15f, 1.0f });
 
+			const auto& entityClasses = ScriptEngine::GetEntityClasses();
+			component.HasValidClass = ScriptEngine::CheckEntityClass(component.ClassName);
+
 			RenderProp("Class", [&]
 			{
-				if (ImGui::InputText("##class", &name, ImGuiInputTextFlags_EnterReturnsTrue))
-				{
-					const auto& entityClasses = ScriptEngine::GetEntityClasses();
-					component.HasValidClass = ScriptEngine::CheckEntityClass(component.ClassName);
-				}
+				ImGui::InputText("##class", &name);
 
 				bool isRuntimeRunning = EditorLayer::State() != EditorLayer::EditorState::Edit;
-
 				if (isRuntimeRunning)
 				{
 					Shared<ScriptInstance> scriptInstance = ScriptEngine::GetEntityScriptInstance(selectedEntity.GetUUID());
 					if (scriptInstance)
 					{
 						const auto& fields = scriptInstance->GetScriptClass()->GetFields();
-						for (const auto [name, field] : fields)
+						for (const auto& [name, field] : fields)
 						{
 							if (field.Type == ScriptFieldType::Float)
 							{

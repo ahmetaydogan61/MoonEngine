@@ -115,7 +115,7 @@ namespace MoonEngine
 
 
 		void Spawn(const ParticleBody& particle, const glm::vec3& position);
-		
+
 		void UpdateEmitter(float dt, const ParticleBody& particle, const glm::vec3& position);
 		void UpdateParticles(float dt);
 		void DrawParticles(int entityId);
@@ -138,7 +138,11 @@ namespace MoonEngine
 		void Pause() { m_IsPlaying = false; m_IsPaused = true; }
 		void Stop();
 
-		REFLECT(("SortMode", SortMode)("EmitterType", EmitterType)("PlayOnAwake", PlayOnAwake)("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond)("Layer", Layer))
+		REFLECT(
+			("EmitterType", EmitterType)("PlayOnAwake", PlayOnAwake)
+			("Looping", Looping)("Duration", Duration)("ParticlePerSecond", ParticlePerSecond)("ParticlePerUnit", ParticlePerUnit)
+			("SortMode", SortMode)("Layer", Layer)
+		)
 	private:
 		bool m_IsPlaying = false;
 		bool m_IsPaused = false;

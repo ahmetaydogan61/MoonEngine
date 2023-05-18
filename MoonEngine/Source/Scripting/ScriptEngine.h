@@ -43,22 +43,22 @@ namespace MoonEngine
 		}
 
 		template<typename T>
-		T GetValue() 
-		{ 
-			static_assert(sizeof(T) <= 8, "Type to large!");
+		T GetValue()
+		{
+			static_assert(sizeof(T) <= 16, "Type to large!");
 			return *(T*)m_Data;
 		}
 
 		template<typename T>
 		void SetValue(T valueBuffer)
 		{
-			static_assert(sizeof(T) <= 8, "Type to large!");
+			static_assert(sizeof(T) <= 16, "Type to large!");
 			memcpy(m_Data, &valueBuffer, sizeof(T));
 		}
 
 		const uint8_t* GetData() const { return m_Data; }
 	private:
-		uint8_t m_Data[8];
+		uint8_t m_Data[16];
 	};
 
 	using ScriptFieldMap = std::unordered_map<std::string, ScriptFieldInstance>;
@@ -139,4 +139,66 @@ namespace MoonEngine
 
 		friend class ScriptClass;
 	};
+
+	inline const char* ScriptFieldTypeToString(ScriptFieldType fieldType)
+	{
+		switch (fieldType)
+		{
+			case MoonEngine::ScriptFieldType::None: return "None";
+			case MoonEngine::ScriptFieldType::Bool: return "Bool";
+			case MoonEngine::ScriptFieldType::Char: return "Char";
+			case MoonEngine::ScriptFieldType::Float: return "Float";
+			case MoonEngine::ScriptFieldType::Double: return "Double";
+
+			case MoonEngine::ScriptFieldType::Byte: return "Byte";
+			case MoonEngine::ScriptFieldType::Short: return "Short";
+			case MoonEngine::ScriptFieldType::Int: return "Int";
+			case MoonEngine::ScriptFieldType::Long: return "Long";
+
+			case MoonEngine::ScriptFieldType::UByte: return "UByte";
+			case MoonEngine::ScriptFieldType::UShort: return "UShort";
+			case MoonEngine::ScriptFieldType::UInt: return "UInt";
+			case MoonEngine::ScriptFieldType::ULong: return "ULong";
+
+			case MoonEngine::ScriptFieldType::Vector2: return "Vector2";
+			case MoonEngine::ScriptFieldType::Vector3: return "Vector3";
+			case MoonEngine::ScriptFieldType::Vector4: return "Vector4";
+
+			case MoonEngine::ScriptFieldType::Entity: return "Entity";
+			case MoonEngine::ScriptFieldType::TransformComponent: return "TransformComponent";
+			case MoonEngine::ScriptFieldType::PhysicsBodyComponent: return "PhysicsBodyComponent";
+		}
+		ME_ASSERT(false, "Unkonw Script Field Type");
+		return "None";
+	}
+
+	inline ScriptFieldType ScriptFieldTypeFromString(const std::string& fieldType)
+	{
+		if (fieldType == "None") return ScriptFieldType::None;
+		if (fieldType == "Bool") return ScriptFieldType::Bool;
+		if (fieldType == "Char") return ScriptFieldType::Char;
+		if (fieldType == "Float") return ScriptFieldType::Float;
+		if (fieldType == "Double") return ScriptFieldType::Double;
+
+		if (fieldType == "Byte") return ScriptFieldType::Byte;
+		if (fieldType == "Short") return ScriptFieldType::Short;
+		if (fieldType == "Int") return ScriptFieldType::Int;
+		if (fieldType == "Long") return ScriptFieldType::Long;
+
+		if (fieldType == "UByte") return ScriptFieldType::UByte;
+		if (fieldType == "UShort") return ScriptFieldType::UShort;
+		if (fieldType == "UInt") return ScriptFieldType::UInt;
+		if (fieldType == "ULong") return ScriptFieldType::ULong;
+
+		if (fieldType == "Vector2") return ScriptFieldType::Vector2;
+		if (fieldType == "Vector3") return ScriptFieldType::Vector3;
+		if (fieldType == "Vector4") return ScriptFieldType::Vector4;
+
+		if (fieldType == "Entity") return ScriptFieldType::Entity;
+		if (fieldType == "TransformComponent") return ScriptFieldType::TransformComponent;
+		if (fieldType == "PhysicsBodyComponent") return ScriptFieldType::PhysicsBodyComponent;
+
+		ME_ASSERT(false, "Unkonw Script Field Type");
+		return ScriptFieldType::None;
+	}
 }

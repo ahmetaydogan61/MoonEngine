@@ -119,36 +119,6 @@ namespace MoonEngine
 		return it->second;
 	}
 
-	const char* ScriptFieldTypeToString(ScriptFieldType fieldType)
-	{
-		switch (fieldType)
-		{
-			case MoonEngine::ScriptFieldType::Bool: return "Bool";
-			case MoonEngine::ScriptFieldType::Char: return "Char";
-			case MoonEngine::ScriptFieldType::Float: return "Float";
-			case MoonEngine::ScriptFieldType::Double: return "Double";
-
-			case MoonEngine::ScriptFieldType::Byte: return "Byte";
-			case MoonEngine::ScriptFieldType::Short: return "Short";
-			case MoonEngine::ScriptFieldType::Int: return "Int";
-			case MoonEngine::ScriptFieldType::Long: return "Long";
-
-			case MoonEngine::ScriptFieldType::UByte: return "UByte";
-			case MoonEngine::ScriptFieldType::UShort: return "UShort";
-			case MoonEngine::ScriptFieldType::UInt: return "UInt";
-			case MoonEngine::ScriptFieldType::ULong: return "ULong";
-
-			case MoonEngine::ScriptFieldType::Vector2: return "Vector2";
-			case MoonEngine::ScriptFieldType::Vector3: return "Vector3";
-			case MoonEngine::ScriptFieldType::Vector4: return "Vector4";
-
-			case MoonEngine::ScriptFieldType::Entity: return "Entity";
-			case MoonEngine::ScriptFieldType::TransformComponent: return "TransformComponent";
-			case MoonEngine::ScriptFieldType::PhysicsBodyComponent: return "PhysicsBodyComponent";
-		}
-		return "Invalid";
-	}
-
 	struct ScriptEngineData
 	{
 		MonoDomain* RootDomain = nullptr;
@@ -315,11 +285,13 @@ namespace MoonEngine
 			Shared<ScriptInstance> instance = MakeShared<ScriptInstance>(s_Data->EntityClasses[scriptComponent.ClassName], entity);
 			s_Data->EntityInstances[uuid] = instance;
 
-			ME_ASSERT(s_Data->EntityScriptFields.contains(uuid), "Entity does not contain script field!");
-			const ScriptFieldMap& fieldMap = s_Data->EntityScriptFields.at(uuid);
+			if (s_Data->EntityScriptFields.find(uuid) != s_Data->EntityScriptFields.end())
+			{
+				const ScriptFieldMap& fieldMap = s_Data->EntityScriptFields.at(uuid);
 
-			for (const auto& [name, fieldInstance] : fieldMap)
-				instance->SetFieldValue(name, fieldInstance.GetData());
+				for (const auto& [name, fieldInstance] : fieldMap)
+					instance->SetFieldValue(name, fieldInstance.GetData());
+			}
 
 			instance->InvokeAwake();
 		}

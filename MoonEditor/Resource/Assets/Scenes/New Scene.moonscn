@@ -1,0 +1,17 @@
+Scene: New Scene
+Entities:
+  - Entity: a05b94d0-813e-44da-936c-c089ade04207
+    struct MoonEngine::IdentityComponent:
+      Name: Entity
+    struct MoonEngine::TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    struct MoonEngine::ScriptComponent:
+      ClassName: Game.Camera
+    struct MoonEngine::ScriptComponent:
+      ClassName: Game.Camera
+      Fields:
+        - Name: Speed
+          Type: Float
+          Value: 5
