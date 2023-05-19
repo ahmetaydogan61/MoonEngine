@@ -59,7 +59,7 @@ namespace MoonEngine
 		}
 
 
-		const std::string GetUUID() { return GetComponent<UUIDComponent>().ID.str(); }
+		const UUID GetUUID() { return GetComponent<UUIDComponent>().ID; }
 		const std::string Name() { return GetComponent<IdentityComponent>().Name; }
 
 	private:

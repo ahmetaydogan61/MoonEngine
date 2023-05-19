@@ -12,6 +12,7 @@ extern "C"
 
 namespace MoonEngine
 {
+	class UUID;
 	class Entity;
 	class Scene;
 	struct ScriptComponent;
@@ -125,7 +126,7 @@ namespace MoonEngine
 		static std::unordered_map<std::string, Shared<ScriptClass>> GetEntityClasses();
 		static Shared<ScriptClass> GetEntityClass(const std::string& name);
 		static ScriptFieldMap& GetScriptFieldMap(Entity entity);
-		static Shared<ScriptInstance> GetEntityScriptInstance(const std::string& entityId);
+		static Shared<ScriptInstance> GetEntityScriptInstance(UUID entityId);
 
 		static MonoImage* GetScripterImage();
 		static Scene* GetRuntimeScene();

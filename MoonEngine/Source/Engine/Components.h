@@ -2,22 +2,18 @@
 #include "Engine/Systems/ParticleSystem.h"
 #include "Physics/Physics.h"
 
+#include "Engine/UUID.h"
+
 #include "Renderer/Camera.h"
 #include "Renderer/Texture.h"
 #include "Renderer/TextureSheet.h"
-
-#include <uuid/uuid_v4.h>
 
 namespace MoonEngine
 {
 	struct UUIDComponent
 	{
-		UUIDv4::UUID ID;
-		UUIDComponent()
-		{
-			UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-			ID = uuidGenerator.getUUID();
-		}
+		UUID ID;
+		UUIDComponent() = default;
 		UUIDComponent(const UUIDComponent&) = default;
 	};
 

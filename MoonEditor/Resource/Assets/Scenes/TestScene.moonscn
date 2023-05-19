@@ -1,13 +1,13 @@
 Scene: TestScene
 Entities:
-  - Entity: a3726b8a-ba45-4596-8aaa-895053e202d3
-    struct MoonEngine::IdentityComponent:
+  - Entity: a3726b8a-ba45-4596
+    IdentityComponent:
       Name: Player
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [2.23556685, 3.55171156, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::SpriteComponent:
+    SpriteComponent:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\spritesheet.png
@@ -15,13 +15,13 @@ Entities:
       SpriteCoords: [0, 0]
       SpriteSize: [128, 128]
       HasSpriteSheet: true
-    struct MoonEngine::ScriptComponent:
+    ScriptComponent:
       ClassName: Game.Player
       Fields:
         - Name: Speed
           Type: Float
           Value: 2750
-    struct MoonEngine::PhysicsBodyComponent:
+    PhysicsBodyComponent:
       Type: Dynamic
       FreezeRotation: true
       ContinuousDetection: false
@@ -35,7 +35,7 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-    struct MoonEngine::ParticleComponent:
+    ParticleComponent:
       EmitterType: 1
       PlayOnAwake: true
       Looping: true
@@ -76,14 +76,14 @@ Entities:
       IsColorEndConstant: true
       ColorEnd: [0.263610303, 0.263610303, 0.263610303, 1]
       ColorEndRandom: [1, 1, 1, 1]
-  - Entity: b6b1529b-9d84-41ea-9f4e-be3405d97395
-    struct MoonEngine::IdentityComponent:
+  - Entity: b6b1529b-9d84-41ea
+    IdentityComponent:
       Name: Static Square
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, -1.34306192, 0]
       Rotation: [0, 0, 0]
       Scale: [10, 1, 1]
-    struct MoonEngine::SpriteComponent:
+    SpriteComponent:
       Color: [1, 1, 1, 1]
       Tiling: [10, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
@@ -91,7 +91,7 @@ Entities:
       SpriteCoords: [0, 0]
       SpriteSize: [0, 0]
       HasSpriteSheet: false
-    struct MoonEngine::PhysicsBodyComponent:
+    PhysicsBodyComponent:
       Type: Static
       FreezeRotation: false
       ContinuousDetection: false
@@ -105,17 +105,17 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 5d9dd7e1-1bf3-480f-a68d-c55d9326690c
-    struct MoonEngine::IdentityComponent:
+  - Entity: 5d9dd7e1-1bf3-480f
+    IdentityComponent:
       Name: Camera
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::CameraComponent:
+    CameraComponent:
       IsMain: true
       Size: 8.39999962
-    struct MoonEngine::ScriptComponent:
+    ScriptComponent:
       ClassName: Game.Camera
       Fields:
         - Name: Speed

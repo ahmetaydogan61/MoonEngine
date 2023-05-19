@@ -140,7 +140,21 @@ namespace MoonEngine
 		entt::entity entt = m_Registry.create();
 		Entity entity = { entt, this };
 
-		const std::string& uuid = entity.AddComponent<UUIDComponent>().ID.str();
+		UUID uuid = entity.AddComponent<UUIDComponent>().ID;
+		m_UUIDRegistry[uuid] = entt;
+
+		entity.AddComponent<IdentityComponent>();
+		entity.AddComponent<TransformComponent>();
+		return entity;
+	}
+
+
+	Entity Scene::CreateEntity(UUID uuid)
+	{
+		entt::entity entt = m_Registry.create();
+		Entity entity = { entt, this };
+
+		entity.AddComponent<UUIDComponent>().ID = uuid;
 		m_UUIDRegistry[uuid] = entt;
 
 		entity.AddComponent<IdentityComponent>();
@@ -153,7 +167,7 @@ namespace MoonEngine
 		entt::entity entt = m_Registry.create();
 		Entity e = { entt, this };
 
-		const std::string& uuid = e.AddComponent<UUIDComponent>().ID.str();
+		UUID uuid = e.AddComponent<UUIDComponent>().ID;
 		m_UUIDRegistry[uuid] = entt;
 
 		CopyIfExists<IdentityComponent>(e, entity);
@@ -203,7 +217,7 @@ namespace MoonEngine
 		return tempScene;
 	}
 
-	Entity Scene::FindEntityWithUUID(const std::string& uuid)
+	Entity Scene::FindEntityWithUUID(UUID uuid)
 	{
 		if (m_UUIDRegistry.find(uuid) != m_UUIDRegistry.end())
 			return { m_UUIDRegistry.at(uuid), this };

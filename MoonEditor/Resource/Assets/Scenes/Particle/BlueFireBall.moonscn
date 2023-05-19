@@ -1,13 +1,13 @@
 Scene: BlueFireBall
 Entities:
-  - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
-    struct MoonEngine::IdentityComponent:
+  - Entity: 404870a1-5cd9-448b
+    IdentityComponent:
       Name: BlueFireBall
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, -0.343469918, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::ParticleComponent:
+    ParticleComponent:
       SortMode: 1
       EmitterType: 1
       Looping: true

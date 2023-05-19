@@ -1,13 +1,13 @@
 Scene: Fire
 Entities:
-  - Entity: 12c46f49-59d1-4d6f-a4a6-46fd555419dd
-    struct MoonEngine::IdentityComponent:
+  - Entity: 12c46f49-59d1-4d6f
+    IdentityComponent:
       Name: SmokeParticle
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, 1.08029056, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::ParticleComponent:
+    ParticleComponent:
       SortMode: 0
       EmitterType: 1
       PlayOnAwake: true
@@ -47,26 +47,26 @@ Entities:
       IsColorEndConstant: false
       ColorEnd: [1, 1, 1, 0.392156869]
       ColorEndRandom: [0.733333349, 0.733333349, 0.733333349, 0.392156869]
-  - Entity: 266c382a-d508-4d0b-b778-c22e29165306
-    struct MoonEngine::IdentityComponent:
+  - Entity: 266c382a-d508-4d0b
+    IdentityComponent:
       Name: Square
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1.25, 1.25, 1]
-    struct MoonEngine::SpriteComponent:
+    SpriteComponent:
       Color: [1, 1, 1, 1]
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\LearnOpenGL\container.jpg
       Layer: 1
-  - Entity: 404870a1-5cd9-448b-80b5-2743d21602e6
-    struct MoonEngine::IdentityComponent:
+  - Entity: 404870a1-5cd9-448b
+    IdentityComponent:
       Name: FireParticle
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [-0.0217508078, 0.616273344, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::ParticleComponent:
+    ParticleComponent:
       SortMode: 1
       EmitterType: 1
       PlayOnAwake: true
@@ -106,13 +106,13 @@ Entities:
       IsColorEndConstant: false
       ColorEnd: [1, 0.392156869, 0, 1]
       ColorEndRandom: [1, 0.274509817, 0, 1]
-  - Entity: 1e8bb1e0-0729-4146-bfe5-4c616259e53a
-    struct MoonEngine::IdentityComponent:
+  - Entity: 1e8bb1e0-0729-4146
+    IdentityComponent:
       Name: Camera
-    struct MoonEngine::TransformComponent:
+    TransformComponent:
       Position: [0, 1.50260997, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    struct MoonEngine::CameraComponent:
+    CameraComponent:
       IsMain: true
       Size: 3.5999999

@@ -133,9 +133,9 @@ namespace MoonEngine
 		ScriptClass EntityClass;
 
 		std::unordered_map<std::string, Shared<ScriptClass>> EntityClasses;
-		std::unordered_map<std::string, Shared<ScriptInstance>> EntityInstances;
+		std::unordered_map<UUID, Shared<ScriptInstance>> EntityInstances;
 
-		std::unordered_map<std::string, ScriptFieldMap> EntityScriptFields;
+		std::unordered_map<UUID, ScriptFieldMap> EntityScriptFields;
 
 		Scene* RuntimeScene;
 	};
@@ -299,7 +299,7 @@ namespace MoonEngine
 
 	void ScriptEngine::UpdateEntity(Entity entity, ScriptComponent& scriptComponent, float dt)
 	{
-		const std::string& uuid = entity.GetUUID();
+		UUID uuid = entity.GetUUID();
 
 		ME_ASSERT((s_Data->EntityInstances.find(uuid) != s_Data->EntityInstances.end()), "Calling an entity that s no Instance!");
 
@@ -324,11 +324,11 @@ namespace MoonEngine
 	{
 		ME_ASSERT(e, "Entity is null!");
 
-		const std::string& uuid = e.GetUUID();
+		UUID uuid = e.GetUUID();
 		return s_Data->EntityScriptFields[uuid];
 	}
 
-	Shared<ScriptInstance> ScriptEngine::GetEntityScriptInstance(const std::string& entityId)
+	Shared<ScriptInstance> ScriptEngine::GetEntityScriptInstance(UUID entityId)
 	{
 		auto it = s_Data->EntityInstances.find(entityId);
 		if (it == s_Data->EntityInstances.end())

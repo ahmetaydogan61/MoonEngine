@@ -3,6 +3,7 @@
 
 #include "Engine/Components.h"
 #include "Engine/Entity.h"
+#include "Engine/UUID.h"
 #include "Engine/Scene.h"
 
 #include "Scripting/ScriptEngine.h"
@@ -88,19 +89,18 @@ namespace YAML
 	};
 
 	template<>
-	struct convert<MoonEngine::Entity>
+	struct convert<MoonEngine::UUID>
 	{
-		static Node encode(MoonEngine::Entity& ent)
+		static Node encode(MoonEngine::UUID& uuid)
 		{
 			Node node;
-			node.push_back(ent.GetUUID());
+			node.push_back((uint64_t)uuid);
 			return node;
 		}
 
-		static bool decode(const Node& node, MoonEngine::Entity& ent)
+		static bool decode(const Node& node, MoonEngine::UUID& uuid)
 		{
-			const auto& val = node[0].as<std::string>();
-			ent.GetComponent<MoonEngine::UUIDComponent>().ID.fromStr(val.c_str());
+			uuid = node.as<uint64_t>();
 			return true;
 		}
 	};
@@ -325,13 +325,21 @@ namespace MoonEngine
 	};
 
 	template<typename T>
+	std::string GetTypeName()
+	{
+		std::string typeName = typeid(T).name();
+		size_t pos = typeName.find_last_of(":");
+		return typeName.substr(pos + 1);
+	}
+
+	template<typename T>
 	void SerializeIfExists(YAML::Emitter& out, Entity& entity)
 	{
 		if (entity.HasComponent<T>())
 		{
 			YAMLSerializer parser(out);
 			T& c = entity.GetComponent<T>();
-			parser.BeginParse(typeid(T).name());
+			parser.BeginParse(GetTypeName<T>());
 			parser.Serialize(c);
 			parser.EndParse();
 		}
@@ -341,7 +349,7 @@ namespace MoonEngine
 	{
 		out << YAML::BeginMap;
 		const auto& uuid = entity.GetComponent<UUIDComponent>();
-		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.str();
+		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.ToString();
 
 		SerializeIfExists<IdentityComponent>(out, entity);
 		SerializeIfExists<TransformComponent>(out, entity);
@@ -352,7 +360,7 @@ namespace MoonEngine
 		{
 			YAMLSerializer parser(out);
 			ScriptComponent& c = entity.GetComponent<ScriptComponent>();
-			parser.BeginParse(typeid(ScriptComponent).name());
+			parser.BeginParse(GetTypeName<ScriptComponent>());
 			parser.Serialize(c);
 
 			Shared<ScriptClass> entityClass = ScriptEngine::GetEntityClass(c.ClassName);
@@ -397,7 +405,7 @@ namespace MoonEngine
 						WRITE_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
 						WRITE_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
 
-						WRITE_SCRIPT_FIELD_TYPE(Entity, int64_t);
+						WRITE_SCRIPT_FIELD_TYPE(Entity, UUID);
 					}
 					out << YAML::EndMap;
 				}
@@ -412,7 +420,7 @@ namespace MoonEngine
 		{
 			YAMLSerializer parser(out);
 			ParticleComponent& c = entity.GetComponent<ParticleComponent>();
-			parser.BeginParse(typeid(ParticleComponent).name());
+			parser.BeginParse(GetTypeName<ParticleComponent>());
 			parser.Serialize(c.ParticleSystem);
 			parser.Serialize(c.Particle);
 			parser.EndParse();
@@ -449,22 +457,13 @@ namespace MoonEngine
 	template<typename T>
 	T* GetIfExists(YAML::Node& node, Entity& entity)
 	{
-		auto componentNode = node[typeid(T).name()];
+		auto componentNode = node[GetTypeName<T>()];
 		if (componentNode)
 		{
 			YAMLDeserializer deserializer(componentNode);
-			if (entity.HasComponent<T>())
-			{
-				T& component = entity.GetComponent<T>();
-				deserializer.Deserialize(component);
-				return &component;
-			}
-			else
-			{
-				T& component = entity.AddComponent<T>();
-				deserializer.Deserialize(component);
-				return &component;
-			}
+			T& component = entity.HasComponent<T>() ? entity.GetComponent<T>() : entity.AddComponent<T>();
+			deserializer.Deserialize(component);
+			return &component;
 		}
 		return nullptr;
 	}
@@ -492,10 +491,10 @@ namespace MoonEngine
 		{
 			for (auto entity : entities)
 			{
-				Entity deserializedEntity = scene->CreateEntity();
+				const auto& uuidStr = entity["Entity"].as<std::string>();
+				UUID uuid(uuidStr);
 
-				auto& uuidComponent = deserializedEntity.GetComponent<UUIDComponent>();
-				uuidComponent.ID.fromStr(entity["Entity"].as<std::string>().c_str());
+				Entity deserializedEntity = scene->CreateEntity(uuid);
 
 				GetIfExists<IdentityComponent>(entity, deserializedEntity);
 				GetIfExists<TransformComponent>(entity, deserializedEntity);
@@ -508,7 +507,7 @@ namespace MoonEngine
 				GetIfExists<ScriptComponent>(entity, deserializedEntity);
 				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
 
-				auto scriptNode = entity[typeid(ScriptComponent).name()];
+				auto scriptNode = entity[GetTypeName<ScriptComponent>()];
 				if (scriptNode)
 				{
 					YAMLDeserializer deserializer(scriptNode);
@@ -563,13 +562,13 @@ namespace MoonEngine
 								READ_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
 								READ_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
 
-								READ_SCRIPT_FIELD_TYPE(Entity, Entity);
+								READ_SCRIPT_FIELD_TYPE(Entity, UUID);
 							}
 						}
 					}
 				}
 
-				auto particleNode = entity[typeid(ParticleComponent).name()];
+				auto particleNode = entity[GetTypeName<ParticleComponent>()];
 				if (particleNode)
 				{
 					YAMLDeserializer deserializer(particleNode);

@@ -1,9 +1,9 @@
 #pragma once
+#include "Physics/PhysicsWorld.h"
+
 #include "Renderer/Renderer.h"
 
 #include <entt.hpp>
-
-#include "Physics/PhysicsWorld.h"
 
 namespace MoonEngine
 {
@@ -19,6 +19,7 @@ namespace MoonEngine
 		std::string SceneName = "New Scene";
 
 		Entity CreateEntity();
+		Entity CreateEntity(UUID uuid);
 		void DestroyEntity(Entity e);
 		Entity DuplicateEntity(Entity& entity);
 		  
@@ -33,10 +34,10 @@ namespace MoonEngine
 
 		static Shared<Scene> CopyScene(Shared<Scene> scene);
 
-		Entity FindEntityWithUUID(const std::string& uuid);
+		Entity FindEntityWithUUID(UUID uuid);
 	private:
 		entt::registry m_Registry;
-		std::unordered_map<std::string, entt::entity> m_UUIDRegistry;
+		std::unordered_map<UUID, entt::entity> m_UUIDRegistry;
 
 		PhysicsWorld m_PhysicsWorld;
 		void OnCollisionBegin(void*, void*);

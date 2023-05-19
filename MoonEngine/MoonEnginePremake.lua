@@ -33,7 +33,6 @@ project "MoonEngine"
         includeEntt,
         includeYaml,
         includeIconFont,
-        includeUuidv4,
         includeImGuizmo,
         includeBox2D,
         includeMono
