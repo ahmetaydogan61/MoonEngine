@@ -16,12 +16,17 @@ namespace MoonEngine
 
 #define ME_ADD_INTERNAL_CALL(name) mono_add_internal_call("MoonEngine.InternalCalls::" #name, name)
 
-	static bool Entity_HasComponent(int entityId, MonoReflectionType* componentType)
+	static MonoObject* GetScriptInstance(UUID entityId)
+	{
+		return ScriptEngine::GetMonoInstance(entityId);
+	}
+
+	static bool Entity_HasComponent(UUID entityId, MonoReflectionType* componentType)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
 		ME_ASSERT(scene, "Scene Not Found!");
 
-		auto entity = Entity{ (entt::entity)entityId, scene };
+		auto entity = scene->FindEntityWithUUID(entityId);
 		ME_ASSERT(entity, "Entity Does not Exist!");
 
 		MonoType* monoType = mono_reflection_type_get_type(componentType);
@@ -30,24 +35,39 @@ namespace MoonEngine
 		return s_EntityHasComponentFuncs.at(monoType)(entity);
 	}
 
-	static void Transform_SetPosition(int entityId, glm::vec3* refPosition)
+	static uint64_t Entity_FindByName(MonoString* name)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
-		auto entity = Entity{ (entt::entity)entityId, scene };
+		ME_ASSERT(scene, "Scene Not Found!");
+
+		char* nameStr = mono_string_to_utf8(name);
+		Entity entity = scene->FindEntityWithName(nameStr);
+		mono_free(nameStr);
+
+		if (!entity)
+			return 0;
+
+		return entity.GetUUID();
+	}
+
+	static void Transform_SetPosition(UUID entityId, glm::vec3* refPosition)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		auto entity = scene->FindEntityWithUUID(entityId);
 		entity.GetComponent<TransformComponent>().Position = *refPosition;
 	}
 
-	static void Transform_GetPosition(int entityId, glm::vec3* outPosition)
+	static void Transform_GetPosition(UUID entityId, glm::vec3* outPosition)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
-		auto entity = Entity{ (entt::entity)entityId, scene };
+		auto entity = scene->FindEntityWithUUID(entityId);
 		*outPosition = entity.GetComponent<TransformComponent>().Position;
 	}
 
-	static void PhysicsBody_AddForce(int entityId, glm::vec2* force, glm::vec2* position)
+	static void PhysicsBody_AddForce(UUID entityId, glm::vec2* force, glm::vec2* position)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
-		auto entity = Entity{ (entt::entity)entityId, scene };
+		auto entity = scene->FindEntityWithUUID(entityId);
 
 		entity.GetComponent<PhysicsBodyComponent>().AddForce(*force, *position);
 	}
@@ -92,7 +112,11 @@ namespace MoonEngine
 
 	void ScriptDepot::InitializeScripts()
 	{
+		ME_ADD_INTERNAL_CALL(GetScriptInstance);
+
 		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
+		ME_ADD_INTERNAL_CALL(Entity_FindByName);
+
 		ME_ADD_INTERNAL_CALL(Transform_SetPosition);
 		ME_ADD_INTERNAL_CALL(Transform_GetPosition);
 

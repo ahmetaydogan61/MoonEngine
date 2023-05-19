@@ -137,17 +137,8 @@ namespace MoonEngine
 
 	Entity Scene::CreateEntity()
 	{
-		entt::entity entt = m_Registry.create();
-		Entity entity = { entt, this };
-
-		UUID uuid = entity.AddComponent<UUIDComponent>().ID;
-		m_UUIDRegistry[uuid] = entt;
-
-		entity.AddComponent<IdentityComponent>();
-		entity.AddComponent<TransformComponent>();
-		return entity;
+		return CreateEntity(UUID());
 	}
-
 
 	Entity Scene::CreateEntity(UUID uuid)
 	{
@@ -224,6 +215,14 @@ namespace MoonEngine
 
 		ME_LOG("Entity with this UUID not found!");
 		return {};
+	}
+
+	Entity Scene::FindEntityWithName(std::string_view name)
+	{
+		auto view = m_Registry.view<IdentityComponent>();
+		for (auto [e, idendity] : view.each())
+			if (name == idendity.Name)
+				return Entity{ e, this };
 	}
 
 	void Scene::OnCollisionBegin(void* collisionA, void* collisionB)

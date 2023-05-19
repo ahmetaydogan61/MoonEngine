@@ -296,19 +296,18 @@ namespace MoonEngine
 		{
 			BeginDrawProp("##Script");
 
-			std::string& name = component.ClassName;
+			component.HasValidClass = ScriptEngine::CheckEntityClass(component.ClassName);
+
 			bool hasNoClass = !component.HasValidClass;
 
 			if (hasNoClass)
 				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.25f, 0.15f, 1.0f });
 
-			const auto& entityClasses = ScriptEngine::GetEntityClasses();
-			component.HasValidClass = ScriptEngine::CheckEntityClass(component.ClassName);
-
 			RenderProp("Class", [&]
 			{
-				ImGui::InputText("##class", &name);
-
+				if (ImGui::InputText("##class", &component.ClassName))
+				{
+				}
 				bool isRuntimeRunning = EditorLayer::State() != EditorLayer::EditorState::Edit;
 				if (isRuntimeRunning)
 				{

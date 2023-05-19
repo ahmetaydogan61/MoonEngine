@@ -8,15 +8,18 @@ namespace Game
         private PhysicsBodyComponent m_PhysicsBody;
 
         public float Speed = 2500.0f;
-        public Entity MyEntity;
+        public Camera m_Camera;
 
         void Awake()
         {
             m_PhysicsBody = GetComponent<PhysicsBodyComponent>();
+            m_Camera = FindEntityByName("Camera").As<Camera>();
         }
 
         void Update(float dt)
         {
+            m_Camera.Speed = Speed;
+
             float speed = Speed;
             Vector2 velocity = Vector2.Zero;
 

@@ -24,7 +24,7 @@ namespace MoonEngine
 		Byte, Char, Short, Int, Long,
 		UByte, UShort, UInt, ULong,
 		Vector2, Vector3, Vector4,
-		Entity, TransformComponent, PhysicsBodyComponent
+		Entity
 	};
 
 	struct ScriptField
@@ -98,6 +98,8 @@ namespace MoonEngine
 
 		bool GetFieldValue(const std::string& name, void* valueBuffer);
 		bool SetFieldValue(const std::string& name, const void* valueBuffer);
+
+		MonoObject* GetMonoObject() { return m_Instance; }
 	private:
 		Shared<ScriptClass> m_ScriptClass;
 
@@ -127,6 +129,8 @@ namespace MoonEngine
 		static Shared<ScriptClass> GetEntityClass(const std::string& name);
 		static ScriptFieldMap& GetScriptFieldMap(Entity entity);
 		static Shared<ScriptInstance> GetEntityScriptInstance(UUID entityId);
+
+		static MonoObject* GetMonoInstance(UUID uuid);
 
 		static MonoImage* GetScripterImage();
 		static Scene* GetRuntimeScene();
@@ -166,8 +170,6 @@ namespace MoonEngine
 			case MoonEngine::ScriptFieldType::Vector4: return "Vector4";
 
 			case MoonEngine::ScriptFieldType::Entity: return "Entity";
-			case MoonEngine::ScriptFieldType::TransformComponent: return "TransformComponent";
-			case MoonEngine::ScriptFieldType::PhysicsBodyComponent: return "PhysicsBodyComponent";
 		}
 		ME_ASSERT(false, "Unkonw Script Field Type");
 		return "None";
@@ -196,8 +198,6 @@ namespace MoonEngine
 		if (fieldType == "Vector4") return ScriptFieldType::Vector4;
 
 		if (fieldType == "Entity") return ScriptFieldType::Entity;
-		if (fieldType == "TransformComponent") return ScriptFieldType::TransformComponent;
-		if (fieldType == "PhysicsBodyComponent") return ScriptFieldType::PhysicsBodyComponent;
 
 		ME_ASSERT(false, "Unkonw Script Field Type");
 		return ScriptFieldType::None;

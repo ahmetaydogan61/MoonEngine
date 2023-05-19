@@ -6,12 +6,12 @@ namespace MoonEngine
     {
         protected Entity() { }
 
-        internal Entity(int id)
+        internal Entity(ulong id)
         {
             ID = id;
         }
 
-        public readonly int ID;
+        public readonly ulong ID;
 
         public Vector3 Position
         {
@@ -39,6 +39,21 @@ namespace MoonEngine
 
             T component = new T() { Entity = this };
             return component;
+        }
+
+        public Entity FindEntityByName(string name)
+        {
+            ulong entityId = InternalCalls.Entity_FindByName(name);
+            if(entityId == 0)
+                return null;
+
+            return new Entity(entityId);
+        }
+
+        public T As<T>() where T : Entity, new()
+        {
+            object instance = InternalCalls.GetScriptInstance(ID);
+            return instance as T;
         }
     }
 }

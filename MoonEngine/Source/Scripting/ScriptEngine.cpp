@@ -101,8 +101,6 @@ namespace MoonEngine
 		{ "MoonEngine.Vector4", ScriptFieldType::Vector4 },
 
 		{ "MoonEngine.Entity", ScriptFieldType::Entity},
-		{ "MoonEngine.TransformComponent", ScriptFieldType::TransformComponent },
-		{ "MoonEngine.PhysicsBodyComponent", ScriptFieldType::PhysicsBodyComponent },
 	};
 
 	ScriptFieldType MonoTypeToScriptFieldType(MonoType* type)
@@ -337,6 +335,12 @@ namespace MoonEngine
 		return it->second;
 	}
 
+	MonoObject* ScriptEngine::GetMonoInstance(UUID uuid)
+	{
+		ME_ASSERT((s_Data->EntityInstances.find(uuid) != s_Data->EntityInstances.end()), "Mono Object not found!");
+		return s_Data->EntityInstances.at(uuid)->GetMonoObject();
+	}
+
 	MonoImage* ScriptEngine::GetScripterImage()
 	{
 		return s_Data->ScripterImage;
@@ -385,7 +389,7 @@ namespace MoonEngine
 		m_UpdateMethod = scriptClass->GetMethod("Update", 1);
 
 		//Constructor Call
-		int entityID = (int)entity.m_ID;
+		UUID entityID = entity.GetUUID();
 		void* param = &entityID;
 		m_ScriptClass->InvokeMethod(m_Instance, m_Constructor, &param);
 	}

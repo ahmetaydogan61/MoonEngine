@@ -35,6 +35,7 @@ namespace MoonEngine
 		static Shared<Scene> CopyScene(Shared<Scene> scene);
 
 		Entity FindEntityWithUUID(UUID uuid);
+		Entity FindEntityWithName(std::string_view name);
 	private:
 		entt::registry m_Registry;
 		std::unordered_map<UUID, entt::entity> m_UUIDRegistry;
