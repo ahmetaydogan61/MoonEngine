@@ -16,53 +16,43 @@ namespace MoonEngine
 
 #define ME_ADD_INTERNAL_CALL(name) mono_add_internal_call("MoonEngine.InternalCalls::" #name, name)
 
-	static MonoObject* GetScriptInstance(UUID entityId)
-	{
-		return ScriptEngine::GetMonoInstance(entityId);
-	}
-
-	static bool Entity_HasComponent(UUID entityId, MonoReflectionType* componentType)
+	Entity GetEntity(UUID id)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
-		ME_ASSERT(scene, "Scene Not Found!");
+		Entity e = scene->FindEntityWithUUID(id);
+		ME_ASSERT(e, "Entity with given ID not found!");
+		return e;
+	}
 
-		auto entity = scene->FindEntityWithUUID(entityId);
-		ME_ASSERT(entity, "Entity Does not Exist!");
+#pragma region Entity
 
-		MonoType* monoType = mono_reflection_type_get_type(componentType);
+	bool Entity_HasComponent(uint64_t id, MonoReflectionType* type)
+	{
+		auto e = GetEntity(id);
+
+		MonoType* monoType = mono_reflection_type_get_type(type);
 		ME_ASSERT((s_EntityHasComponentFuncs.find(monoType) != s_EntityHasComponentFuncs.end()), "Has not Mono Type!");
-
-		return s_EntityHasComponentFuncs.at(monoType)(entity);
+		
+		return s_EntityHasComponentFuncs.at(monoType)(e);
 	}
 
-	static uint64_t Entity_FindByName(MonoString* name)
+#pragma endregion
+
+#pragma region Transform Component
+
+	void Transform_SetPosition(uint64_t id, glm::vec3* position)
 	{
-		Scene* scene = ScriptEngine::GetRuntimeScene();
-		ME_ASSERT(scene, "Scene Not Found!");
-
-		char* nameStr = mono_string_to_utf8(name);
-		Entity entity = scene->FindEntityWithName(nameStr);
-		mono_free(nameStr);
-
-		if (!entity)
-			return 0;
-
-		return entity.GetUUID();
+		GetEntity(id).GetComponent<TransformComponent>().Position = *position;
 	}
 
-	static void Transform_SetPosition(UUID entityId, glm::vec3* refPosition)
+	void Transform_GetPosition(uint64_t id, glm::vec3* position)
 	{
-		Scene* scene = ScriptEngine::GetRuntimeScene();
-		auto entity = scene->FindEntityWithUUID(entityId);
-		entity.GetComponent<TransformComponent>().Position = *refPosition;
+		*position = GetEntity(id).GetComponent<TransformComponent>().Position;
 	}
 
-	static void Transform_GetPosition(UUID entityId, glm::vec3* outPosition)
-	{
-		Scene* scene = ScriptEngine::GetRuntimeScene();
-		auto entity = scene->FindEntityWithUUID(entityId);
-		*outPosition = entity.GetComponent<TransformComponent>().Position;
-	}
+#pragma endregion
+
+#pragma region Physics
 
 	static void PhysicsBody_AddForce(UUID entityId, glm::vec2* force, glm::vec2* position)
 	{
@@ -72,9 +62,33 @@ namespace MoonEngine
 		entity.GetComponent<PhysicsBodyComponent>().AddForce(*force, *position);
 	}
 
+#pragma endregion
+
+
+#pragma region Input 
+
 	static bool Input_GetKey(Keycode keycode)
 	{
 		return Input::GetKey(keycode);
+	}
+
+#pragma endregion
+
+
+	void ScriptDepot::InitializeScripts()
+	{
+		//Entity
+		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
+
+		//Transform Component
+		ME_ADD_INTERNAL_CALL(Transform_SetPosition);
+		ME_ADD_INTERNAL_CALL(Transform_GetPosition);
+
+		//Physics
+		ME_ADD_INTERNAL_CALL(PhysicsBody_AddForce);
+
+		//Input
+		ME_ADD_INTERNAL_CALL(Input_GetKey);
 	}
 
 	template<typename... T>
@@ -108,20 +122,5 @@ namespace MoonEngine
 	void ScriptDepot::RegisterComponents()
 	{
 		RegisterComponent(AllComponents{});
-	}
-
-	void ScriptDepot::InitializeScripts()
-	{
-		ME_ADD_INTERNAL_CALL(GetScriptInstance);
-
-		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
-		ME_ADD_INTERNAL_CALL(Entity_FindByName);
-
-		ME_ADD_INTERNAL_CALL(Transform_SetPosition);
-		ME_ADD_INTERNAL_CALL(Transform_GetPosition);
-
-		ME_ADD_INTERNAL_CALL(PhysicsBody_AddForce);
-
-		ME_ADD_INTERNAL_CALL(Input_GetKey);
 	}
 }

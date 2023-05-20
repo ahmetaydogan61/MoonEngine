@@ -9,51 +9,31 @@ namespace MoonEngine
         internal Entity(ulong id)
         {
             ID = id;
+            Transform = new TransformComponent() { Entity = this };
         }
 
-        public readonly ulong ID;
+        public ulong ID;
+        private TransformComponent m_Transform;
 
-        public Vector3 Position
+        public TransformComponent Transform
         {
             get
             {
-                InternalCalls.Transform_GetPosition(ID, out Vector3 position);
-                return position;
+                return m_Transform;
             }
-            set
-            {
-                InternalCalls.Transform_SetPosition(ID, ref value);
-            }
-        }
 
-        public bool HasComponent<T>() where T: Component, new()
-        {
-            Type component = typeof(T);
-            return InternalCalls.Entity_HasComponent(ID, component);
+            private set
+            {
+                m_Transform = value;
+            }
         }
 
         public T GetComponent<T>() where T : Component, new()
         {
-            if (!HasComponent<T>())
+            if (!InternalCalls.Entity_HasComponent(ID, typeof(T)))
                 return null;
 
-            T component = new T() { Entity = this };
-            return component;
-        }
-
-        public Entity FindEntityByName(string name)
-        {
-            ulong entityId = InternalCalls.Entity_FindByName(name);
-            if(entityId == 0)
-                return null;
-
-            return new Entity(entityId);
-        }
-
-        public T As<T>() where T : Entity, new()
-        {
-            object instance = InternalCalls.GetScriptInstance(ID);
-            return instance as T;
+            return new T() { Entity = this };
         }
     }
 }

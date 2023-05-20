@@ -48,7 +48,7 @@ namespace MoonEngine
 			for (auto [e, script] : view.each())
 			{
 				Entity entity = { e, this };
-				ScriptEngine::CreateEntity(entity, script);
+				ScriptEngine::AwakeEntity(entity, script.ClassName);
 			}
 
 		}
@@ -85,11 +85,14 @@ namespace MoonEngine
 
 		if (update)
 		{
-			auto view = m_Registry.view<ScriptComponent>();
-			for (auto [e, script] : view.each())
+			//Script Components
 			{
-				Entity entity = { e, this };
-				ScriptEngine::UpdateEntity(entity, script, dt);
+				auto view = m_Registry.view<ScriptComponent>();
+				for (auto [e, script] : view.each())
+				{
+					Entity entity = { e, this };
+					ScriptEngine::UpdateEntity(entity, script.ClassName, dt);
+				}
 			}
 
 			//PhysicsWorld
@@ -106,11 +109,14 @@ namespace MoonEngine
 					m_PhysicsWorld.UpdatePhysicsBodies(Entity{ e, this }, transform, physicsBody);
 			}
 
-			auto particleSystemView = m_Registry.view<const TransformComponent, ParticleComponent>();
-			for (auto [entity, transformComponent, particle] : particleSystemView.each())
+			//Particle System
+			{
+			auto view = m_Registry.view<const TransformComponent, ParticleComponent>();
+			for (auto [entity, transformComponent, particle] : view.each())
 			{
 				particle.ParticleSystem.UpdateEmitter(dt, particle.Particle, transformComponent.Position);
 				particle.ParticleSystem.UpdateParticles(dt);
+			}
 			}
 		}
 	}
@@ -223,6 +229,7 @@ namespace MoonEngine
 		for (auto [e, idendity] : view.each())
 			if (name == idendity.Name)
 				return Entity{ e, this };
+		return {};
 	}
 
 	void Scene::OnCollisionBegin(void* collisionA, void* collisionB)

@@ -14,6 +14,8 @@
 
 namespace MoonEngine
 {
+	Entity draggedEntity;
+
 	void HierarchyView::EntityTreeNode(Entity& entity, int id)
 	{
 		std::string name = entity.GetComponent<IdentityComponent>().Name;
@@ -26,8 +28,23 @@ namespace MoonEngine
 
 		bool opened = ImGui::TreeNodeEx(name.c_str(), flags);
 
-		if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1))
-			editor.SetSelectedEntity(entity);
+		if (ImGui::BeginDragDropSource() && draggedEntity)
+		{
+			uint64_t itemId = draggedEntity.GetUUID();
+			ImGui::SetDragDropPayload("ME_Entity", &itemId, sizeof(uint64_t));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::IsItemClicked(0))
+			draggedEntity = entity;
+
+		if (ImGui::IsMouseReleased(0))
+		{
+			draggedEntity = {};
+			
+			if (ImGui::IsItemHovered())
+				editor.SetSelectedEntity(entity);
+		}
 
 		if (ImGui::BeginPopupContextItem())
 		{

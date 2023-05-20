@@ -121,8 +121,9 @@ namespace MoonEngine
 
 	struct ScriptComponent
 	{
-		std::string ClassName;
+		std::string ClassName = "Game.Player";
 		bool HasValidClass = false;
+		uint64_t EntityHandle;
 
 		REFLECT(("ClassName", ClassName))
 	};

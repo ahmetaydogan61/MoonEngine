@@ -5,14 +5,14 @@ namespace MoonEngine
 {
     internal class InternalCalls
     {
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static object GetScriptInstance(ulong entityId);
+        #region Entity
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(ulong entityId, Type componentType);
-        
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static ulong Entity_FindByName(string name);
+
+        #endregion
+
+        #region Transform
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Transform_SetPosition(ulong entityId, ref Vector3 position);
@@ -20,10 +20,20 @@ namespace MoonEngine
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Transform_GetPosition(ulong entityId, out Vector3 position);
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static bool Input_GetKey(Keycode key);
+        #endregion
+
+        #region Physics
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void PhysicsBody_AddForce(ulong entityId, ref Vector2 force, ref Vector2 position);
+
+        #endregion
+
+        #region Input
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_GetKey(Keycode key);
+        
+        #endregion
     }
 }

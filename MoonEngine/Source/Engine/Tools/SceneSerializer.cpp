@@ -358,61 +358,6 @@ namespace MoonEngine
 
 		if (entity.HasComponent<ScriptComponent>())
 		{
-			YAMLSerializer parser(out);
-			ScriptComponent& c = entity.GetComponent<ScriptComponent>();
-			parser.BeginParse(GetTypeName<ScriptComponent>());
-			parser.Serialize(c);
-
-			Shared<ScriptClass> entityClass = ScriptEngine::GetEntityClass(c.ClassName);
-			const auto& fields = entityClass->GetFields();
-
-			if (fields.size() > 0)
-			{
-				out << YAML::Key << "Fields" << YAML::Value;
-				out << YAML::BeginSeq;
-
-				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
-				for (const auto& [name, field] : fields)
-				{
-					if (entityFields.find(name) == entityFields.end())
-						continue;
-
-					ScriptFieldInstance& scriptField = entityFields.at(name);
-
-					out << YAML::BeginMap;
-					out << YAML::Key << "Name" << YAML::Value << name;
-					out << YAML::Key << "Type" << YAML::Value << ScriptFieldTypeToString(field.Type);
-					out << YAML::Key << "Value" << YAML::Value;
-
-					switch (field.Type)
-					{
-						WRITE_SCRIPT_FIELD_TYPE(Bool, bool);
-						WRITE_SCRIPT_FIELD_TYPE(Char, char);
-						WRITE_SCRIPT_FIELD_TYPE(Float, float);
-						WRITE_SCRIPT_FIELD_TYPE(Double, double);
-
-						WRITE_SCRIPT_FIELD_TYPE(Byte, int8_t);
-						WRITE_SCRIPT_FIELD_TYPE(Short, int16_t);
-						WRITE_SCRIPT_FIELD_TYPE(Int, int32_t);
-						WRITE_SCRIPT_FIELD_TYPE(Long, int64_t);
-
-						WRITE_SCRIPT_FIELD_TYPE(UByte, uint8_t);
-						WRITE_SCRIPT_FIELD_TYPE(UShort, uint16_t);
-						WRITE_SCRIPT_FIELD_TYPE(UInt, uint32_t);
-						WRITE_SCRIPT_FIELD_TYPE(ULong, uint64_t);
-
-						WRITE_SCRIPT_FIELD_TYPE(Vector2, glm::vec2);
-						WRITE_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
-						WRITE_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
-
-						WRITE_SCRIPT_FIELD_TYPE(Entity, UUID);
-					}
-					out << YAML::EndMap;
-				}
-
-				out << YAML::EndSeq;
-			}
-			parser.EndParse();
 		}
 
 		SerializeIfExists<PhysicsBodyComponent>(out, entity);
@@ -510,62 +455,6 @@ namespace MoonEngine
 				auto scriptNode = entity[GetTypeName<ScriptComponent>()];
 				if (scriptNode)
 				{
-					YAMLDeserializer deserializer(scriptNode);
-					ScriptComponent& component = deserializedEntity.HasComponent<ScriptComponent>() ?
-						deserializedEntity.GetComponent<ScriptComponent>() : deserializedEntity.AddComponent<ScriptComponent>();
-
-					deserializer.Deserialize(component);
-
-					auto scriptFields = scriptNode["Fields"];
-					if (scriptFields)
-					{
-						Shared<ScriptClass> entityClass = ScriptEngine::GetEntityClass(component.ClassName);
-						ME_ASSERT(entityClass, "Class Not Found!");
-						const auto& fields = entityClass->GetFields();
-						auto& entityFields = ScriptEngine::GetScriptFieldMap(deserializedEntity);
-
-						for (auto scriptField : scriptFields)
-						{
-							std::string name = scriptField["Name"].as<std::string>();
-							std::string typeName = scriptField["Type"].as<std::string>();
-							ScriptFieldType type = ScriptFieldTypeFromString(typeName);
-
-							ScriptFieldInstance& fieldInstance = entityFields[name];
-
-							bool hasFields = fields.find(name) != fields.end();
-							//TODO: Should be a log message to the editor.
-							ME_ASSERT(hasFields, "Fields Not Found!");
-
-							if (!hasFields)
-								continue;
-
-							fieldInstance.Field = fields.at(name);
-
-							switch (type)
-							{
-								READ_SCRIPT_FIELD_TYPE(Bool, bool);
-								READ_SCRIPT_FIELD_TYPE(Char, char);
-								READ_SCRIPT_FIELD_TYPE(Float, float);
-								READ_SCRIPT_FIELD_TYPE(Double, double);
-
-								READ_SCRIPT_FIELD_TYPE(Byte, int8_t);
-								READ_SCRIPT_FIELD_TYPE(Short, int16_t);
-								READ_SCRIPT_FIELD_TYPE(Int, int32_t);
-								READ_SCRIPT_FIELD_TYPE(Long, int64_t);
-
-								READ_SCRIPT_FIELD_TYPE(UByte, uint8_t);
-								READ_SCRIPT_FIELD_TYPE(UShort, uint16_t);
-								READ_SCRIPT_FIELD_TYPE(UInt, uint32_t);
-								READ_SCRIPT_FIELD_TYPE(ULong, uint64_t);
-
-								READ_SCRIPT_FIELD_TYPE(Vector2, glm::vec2);
-								READ_SCRIPT_FIELD_TYPE(Vector3, glm::vec3);
-								READ_SCRIPT_FIELD_TYPE(Vector4, glm::vec4);
-
-								READ_SCRIPT_FIELD_TYPE(Entity, UUID);
-							}
-						}
-					}
 				}
 
 				auto particleNode = entity[GetTypeName<ParticleComponent>()];

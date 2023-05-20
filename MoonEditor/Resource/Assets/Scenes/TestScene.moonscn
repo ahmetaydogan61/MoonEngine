@@ -12,7 +12,7 @@ Entities:
       Tiling: [1, 1]
       Texture: Resource\Assets\Textures\spritesheet.png
       Layer: 1
-      SpriteCoords: [0, 0]
+      SpriteCoords: [1, 0]
       SpriteSize: [128, 128]
       HasSpriteSheet: true
     ScriptComponent:
@@ -29,8 +29,8 @@ Entities:
       LinearDamping: 0
       AngularDamping: 0.00999999978
       GravityScale: 1
-      Offset: [0, 0]
-      Size: [0.5, 0.5]
+      Offset: [0.0500000007, -0.100000001]
+      Size: [0.300000012, 0.400000006]
       Density: 1
       Friction: 0.5
       Restitution: 0

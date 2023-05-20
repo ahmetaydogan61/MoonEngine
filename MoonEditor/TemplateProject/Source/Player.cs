@@ -5,37 +5,36 @@ namespace Game
 {
     public class Player : Entity
     {
-        private PhysicsBodyComponent m_PhysicsBody;
-
-        public float Speed = 2500.0f;
-        public Camera m_Camera;
+        public PhysicsBodyComponent PhysicsBody;
+        public float Speed = 1500.0f;
 
         void Awake()
         {
-            m_PhysicsBody = GetComponent<PhysicsBodyComponent>();
-            m_Camera = FindEntityByName("Camera").As<Camera>();
+            Console.WriteLine($"Entity Id {ID}");
+
+            PhysicsBody = GetComponent<PhysicsBodyComponent>();
+
+            if (PhysicsBody != null)
+                Console.WriteLine($"PB Found!");
+            else
+                Console.WriteLine($"PB Not Found!");
         }
 
         void Update(float dt)
         {
-            m_Camera.Speed = Speed;
-
-            float speed = Speed;
             Vector2 velocity = Vector2.Zero;
 
-            if (Input.GetKey(Keycode.W))
-                velocity.Y = 1.0f;
-            else if (Input.GetKey(Keycode.S))
-                velocity.Y = -1.0f;
-
             if (Input.GetKey(Keycode.A))
-                velocity.X = -1.0f;
+                velocity.X -= Speed;
             else if (Input.GetKey(Keycode.D))
-                velocity.X = 1.0f;
+                velocity.X += Speed;
 
-            velocity *= speed * dt;
+            if (Input.GetKey(Keycode.W))
+                velocity.Y += Speed;
+            else if (Input.GetKey(Keycode.S))
+                velocity.Y -= Speed;
 
-            m_PhysicsBody.AddForce(velocity);
+            PhysicsBody.AddForce(velocity * dt);
         }
     }
 }
