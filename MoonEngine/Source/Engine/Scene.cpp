@@ -16,8 +16,16 @@
 
 namespace MoonEngine
 {
-	Scene::Scene()
+	static Scene* s_ActiveScene = nullptr;
+
+	void Scene::SetActiveScene(Scene* scene)
 	{
+		s_ActiveScene = scene;
+	}
+
+	const Scene* const Scene::GetActiveScene()
+	{
+		return s_ActiveScene;
 	}
 
 	void Scene::StartRuntime()
@@ -42,15 +50,12 @@ namespace MoonEngine
 
 		//+ScriptComponents
 		{
-			ScriptEngine::StartRuntime(this);
-
 			auto view = m_Registry.view<ScriptComponent>();
 			for (auto [e, script] : view.each())
 			{
 				Entity entity = { e, this };
 				ScriptEngine::AwakeEntity(entity, script.ClassName);
 			}
-
 		}
 		//-ScriptComponents
 	}
@@ -63,7 +68,6 @@ namespace MoonEngine
 		for (auto [entity, transformComponent, particle] : particleSystemView.each())
 			particle.ParticleSystem.Stop();
 
-		ScriptEngine::StopRuntime();
 	}
 
 	void Scene::StartEdit()
@@ -77,6 +81,16 @@ namespace MoonEngine
 	void Scene::UpdateEdit(const Camera* camera)
 	{
 
+	}
+
+	void Scene::CreateSciptInstances()
+	{
+		auto view = m_Registry.view<ScriptComponent>();
+		for (auto [e, script] : view.each())
+		{
+			Entity entity = { e, this };
+			ScriptEngine::CreateEntityInstance(entity, script.ClassName);
+		}
 	}
 
 	void Scene::UpdateRuntime(bool update)
@@ -181,13 +195,13 @@ namespace MoonEngine
 	{
 		m_UUIDRegistry.erase(e.GetUUID());
 
-		RemoveIfExists<UUIDComponent>(e);
+		RemoveIfExists<PhysicsBodyComponent>(e);
+		RemoveIfExists<ParticleComponent>(e);
+		RemoveIfExists<ScriptComponent>(e);
+		RemoveIfExists<SpriteComponent>(e);
 		RemoveIfExists<IdentityComponent>(e);
 		RemoveIfExists<TransformComponent>(e);
-		RemoveIfExists<SpriteComponent>(e);
-		RemoveIfExists<ScriptComponent>(e);
-		RemoveIfExists<ParticleComponent>(e);
-		RemoveIfExists<PhysicsBodyComponent>(e);
+		RemoveIfExists<UUIDComponent>(e);
 
 		m_Registry.destroy(e.m_ID);
 	}
@@ -287,10 +301,13 @@ namespace MoonEngine
 	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) {}
+	void Scene::OnAddComponent(Entity entity, ScriptComponent& component)  {}
 
 	template<>
-	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component) {}
+	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component) 
+	{
+		ScriptEngine::DestroyEntity(entity);
+	}
 
 	template<>
 	void Scene::OnAddComponent(Entity entity, ParticleComponent& component) {}

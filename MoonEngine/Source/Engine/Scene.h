@@ -13,7 +13,7 @@ namespace MoonEngine
 	class Scene
 	{
 	public:
-		Scene();
+		Scene() = default;
 		~Scene() = default;
 
 		std::string SceneName = "New Scene";
@@ -32,10 +32,13 @@ namespace MoonEngine
 		void UpdateRuntime(bool update);
 		void UpdateEdit(const Camera* camera);
 
-		static Shared<Scene> CopyScene(Shared<Scene> scene);
+		void CreateSciptInstances();
 
 		Entity FindEntityWithUUID(UUID uuid);
 		Entity FindEntityWithName(std::string_view name);
+
+		static Shared<Scene> CopyScene(Shared<Scene> scene);
+		static const Scene* const GetActiveScene();
 	private:
 		entt::registry m_Registry;
 		std::unordered_map<UUID, entt::entity> m_UUIDRegistry;
@@ -48,6 +51,8 @@ namespace MoonEngine
 		void OnAddComponent(Entity entity, T& component);
 		template<typename T>
 		void OnRemoveComponent(Entity entity, T& component);
+
+		static void SetActiveScene(Scene* scene);
 
 		friend class Entity;
 		friend class SceneSerializer;

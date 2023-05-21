@@ -40,17 +40,33 @@ namespace MoonEngine
 
 #pragma region Transform Component
 
-	void Transform_SetPosition(uint64_t id, glm::vec3* position)
-	{
-		GetEntity(id).GetComponent<TransformComponent>().Position = *position;
-	}
-
 	void Transform_GetPosition(uint64_t id, glm::vec3* position)
 	{
 		*position = GetEntity(id).GetComponent<TransformComponent>().Position;
 	}
 
+	void Transform_SetPosition(uint64_t id, glm::vec3* position)
+	{
+		GetEntity(id).GetComponent<TransformComponent>().Position = *position;
+	}
+
 #pragma endregion
+
+#pragma region Camera
+
+	float Camera_GetSize(uint64_t id)
+	{
+		return GetEntity(id).GetComponent<CameraComponent>().Size;
+	}
+
+	void Camera_SetSize(uint64_t id, float size)
+	{
+		GetEntity(id).GetComponent<CameraComponent>().Size = size;
+	}
+
+
+#pragma endregion
+
 
 #pragma region Physics
 
@@ -64,7 +80,6 @@ namespace MoonEngine
 
 #pragma endregion
 
-
 #pragma region Input 
 
 	static bool Input_GetKey(Keycode keycode)
@@ -74,15 +89,18 @@ namespace MoonEngine
 
 #pragma endregion
 
-
 	void ScriptDepot::InitializeScripts()
 	{
 		//Entity
 		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
 
-		//Transform Component
-		ME_ADD_INTERNAL_CALL(Transform_SetPosition);
+		//Transform
 		ME_ADD_INTERNAL_CALL(Transform_GetPosition);
+		ME_ADD_INTERNAL_CALL(Transform_SetPosition);
+
+		//Camera
+		ME_ADD_INTERNAL_CALL(Camera_GetSize);
+		ME_ADD_INTERNAL_CALL(Camera_SetSize);
 
 		//Physics
 		ME_ADD_INTERNAL_CALL(PhysicsBody_AddForce);

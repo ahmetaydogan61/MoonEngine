@@ -15,10 +15,20 @@ namespace MoonEngine
         #region Transform
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void Transform_SetPosition(ulong entityId, ref Vector3 position);
+        internal extern static void Transform_GetPosition(ulong entityId, out Vector3 position);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void Transform_GetPosition(ulong entityId, out Vector3 position);
+        internal extern static void Transform_SetPosition(ulong entityId, ref Vector3 position);
+
+        #endregion
+
+        #region Camera
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Camera_GetSize(ulong entityId);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Camera_SetSize(ulong entityId, float size);
 
         #endregion
 

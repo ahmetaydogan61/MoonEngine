@@ -20,6 +20,22 @@
             }
         }
     }
+
+    public class CameraComponent : Component
+    {
+        public float Size
+        {
+            get
+            {
+                return InternalCalls.Camera_GetSize(Entity.ID);
+            }
+            set
+            {
+                InternalCalls.Camera_SetSize(Entity.ID, value);
+            }
+        }
+    }
+
     public class PhysicsBodyComponent : Component
     {
         public void AddForce(Vector2 Force, Vector2 Position = new Vector2())

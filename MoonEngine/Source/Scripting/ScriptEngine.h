@@ -27,7 +27,7 @@ namespace MoonEngine
 	{
 		static const char* ToString(ScriptFieldType fieldType);
 		static ScriptFieldType FromString(std::string_view fieldName);
-		static ScriptFieldType MonoToType(MonoClassField* monoField);
+		static ScriptFieldType FromMonoType(MonoClassField* monoField);
 	};
 
 	struct ScriptField
@@ -35,6 +35,8 @@ namespace MoonEngine
 		ScriptFieldType Type;
 		std::string FieldName;
 		MonoClassField* MonoField;
+
+		void* Data;
 	};
 
 	class ScriptClass
@@ -52,14 +54,12 @@ namespace MoonEngine
 		std::string GetFullname() const { return fmt::format("{}.{}", m_Namespace, m_Name); }
 
 		const std::map<std::string, ScriptField>& GetFields() const { return m_Fields; }
-
 	private:
 		std::string m_Namespace;
 		std::string m_Name;
 
-		std::map<std::string, ScriptField> m_Fields;
-
 		MonoClass* m_MonoClass = nullptr;
+		std::map<std::string, ScriptField> m_Fields;
 
 		friend class ScriptEngine;
 	};
@@ -79,8 +79,8 @@ namespace MoonEngine
 		bool GetFieldValue(const ScriptField& field, void* value);
 		bool SetFieldValue(const ScriptField& field, const void* value);
 
-		void SetEntityReference(const ScriptField& field, Entity entity, uint64_t value);
-		uint64_t GetEntityReference(const ScriptField& field, Entity entity);
+		void GetEntityReference(const ScriptField& field, void* value);
+		void SetEntityReference(const ScriptField& field, const void* value);
 	private:
 		Shared<ScriptClass> m_ScriptClass;
 		MonoObject* m_Instance = nullptr;
@@ -102,16 +102,21 @@ namespace MoonEngine
 
 		static MonoImage* GetScripterImage();
 
-		static void StartRuntime(Scene* scene);
-		static void StopRuntime();
+		static void SetRuntimeScene(Scene* scene);
 		static Scene* GetRuntimeScene();
+
+		static void CreateEntityInstance(Entity entity, const std::string& scriptName);
+		static void AwakeEntity(Entity entity, const std::string& scriptName);
+		static void UpdateEntity(Entity entity, const std::string& scriptName, float dt);
+		static void DestroyEntity(Entity entity);
 
 		static bool CheckScriptClass(const std::string& scriptName);
 		static Shared<ScriptClass> GetScriptClass(const std::string& className);
-		static Shared<ScriptInstance> GetScriptInstance(UUID id);
+		static const std::unordered_map<std::string, Shared<ScriptClass>>& GetScriptClasses();
 
-		static void AwakeEntity(Entity entity, const std::string& scriptName);
-		static void UpdateEntity(Entity entity, const std::string& scriptName, float dt);
+		static Shared<ScriptInstance> GetScriptInstance(UUID id);
+		static const std::unordered_map<UUID, Shared<ScriptInstance>>& GetScriptInstances();
+		static void ClearScriptInstances();
 	private:
 		static void InitMono();
 		static void ShutdownMono();

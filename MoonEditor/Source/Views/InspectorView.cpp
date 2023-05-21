@@ -21,16 +21,25 @@ namespace MoonEngine
 			{
 				float data = 0.0f;
 				instance.GetFieldValue(field, &data);
+
 				if (ImGui::DragFloat(field.FieldName.c_str(), &data))
 					instance.SetFieldValue(field, &data);
+
 				break;
 			}
 			case ScriptFieldType::Entity:
 			{
 				ImGuiUtils::Label(field.FieldName.c_str());
+
+				bool reset = false;
+				if (ImGui::Button(" X "))
+					reset = true;
+
+				ImGui::SameLine();
+
 				uint64_t data = 0;
-				
-				instance.GetFieldValue(field, &data);
+
+				instance.GetEntityReference(field, &data);
 
 				ImGui::Text("%llu", data);
 
@@ -39,11 +48,14 @@ namespace MoonEngine
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
 					{
 						uint64_t id = *(const uint64_t*)payload->Data;
-						instance.SetFieldValue(field, &id);
+						instance.SetEntityReference(field, &id);
 					}
 
 					ImGui::EndDragDropTarget();
 				}
+
+				if (reset)
+					instance.SetEntityReference(field, 0);
 				break;
 			}
 		}
@@ -177,8 +189,8 @@ namespace MoonEngine
 		ImGui::PopID();
 	}
 
-	template<typename T, typename Function>
-	void ShowComponent(std::string componentName, Function function, Entity selectedEntity)
+	template<typename T>
+	void ShowComponent(const std::string& componentName, std::function<void(T&)> function, Entity selectedEntity)
 	{
 		if (selectedEntity.HasComponent<T>())
 		{
@@ -334,17 +346,42 @@ namespace MoonEngine
 
 			RenderProp("Class", [&]
 			{
-				ImGui::InputText("##class", &component.ClassName);
+				std::vector<std::string> classes;
 
-				if (EditorLayer::State() != EditorLayer::EditorState::Edit && ScriptEngine::CheckScriptClass(component.ClassName))
+				for (const auto& [name, scriptClass] : ScriptEngine::GetScriptClasses())
+					classes.push_back(name);
+
+				const char* currentItem = component.ClassName.c_str();
+				if (ImGui::BeginCombo("##Type", currentItem, ImGuiComboFlags_::ImGuiComboFlags_NoArrowButton))
 				{
-					Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
-					if (scriptInstance)
+					for (int n = 0; n < classes.size(); n++)
 					{
-						const auto& fields = scriptInstance->GetScriptClass()->GetFields();
+						bool is_selected = (currentItem == classes[n]);
 
-						for (const auto& [name, field] : fields)
-							ImGuiFieldConverter(*scriptInstance, field);
+						if (ImGui::Selectable(classes[n].c_str(), is_selected))
+						{
+							component.ClassName = classes[n];
+							ScriptEngine::CreateEntityInstance(selectedEntity, component.ClassName);
+						}
+
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				if (ScriptEngine::CheckScriptClass(component.ClassName))
+				{
+					if (EditorLayer::State() != EditorLayer::EditorState::Edit)
+					{
+						Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
+						if (scriptInstance)
+						{
+							const auto& fields = scriptInstance->GetScriptClass()->GetFields();
+
+							for (const auto& [name, field] : fields)
+								ImGuiFieldConverter(*scriptInstance, field);
+						}
 					}
 				}
 			});

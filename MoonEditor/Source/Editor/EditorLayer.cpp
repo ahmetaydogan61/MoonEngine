@@ -3,6 +3,8 @@
 #include "Editor/EditorAssets.h"
 
 #include <MoonEngine.h>
+#include <Scripting/ScriptEngine.h>
+
 #include <Gui/ImGuiUtils.h>
 #include <Gui/ImFileBrowser.h>
 
@@ -121,14 +123,20 @@ namespace MoonEngine
 	{
 		m_SelectedEntity = {};
 
-		m_HierarchyView->Scene = m_Scene.get();
+		Scene* scene = m_Scene.get();
 
-		m_ViewportView->Scene = m_Scene.get();
-		m_GameView->Scene = m_Scene.get();
+		m_HierarchyView->Scene = scene;
+
+		m_ViewportView->Scene = scene;
+		m_GameView->Scene = scene;
+
+		ScriptEngine::SetRuntimeScene(scene);
 	}
 
 	void EditorLayer::NewScene()
 	{
+		ScriptEngine::ClearScriptInstances();
+
 		if (m_EditorState == EditorState::Play)
 			m_Scene->StopRuntime();
 
@@ -235,6 +243,14 @@ namespace MoonEngine
 			ImGui::Text("Scene Name: %s", m_Scene->SceneName.c_str());
 			ImGui::Text("Scene Path: %s", m_ScenePath.string().c_str());
 			ImGui::Text("Scene Filename: %s", m_ScenePath.filename().string().c_str());
+
+			const auto& scripts = ScriptEngine::GetScriptInstances();
+			ImGui::Text("Script Instances: %d", scripts.size());
+
+			for (const auto& [uuid, instance] : scripts)
+			{
+				ImGui::Text("%llu", uuid);
+			}
 
 			ImGui::Separator();
 			ImGuiUtils::AddPadding(0.0f, 10.0f);

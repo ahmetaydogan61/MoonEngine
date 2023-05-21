@@ -10,14 +10,7 @@ namespace Game
 
         void Awake()
         {
-            Console.WriteLine($"Entity Id {ID}");
-
             PhysicsBody = GetComponent<PhysicsBodyComponent>();
-
-            if (PhysicsBody != null)
-                Console.WriteLine($"PB Found!");
-            else
-                Console.WriteLine($"PB Not Found!");
         }
 
         void Update(float dt)
