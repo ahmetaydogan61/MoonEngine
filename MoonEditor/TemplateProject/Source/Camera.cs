@@ -23,7 +23,7 @@ namespace Game
             if (m_CameraComponent != null)
             {
                 bool zoomOut = Input.GetKey(Keycode.LeftShift);
-
+            
                 if (Input.GetKey(Keycode.Z))
                     m_CameraComponent.Size += zoomOut ? dt * ZoomSpeed : dt * -ZoomSpeed;
             }

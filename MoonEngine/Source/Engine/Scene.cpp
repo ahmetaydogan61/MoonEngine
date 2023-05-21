@@ -16,6 +16,8 @@
 
 namespace MoonEngine
 {
+	static  std::unordered_map<UUID, Shared<ScriptInstance>> s_ScriptInstances;
+
 	static Scene* s_ActiveScene = nullptr;
 
 	void Scene::SetActiveScene(Scene* scene)
@@ -23,7 +25,7 @@ namespace MoonEngine
 		s_ActiveScene = scene;
 	}
 
-	const Scene* const Scene::GetActiveScene()
+	Scene* const Scene::GetActiveScene()
 	{
 		return s_ActiveScene;
 	}
@@ -47,6 +49,8 @@ namespace MoonEngine
 			if (particle.ParticleSystem.PlayOnAwake)
 				particle.ParticleSystem.Play();
 		}
+
+		s_ScriptInstances = ScriptEngine::GetScriptInstances();
 
 		//+ScriptComponents
 		{
@@ -72,6 +76,7 @@ namespace MoonEngine
 
 	void Scene::StartEdit()
 	{
+		CreateSciptInstances();
 	}
 
 	void Scene::StopEdit()
@@ -85,12 +90,22 @@ namespace MoonEngine
 
 	void Scene::CreateSciptInstances()
 	{
+		ScriptEngine::ClearScriptInstances();
+
 		auto view = m_Registry.view<ScriptComponent>();
 		for (auto [e, script] : view.each())
 		{
 			Entity entity = { e, this };
 			ScriptEngine::CreateEntityInstance(entity, script.ClassName);
 		}
+
+		for (const auto& [uuid, instance] : s_ScriptInstances)
+		{
+			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
+			scriptInstance->SetInstanceFields(instance->GetInstanceFields());
+		}
+
+		s_ScriptInstances.clear();
 	}
 
 	void Scene::UpdateRuntime(bool update)
@@ -125,12 +140,12 @@ namespace MoonEngine
 
 			//Particle System
 			{
-			auto view = m_Registry.view<const TransformComponent, ParticleComponent>();
-			for (auto [entity, transformComponent, particle] : view.each())
-			{
-				particle.ParticleSystem.UpdateEmitter(dt, particle.Particle, transformComponent.Position);
-				particle.ParticleSystem.UpdateParticles(dt);
-			}
+				auto view = m_Registry.view<const TransformComponent, ParticleComponent>();
+				for (auto [entity, transformComponent, particle] : view.each())
+				{
+					particle.ParticleSystem.UpdateEmitter(dt, particle.Particle, transformComponent.Position);
+					particle.ParticleSystem.UpdateParticles(dt);
+				}
 			}
 		}
 	}
@@ -184,9 +199,9 @@ namespace MoonEngine
 		CopyIfExists<IdentityComponent>(e, entity);
 		CopyIfExists<TransformComponent>(e, entity);
 		CopyIfExists<SpriteComponent>(e, entity);
-		CopyIfExists<ScriptComponent>(e, entity);
 		CopyIfExists<ParticleComponent>(e, entity);
 		CopyIfExists<PhysicsBodyComponent>(e, entity);
+		CopyIfExists<ScriptComponent>(e, entity);
 
 		return e;
 	}
@@ -195,9 +210,9 @@ namespace MoonEngine
 	{
 		m_UUIDRegistry.erase(e.GetUUID());
 
+		RemoveIfExists<ScriptComponent>(e);
 		RemoveIfExists<PhysicsBodyComponent>(e);
 		RemoveIfExists<ParticleComponent>(e);
-		RemoveIfExists<ScriptComponent>(e);
 		RemoveIfExists<SpriteComponent>(e);
 		RemoveIfExists<IdentityComponent>(e);
 		RemoveIfExists<TransformComponent>(e);
@@ -220,10 +235,10 @@ namespace MoonEngine
 			CopyIfExists<IdentityComponent>(copyTo, copyFrom);
 			CopyIfExists<TransformComponent>(copyTo, copyFrom);
 			CopyIfExists<SpriteComponent>(copyTo, copyFrom);
-			CopyIfExists<ScriptComponent>(copyTo, copyFrom);
 			CopyIfExists<CameraComponent>(copyTo, copyFrom);
 			CopyIfExists<ParticleComponent>(copyTo, copyFrom);
 			CopyIfExists<PhysicsBodyComponent>(copyTo, copyFrom);
+			CopyIfExists<ScriptComponent>(copyTo, copyFrom);
 		});
 		return tempScene;
 	}
@@ -301,10 +316,11 @@ namespace MoonEngine
 	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent(Entity entity, ScriptComponent& component)  {}
+	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) 
+	{ }
 
 	template<>
-	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component) 
+	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component)
 	{
 		ScriptEngine::DestroyEntity(entity);
 	}

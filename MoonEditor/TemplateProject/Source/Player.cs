@@ -5,8 +5,8 @@ namespace Game
 {
     public class Player : Entity
     {
-        public PhysicsBodyComponent PhysicsBody;
         public float Speed = 1500.0f;
+        private PhysicsBodyComponent PhysicsBody;
 
         void Awake()
         {
@@ -15,6 +15,9 @@ namespace Game
 
         void Update(float dt)
         {
+            if (PhysicsBody == null)
+                return;
+
             Vector2 velocity = Vector2.Zero;
 
             if (Input.GetKey(Keycode.A))
@@ -26,7 +29,7 @@ namespace Game
                 velocity.Y += Speed;
             else if (Input.GetKey(Keycode.S))
                 velocity.Y -= Speed;
-
+            
             PhysicsBody.AddForce(velocity * dt);
         }
     }

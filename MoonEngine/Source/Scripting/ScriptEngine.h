@@ -36,7 +36,7 @@ namespace MoonEngine
 		std::string FieldName;
 		MonoClassField* MonoField;
 
-		void* Data;
+		uint8_t Data[16];
 	};
 
 	class ScriptClass
@@ -81,14 +81,21 @@ namespace MoonEngine
 
 		void GetEntityReference(const ScriptField& field, void* value);
 		void SetEntityReference(const ScriptField& field, const void* value);
+
+		std::unordered_map<std::string, ScriptField>& GetInstanceFields() { return m_InstanceFields; }
+		void SetInstanceFields(const std::unordered_map<std::string, ScriptField>& instanceFields) { m_InstanceFields = instanceFields; }
 	private:
 		Shared<ScriptClass> m_ScriptClass;
 		MonoObject* m_Instance = nullptr;
+
+		std::unordered_map<std::string, ScriptField> m_InstanceFields;
 
 		//Methods
 		MonoMethod* m_Constructor = nullptr;
 		MonoMethod* m_AwakeMethod = nullptr;
 		MonoMethod* m_UpdateMethod = nullptr;
+
+		friend class ScriptEngine;
 	};
 
 	class ScriptEngine

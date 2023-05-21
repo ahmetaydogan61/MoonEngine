@@ -61,6 +61,44 @@ namespace MoonEngine
 		}
 	}
 
+	void ImGuiInstanceFieldConverter(ScriptInstance& instance, ScriptField& field)
+	{
+		switch (field.Type)
+		{
+			case ScriptFieldType::Float:
+			{
+				ImGui::DragFloat(field.FieldName.c_str(), &*(float*)field.Data);
+				break;
+			}
+			case ScriptFieldType::Entity:
+			{
+				ImGuiUtils::Label(field.FieldName.c_str());
+
+				bool reset = false;
+				if (ImGui::Button(" X "))
+					reset = true;
+
+				ImGui::SameLine();
+
+				ImGui::Text("%llu", *(uint64_t*)field.Data);
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
+					{
+						memcpy(field.Data, payload->Data, sizeof(uint64_t));
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
+				if (reset)
+					memset(field.Data, 0, sizeof(uint64_t));
+				break;
+			}
+		}
+	}
+
 	InspectorView::InspectorView()
 	{
 		Name = ICON_MD_MANAGE_SEARCH;
@@ -346,6 +384,8 @@ namespace MoonEngine
 
 			RenderProp("Class", [&]
 			{
+				bool isEditorPlaying = EditorLayer::State() != EditorLayer::EditorState::Edit;
+
 				std::vector<std::string> classes;
 
 				for (const auto& [name, scriptClass] : ScriptEngine::GetScriptClasses())
@@ -362,6 +402,8 @@ namespace MoonEngine
 						{
 							component.ClassName = classes[n];
 							ScriptEngine::CreateEntityInstance(selectedEntity, component.ClassName);
+							if (isEditorPlaying)
+								ScriptEngine::AwakeEntity(selectedEntity, component.ClassName);
 						}
 
 						if (is_selected)
@@ -372,15 +414,20 @@ namespace MoonEngine
 
 				if (ScriptEngine::CheckScriptClass(component.ClassName))
 				{
-					if (EditorLayer::State() != EditorLayer::EditorState::Edit)
+					Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
+					if (scriptInstance)
 					{
-						Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
-						if (scriptInstance)
+						if (isEditorPlaying)
 						{
 							const auto& fields = scriptInstance->GetScriptClass()->GetFields();
-
 							for (const auto& [name, field] : fields)
 								ImGuiFieldConverter(*scriptInstance, field);
+						}
+						else
+						{
+							auto& fields = scriptInstance->GetInstanceFields();
+							for (auto& [name, field] : fields)
+								ImGuiInstanceFieldConverter(*scriptInstance, field);
 						}
 					}
 				}

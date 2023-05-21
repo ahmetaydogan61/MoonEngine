@@ -455,6 +455,12 @@ namespace MoonEngine
 				auto scriptNode = entity[GetTypeName<ScriptComponent>()];
 				if (scriptNode)
 				{
+					YAMLDeserializer deserializer(scriptNode);
+					ScriptComponent& component = deserializedEntity.HasComponent<ScriptComponent>() ?
+						deserializedEntity.GetComponent<ScriptComponent>() : deserializedEntity.AddComponent<ScriptComponent>();
+
+					deserializer.Deserialize(component);
+					ScriptEngine::CreateEntityInstance(deserializedEntity, component.ClassName);
 				}
 
 				auto particleNode = entity[GetTypeName<ParticleComponent>()];

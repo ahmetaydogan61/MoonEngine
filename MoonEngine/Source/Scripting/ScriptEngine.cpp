@@ -147,6 +147,8 @@ namespace MoonEngine
 
 					ME_SYS_LOG("Name: {} - Type: {}", fieldName, typeName);
 
+					ScriptField scriptField = { fieldType, fieldName, field };
+
 					scriptClass->m_Fields[fieldName] = { fieldType, fieldName, field };
 				}
 			}
@@ -177,17 +179,6 @@ namespace MoonEngine
 	void  ScriptEngine::SetRuntimeScene(Scene* scene)
 	{
 		s_Data->RuntimeScene = scene;
-
-		std::vector<UUID> removeNonExistingInstances;
-
-		for (const auto& [uuid, instance] : s_Data->ScriptInstances)
-		{
-			if (!s_Data->RuntimeScene->FindEntityWithUUID(uuid))
-				removeNonExistingInstances.push_back(uuid);
-		}
-
-		for (auto& uuid : removeNonExistingInstances)
-			s_Data->ScriptInstances.extract(uuid);
 	}
 
 	Scene* ScriptEngine::GetRuntimeScene()
@@ -200,7 +191,21 @@ namespace MoonEngine
 		if (CheckScriptClass(scriptName))
 		{
 			UUID uuid = entity.GetUUID();
-			Shared<ScriptInstance> instance = MakeShared<ScriptInstance>(s_Data->ScriptClasses[scriptName], entity);
+
+			if (GetScriptInstance(uuid))
+				return;
+
+			Shared<ScriptClass> scriptClass = s_Data->ScriptClasses[scriptName];
+
+			Shared<ScriptInstance> instance = MakeShared<ScriptInstance>(scriptClass, entity);
+
+			for (auto const& [name, field] : scriptClass->GetFields())
+			{
+				ScriptField& scriptField = instance->m_InstanceFields[name] = field;
+				if (field.Type == ScriptFieldType::Float)
+					instance->GetFieldValue(scriptField, &scriptField.Data);
+			}
+
 			s_Data->ScriptInstances[uuid] = instance;
 		}
 		else
@@ -216,13 +221,16 @@ namespace MoonEngine
 			if (!scriptInstance)
 				return;
 
+			for (const auto& [name, field] : scriptInstance->GetInstanceFields())
+				scriptInstance->SetFieldValue(field, &field.Data);
+
 			scriptInstance->InvokeAwake();
 		}
 	}
 
 	void ScriptEngine::UpdateEntity(Entity entity, const std::string& scriptName, float dt)
 	{
-		if(CheckScriptClass(scriptName))
+		if (CheckScriptClass(scriptName))
 		{
 			auto scriptInstance = GetScriptInstance(entity.GetUUID());
 			if (!scriptInstance)
@@ -314,6 +322,9 @@ namespace MoonEngine
 
 	void ScriptInstance::InvokeAwake()
 	{
+		for (const auto& [name, field] : m_InstanceFields)
+			SetFieldValue(field, &field.Data);
+
 		if (m_AwakeMethod)
 			InvokeMethod(m_AwakeMethod);
 	}
@@ -334,12 +345,24 @@ namespace MoonEngine
 
 	bool ScriptInstance::GetFieldValue(const ScriptField& field, void* value)
 	{
+		if (field.Type == ScriptFieldType::Entity)
+		{
+			GetEntityReference(field, value);
+			return true;
+		}
+
 		mono_field_get_value(m_Instance, field.MonoField, value);
 		return true;
 	}
 
 	bool ScriptInstance::SetFieldValue(const ScriptField& field, const void* value)
 	{
+		if (field.Type == ScriptFieldType::Entity)
+		{
+			SetEntityReference(field, value);
+			return true;
+		}
+
 		mono_field_set_value(m_Instance, field.MonoField, (void*)value);
 		return true;
 	}
