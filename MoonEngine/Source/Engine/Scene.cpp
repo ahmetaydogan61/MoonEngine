@@ -50,10 +50,11 @@ namespace MoonEngine
 				particle.ParticleSystem.Play();
 		}
 
-		s_ScriptInstances = ScriptEngine::GetScriptInstances();
 
 		//+ScriptComponents
 		{
+			s_ScriptInstances = ScriptEngine::GetScriptInstances();
+
 			auto view = m_Registry.view<ScriptComponent>();
 			for (auto [e, script] : view.each())
 			{
@@ -80,6 +81,9 @@ namespace MoonEngine
 
 		CreateSciptInstances();
 
+		if (s_ScriptInstances.size() <= 0)
+			return;
+		
 		for (const auto& [uuid, instance] : s_ScriptInstances)
 		{
 			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);

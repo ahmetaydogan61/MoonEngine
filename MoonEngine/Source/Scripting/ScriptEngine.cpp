@@ -48,9 +48,6 @@ namespace MoonEngine
 		LoadAssemblyClasses();
 
 		ScriptDepot::RegisterComponents();
-
-		if (s_Data->RuntimeScene)
-			s_Data->RuntimeScene->CreateSciptInstances();
 	}
 
 	void ScriptEngine::InitMono()
@@ -79,11 +76,10 @@ namespace MoonEngine
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
 	}
 
-
 	void ScriptEngine::ReloadAssembly()
 	{
 		// instance <instance uuid, instance field map<field name, field>>
-		std::unordered_map<UUID, std::unordered_map<std::string, ScriptField>> s_ReloadInstances;
+		std::map<UUID, std::map<std::string, ScriptField>> s_ReloadInstances;
 		for (const auto& [uuid, instance] : s_Data->ScriptInstances)
 			s_ReloadInstances[uuid] = instance->GetInstanceFields();
 
@@ -129,11 +125,7 @@ namespace MoonEngine
 			if (flags & FIELD_ATTRIBUTE_PUBLIC)
 			{
 				const char* fieldName = mono_field_get_name(field);
-				ScriptFieldType fieldType = ScriptFieldConverter::FromMonoType(field);
-
-				const char* typeName = ScriptFieldConverter::ToString(fieldType);
-
-				ME_SYS_LOG("Name: {} - Type: {}", fieldName, typeName);
+				ScriptFieldType fieldType = ScriptFieldTypeConverter::FromMonoType(field);
 
 				s_Data->EntityClass.m_Fields[fieldName] = { fieldType, fieldName, field };
 			}
@@ -163,25 +155,16 @@ namespace MoonEngine
 			Shared<ScriptClass> scriptClass = MakeShared<ScriptClass>(nameSpace, className, monoClass);
 			s_Data->ScriptClasses[scriptClass->GetFullname()] = scriptClass;
 
-			ME_SYS_LOG("Class (Namespace.Name): {}", scriptClass->GetFullname());
-			ME_SYS_LOG("Class (Namespace.Name): {}", mono_class_get_name(monoClass));
-
 			int fieldCount = mono_class_num_fields(monoClass);
 			void* iterator = nullptr;
 
-			ME_SYS_LOG("{} Fields Of '{}'", fieldCount, className);
 			while (MonoClassField* field = mono_class_get_fields(monoClass, &iterator))
 			{
 				uint32_t flags = mono_field_get_flags(field);
 				if (flags & FIELD_ATTRIBUTE_PUBLIC)
 				{
 					const char* fieldName = mono_field_get_name(field);
-					ScriptFieldType fieldType = ScriptFieldConverter::FromMonoType(field);
-					const char* typeName = ScriptFieldConverter::ToString(fieldType);
-
-					ME_SYS_LOG("Name: {} - Type: {}", fieldName, typeName);
-
-					ScriptField scriptField = { fieldType, fieldName, field };
+					ScriptFieldType fieldType = ScriptFieldTypeConverter::FromMonoType(field);
 
 					scriptClass->m_Fields[fieldName] = { fieldType, fieldName, field };
 				}
@@ -228,13 +211,17 @@ namespace MoonEngine
 		{
 			UUID uuid = entity.GetUUID();
 
-			if (GetScriptInstance(uuid))
-				return nullptr;
+			auto existingInstance = GetScriptInstance(uuid);
+			if (existingInstance)
+			{
+				ME_SYS_WAR("Tried to create already existing instance!");
+				return existingInstance;
+			}
 
 			Shared<ScriptClass> scriptClass = s_Data->ScriptClasses[scriptName];
-
 			Shared<ScriptInstance> instance = MakeShared<ScriptInstance>(scriptClass, entity);
 
+			//Set ScriptFieldInstances
 			for (auto const& [name, field] : scriptClass->GetFields())
 			{
 				ScriptField& scriptField = instance->m_InstanceFields[name] = field;
@@ -245,9 +232,9 @@ namespace MoonEngine
 		}
 		else
 			ME_SYS_WAR("Script Class Not Found!");
+		//TODO: Console Log, Script Class Not Found!
 
 		return nullptr;
-		//TODO: Console Log, Script Class Not Found!
 	}
 
 	void ScriptEngine::AwakeEntity(Entity entity, const std::string& scriptName)
@@ -259,10 +246,7 @@ namespace MoonEngine
 				return;
 
 			for (const auto& [name, field] : scriptInstance->GetInstanceFields())
-			{
-				ME_LOG("Instance: {} -> Field Name {}, Field Type {}", entity.GetUUID(), name, ScriptFieldConverter::ToString(field.Type));
 				scriptInstance->SetFieldValue(field, &field.Data);
-			}
 
 			scriptInstance->InvokeAwake();
 		}
@@ -292,8 +276,7 @@ namespace MoonEngine
 
 	bool ScriptEngine::CheckScriptClass(const std::string& scriptName)
 	{
-		auto& scriptClasses = s_Data->ScriptClasses;
-		return scriptClasses.find(scriptName) != scriptClasses.end();
+		return s_Data->ScriptClasses.contains(scriptName);
 	}
 
 	Shared<ScriptClass> ScriptEngine::GetScriptClass(const std::string& className)
@@ -422,23 +405,20 @@ namespace MoonEngine
 	{
 		if (field.Type == ScriptFieldType::Entity)
 		{
-			if (field.Type == ScriptFieldType::Entity)
+			if (value != 0)
 			{
-				if (value != 0)
-				{
-					uint64_t castedValue = *(uint64_t*)value;
-					if (!s_Data->ScriptInstances.contains(castedValue))
-						return;
+				uint64_t castedValue = *(uint64_t*)value;
+				if (!s_Data->ScriptInstances.contains(castedValue))
+					return;
 
-					mono_field_set_value(m_Instance, field.MonoField, (void*)s_Data->ScriptInstances.at(castedValue)->GetMonoObject());
-				}
-				else
-					mono_field_set_value(m_Instance, field.MonoField, 0);
+				mono_field_set_value(m_Instance, field.MonoField, (void*)s_Data->ScriptInstances.at(castedValue)->GetMonoObject());
 			}
+			else
+				mono_field_set_value(m_Instance, field.MonoField, 0);
 		}
 	}
 
-	void ScriptInstance::CopyInstanceFields(std::unordered_map<std::string, ScriptField>& instanceFields)
+	void ScriptInstance::CopyInstanceFields(std::map<std::string, ScriptField>& instanceFields)
 	{
 		for (auto& [name, field] : m_InstanceFields)
 		{
@@ -451,7 +431,7 @@ namespace MoonEngine
 		}
 	}
 
-	const char* ScriptFieldConverter::ToString(ScriptFieldType fieldType)
+	const char* ScriptFieldTypeConverter::ToString(ScriptFieldType fieldType)
 	{
 		switch (fieldType)
 		{
@@ -463,25 +443,24 @@ namespace MoonEngine
 		return "Unkonwn";
 	}
 
-	ScriptFieldType ScriptFieldConverter::FromString(std::string_view fieldName)
+	ScriptFieldType ScriptFieldTypeConverter::FromString(std::string_view fieldName)
 	{
 		if (fieldName == "Float") return ScriptFieldType::Float;
 		if (fieldName == "Entity") return ScriptFieldType::Entity;
 
-		ME_SYS_ERR("Unkonw Script Field Type");
+		ME_SYS_ERR("Unkonw Script Field Type {}", fieldName);
 		return ScriptFieldType::Unknown;
 	}
 
-	ScriptFieldType ScriptFieldConverter::FromMonoType(MonoClassField* monoField)
+	ScriptFieldType ScriptFieldTypeConverter::FromMonoType(MonoClassField* monoField)
 	{
 		MonoType* type = mono_field_get_type(monoField);
 		std::string typeName = mono_type_get_name(type);
 
-		ME_LOG("Type Name: {}", typeName);
 		if (typeName == "System.Single") return ScriptFieldType::Float;
 		if (typeName == "MoonEngine.Entity") return ScriptFieldType::Entity;
 
-		ME_SYS_ERR("Unknown Script Field Type");
+		ME_SYS_ERR("Unknown Script Field Type {}", typeName);
 		return ScriptFieldType::Unknown;
 	}
 }
