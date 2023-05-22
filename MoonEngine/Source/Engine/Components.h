@@ -123,6 +123,12 @@ namespace MoonEngine
 	{
 		std::string ClassName;
 
+		ScriptComponent() = default;
+		ScriptComponent(const std::string& className)
+			:ClassName(className)
+		{}
+		ScriptComponent(const ScriptComponent&) = default;
+
 		REFLECT(("ClassName", ClassName))
 	};
 

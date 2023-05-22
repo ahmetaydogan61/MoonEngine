@@ -123,6 +123,7 @@ namespace MoonEngine
 		static Shared<ScriptClass> GetScriptClass(const std::string& className);
 		static const std::unordered_map<std::string, Shared<ScriptClass>>& GetScriptClasses();
 
+		static bool CheckScriptInstance(UUID id);
 		static Shared<ScriptInstance> GetScriptInstance(UUID id);
 		static const std::unordered_map<UUID, Shared<ScriptInstance>>& GetScriptInstances();
 		static void ClearScriptInstances();

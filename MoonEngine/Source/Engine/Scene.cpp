@@ -78,12 +78,12 @@ namespace MoonEngine
 	void Scene::StartEdit()
 	{
 		ScriptEngine::ClearScriptInstances();
-
+		 
 		CreateSciptInstances();
 
 		if (s_ScriptInstances.size() <= 0)
 			return;
-		
+
 		for (const auto& [uuid, instance] : s_ScriptInstances)
 		{
 			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
@@ -108,7 +108,8 @@ namespace MoonEngine
 		for (auto [e, script] : view.each())
 		{
 			Entity entity = { e, this };
-			ScriptEngine::CreateEntityInstance(entity, script.ClassName);
+			if (ScriptEngine::CheckScriptClass(script.ClassName))
+				ScriptEngine::CreateEntityInstance(entity, script.ClassName);
 		}
 	}
 
@@ -160,7 +161,7 @@ namespace MoonEngine
 		if (copyFrom.HasComponent<T>())
 		{
 			T component = copyFrom.GetComponent<T>();
-			copyTo.AddComponent<T>() = component;
+			copyTo.ReplaceComponent<T>(component);
 		}
 	}
 
@@ -322,7 +323,9 @@ namespace MoonEngine
 	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) {}
+	void Scene::OnAddComponent(Entity entity, ScriptComponent& component)
+	{
+	}
 
 	template<>
 	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component)

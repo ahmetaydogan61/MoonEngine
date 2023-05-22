@@ -211,11 +211,10 @@ namespace MoonEngine
 		{
 			UUID uuid = entity.GetUUID();
 
-			auto existingInstance = GetScriptInstance(uuid);
-			if (existingInstance)
+			if (s_Data->ScriptInstances.contains(uuid))
 			{
 				ME_SYS_WAR("Tried to create already existing instance!");
-				return existingInstance;
+				return GetScriptInstance(uuid);
 			}
 
 			Shared<ScriptClass> scriptClass = s_Data->ScriptClasses[scriptName];
@@ -276,11 +275,19 @@ namespace MoonEngine
 
 	bool ScriptEngine::CheckScriptClass(const std::string& scriptName)
 	{
-		return s_Data->ScriptClasses.contains(scriptName);
+		bool result = s_Data->ScriptClasses.contains(scriptName);
+		if(!result)
+			ME_SYS_WAR("Script Class Does Not Exist! (Script Name: {})", scriptName);
+		return result;
 	}
 
+	//Get the an available script class from the script classes by name. (For safety call CheckScriptClass first)
 	Shared<ScriptClass> ScriptEngine::GetScriptClass(const std::string& className)
 	{
+		bool exists = CheckScriptClass(className);
+		if (!exists)
+			return nullptr;
+
 		return s_Data->ScriptClasses.at(className);
 	}
 
@@ -289,16 +296,22 @@ namespace MoonEngine
 		return s_Data->ScriptClasses;
 	}
 
+	bool ScriptEngine::CheckScriptInstance(UUID id)
+	{
+		bool result = s_Data->ScriptInstances.contains(id);
+		if(!result)
+			ME_SYS_WAR("Entity Instance Does Not Exist! (UUID: {})", id);
+		return result;
+	}
+
+	//Get the created instance by id. (For safety call CheckScriptInstance first)
 	Shared<ScriptInstance> ScriptEngine::GetScriptInstance(UUID id)
 	{
-		auto it = s_Data->ScriptInstances.find(id);
-		if (it == s_Data->ScriptInstances.end())
-		{
-			//TODO: Log this to the console log
-			ME_SYS_WAR("Script Instance of Entity not found!");
+		bool exists = CheckScriptInstance(id);
+		if (!exists)
 			return nullptr;
-		}
-		return it->second;
+
+		return s_Data->ScriptInstances.at(id);
 	}
 
 	const std::unordered_map<UUID, Shared<ScriptInstance>>& ScriptEngine::GetScriptInstances()

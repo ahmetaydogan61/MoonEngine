@@ -456,10 +456,11 @@ namespace MoonEngine
 				if (scriptNode)
 				{
 					YAMLDeserializer deserializer(scriptNode);
-					ScriptComponent& component = deserializedEntity.HasComponent<ScriptComponent>() ?
-						deserializedEntity.GetComponent<ScriptComponent>() : deserializedEntity.AddComponent<ScriptComponent>();
+					ScriptComponent component = {};
+					component.ClassName = scriptNode["ClassName"].as<std::string>();
 
-					deserializer.Deserialize(component);
+					deserializedEntity.ReplaceComponent<ScriptComponent>(component);
+
 					ScriptEngine::CreateEntityInstance(deserializedEntity, component.ClassName);
 				}
 
