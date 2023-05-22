@@ -449,6 +449,7 @@ namespace MoonEngine
 		switch (fieldType)
 		{
 			case MoonEngine::ScriptFieldType::Float: return "Float";
+
 			case MoonEngine::ScriptFieldType::Entity: return "Entity";
 		}
 
@@ -459,6 +460,7 @@ namespace MoonEngine
 	ScriptFieldType ScriptFieldTypeConverter::FromString(std::string_view fieldName)
 	{
 		if (fieldName == "Float") return ScriptFieldType::Float;
+
 		if (fieldName == "Entity") return ScriptFieldType::Entity;
 
 		ME_SYS_ERR("Unkonw Script Field Type {}", fieldName);
@@ -471,6 +473,7 @@ namespace MoonEngine
 		std::string typeName = mono_type_get_name(type);
 
 		if (typeName == "System.Single") return ScriptFieldType::Float;
+
 		if (typeName == "MoonEngine.Entity") return ScriptFieldType::Entity;
 
 		ME_SYS_ERR("Unknown Script Field Type {}", typeName);

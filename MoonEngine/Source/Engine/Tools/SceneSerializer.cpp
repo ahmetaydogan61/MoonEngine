@@ -449,7 +449,6 @@ namespace MoonEngine
 					spriteComponent->GenerateSpriteSheet();
 
 				GetIfExists<CameraComponent>(entity, deserializedEntity);
-				GetIfExists<ScriptComponent>(entity, deserializedEntity);
 				GetIfExists<PhysicsBodyComponent>(entity, deserializedEntity);
 
 				auto scriptNode = entity[GetTypeName<ScriptComponent>()];
@@ -460,8 +459,6 @@ namespace MoonEngine
 					component.ClassName = scriptNode["ClassName"].as<std::string>();
 
 					deserializedEntity.ReplaceComponent<ScriptComponent>(component);
-
-					ScriptEngine::CreateEntityInstance(deserializedEntity, component.ClassName);
 				}
 
 				auto particleNode = entity[GetTypeName<ParticleComponent>()];

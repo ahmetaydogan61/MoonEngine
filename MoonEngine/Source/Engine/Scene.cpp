@@ -78,7 +78,7 @@ namespace MoonEngine
 	void Scene::StartEdit()
 	{
 		ScriptEngine::ClearScriptInstances();
-		 
+
 		CreateSciptInstances();
 
 		if (s_ScriptInstances.size() <= 0)
@@ -156,13 +156,15 @@ namespace MoonEngine
 	}
 
 	template<typename T>
-	static void CopyIfExists(Entity copyTo, Entity copyFrom)
+	static bool CopyIfExists(Entity copyTo, Entity copyFrom)
 	{
 		if (copyFrom.HasComponent<T>())
 		{
 			T component = copyFrom.GetComponent<T>();
 			copyTo.ReplaceComponent<T>(component);
+			return true;
 		}
+		return false;
 	}
 
 	template<typename T>
@@ -207,7 +209,20 @@ namespace MoonEngine
 		CopyIfExists<CameraComponent>(to, from);
 		CopyIfExists<ParticleComponent>(to, from);
 		CopyIfExists<PhysicsBodyComponent>(to, from);
-		CopyIfExists<ScriptComponent>(to, from);
+		
+		if (CopyIfExists<ScriptComponent>(to, from))
+		{
+			auto toInstance = ScriptEngine::GetScriptInstance(to.GetUUID());
+			auto fromInstance = ScriptEngine::GetScriptInstance(from.GetUUID());
+			
+			if (toInstance && fromInstance)
+			{
+				for (const auto& [name, field] : fromInstance->GetInstanceFields())
+					toInstance->SetFieldValue(field, field.Data);
+
+				toInstance->CopyInstanceFields(fromInstance->GetInstanceFields());
+			}
+		}
 
 		return to;
 	}
@@ -325,6 +340,7 @@ namespace MoonEngine
 	template<>
 	void Scene::OnAddComponent(Entity entity, ScriptComponent& component)
 	{
+		ScriptEngine::CreateEntityInstance(entity, component.ClassName);
 	}
 
 	template<>
