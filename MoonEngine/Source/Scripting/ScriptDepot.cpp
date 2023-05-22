@@ -89,7 +89,7 @@ namespace MoonEngine
 
 #pragma endregion
 
-	void ScriptDepot::InitializeScripts()
+	void ScriptDepot::InitializeCalls()
 	{
 		//Entity
 		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
@@ -139,6 +139,7 @@ namespace MoonEngine
 
 	void ScriptDepot::RegisterComponents()
 	{
+		s_EntityHasComponentFuncs.clear();
 		RegisterComponent(AllComponents{});
 	}
 }

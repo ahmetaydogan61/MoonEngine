@@ -41,11 +41,12 @@ namespace MoonEngine
 		s_Data = new ScriptEngineData();
 
 		InitMono();
+		ScriptDepot::InitializeCalls();
+
 		LoadAssembly("Resource/Scripts/MoonScripter.dll");
 		LoadAppAssembly("TemplateProject/Build/Template.dll");
 		LoadAssemblyClasses();
 
-		ScriptDepot::InitializeScripts();
 		ScriptDepot::RegisterComponents();
 
 		if (s_Data->RuntimeScene)
@@ -76,6 +77,39 @@ namespace MoonEngine
 	{
 		s_Data->AppAssembly = ScriptingUtils::LoadMonoAssembly(path);
 		s_Data->AppImage = mono_assembly_get_image(s_Data->AppAssembly);
+	}
+
+
+	void ScriptEngine::ReloadAssembly()
+	{
+		// instance <instance uuid, instance field map<field name, field>>
+		std::unordered_map<UUID, std::unordered_map<std::string, ScriptField>> s_ReloadInstances;
+		for (const auto& [uuid, instance] : s_Data->ScriptInstances)
+			s_ReloadInstances[uuid] = instance->GetInstanceFields();
+
+		ClearScriptInstances();
+
+		mono_domain_set(mono_get_root_domain(), false);
+
+		mono_domain_unload(s_Data->AppDomain);
+		s_Data->AppDomain = nullptr;
+
+		LoadAssembly("Resource/Scripts/MoonScripter.dll");
+		LoadAppAssembly("TemplateProject/Build/Template.dll");
+		LoadAssemblyClasses();
+
+		ScriptDepot::RegisterComponents();
+
+		if (s_Data->RuntimeScene)
+			s_Data->RuntimeScene->CreateSciptInstances();
+
+		for (auto& [uuid, fields] : s_ReloadInstances)
+		{
+			Shared<ScriptInstance> instance = ScriptEngine::GetScriptInstance(uuid);
+			instance->CopyInstanceFields(fields);
+		}
+
+		s_ReloadInstances.clear();
 	}
 
 	void ScriptEngine::LoadAssemblyClasses()
@@ -164,7 +198,9 @@ namespace MoonEngine
 
 	void ScriptEngine::ShutdownMono()
 	{
-		//mono_domain_unload(s_Data->AppDomain);
+		mono_domain_set(mono_get_root_domain(), false);
+
+		mono_domain_unload(s_Data->AppDomain);
 		s_Data->AppDomain = nullptr;
 
 		mono_jit_cleanup(s_Data->RootDomain);
@@ -186,14 +222,14 @@ namespace MoonEngine
 		return s_Data->RuntimeScene;
 	}
 
-	void ScriptEngine::CreateEntityInstance(Entity entity, const std::string& scriptName)
+	Shared<ScriptInstance> ScriptEngine::CreateEntityInstance(Entity entity, const std::string& scriptName)
 	{
 		if (CheckScriptClass(scriptName))
 		{
 			UUID uuid = entity.GetUUID();
 
 			if (GetScriptInstance(uuid))
-				return;
+				return nullptr;
 
 			Shared<ScriptClass> scriptClass = s_Data->ScriptClasses[scriptName];
 
@@ -202,14 +238,15 @@ namespace MoonEngine
 			for (auto const& [name, field] : scriptClass->GetFields())
 			{
 				ScriptField& scriptField = instance->m_InstanceFields[name] = field;
-				if (field.Type == ScriptFieldType::Float)
-					instance->GetFieldValue(scriptField, &scriptField.Data);
+				instance->GetFieldValue(scriptField, &scriptField.Data);
 			}
 
-			s_Data->ScriptInstances[uuid] = instance;
+			return s_Data->ScriptInstances[uuid] = instance;
 		}
 		else
 			ME_SYS_WAR("Script Class Not Found!");
+
+		return nullptr;
 		//TODO: Console Log, Script Class Not Found!
 	}
 
@@ -222,7 +259,10 @@ namespace MoonEngine
 				return;
 
 			for (const auto& [name, field] : scriptInstance->GetInstanceFields())
+			{
+				ME_LOG("Instance: {} -> Field Name {}, Field Type {}", entity.GetUUID(), name, ScriptFieldConverter::ToString(field.Type));
 				scriptInstance->SetFieldValue(field, &field.Data);
+			}
 
 			scriptInstance->InvokeAwake();
 		}
@@ -395,6 +435,19 @@ namespace MoonEngine
 				else
 					mono_field_set_value(m_Instance, field.MonoField, 0);
 			}
+		}
+	}
+
+	void ScriptInstance::CopyInstanceFields(std::unordered_map<std::string, ScriptField>& instanceFields)
+	{
+		for (auto& [name, field] : m_InstanceFields)
+		{
+			auto it = instanceFields.find(name);
+			if (it == instanceFields.end())
+				continue;
+
+			ScriptField& scriptField = instanceFields.at(name);
+			memcpy(field.Data, scriptField.Data, sizeof(field.Data));
 		}
 	}
 

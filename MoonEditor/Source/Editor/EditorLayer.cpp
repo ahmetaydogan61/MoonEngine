@@ -114,6 +114,12 @@ namespace MoonEngine
 					loadDialog.OpenFileBrowser();
 				break;
 			}
+			case Keycode::R:
+			{
+				if (control)
+					ScriptEngine::ReloadAssembly();
+				break;
+			}
 		}
 		if (m_ViewportView->ViewFocused)
 			m_ViewportView->OnKeyEvent(e.Key());

@@ -76,7 +76,17 @@ namespace MoonEngine
 
 	void Scene::StartEdit()
 	{
+		ScriptEngine::ClearScriptInstances();
+
 		CreateSciptInstances();
+
+		for (const auto& [uuid, instance] : s_ScriptInstances)
+		{
+			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
+			scriptInstance->SetInstanceFields(instance->GetInstanceFields());
+		}
+
+		s_ScriptInstances.clear();
 	}
 
 	void Scene::StopEdit()
@@ -90,22 +100,12 @@ namespace MoonEngine
 
 	void Scene::CreateSciptInstances()
 	{
-		ScriptEngine::ClearScriptInstances();
-
 		auto view = m_Registry.view<ScriptComponent>();
 		for (auto [e, script] : view.each())
 		{
 			Entity entity = { e, this };
 			ScriptEngine::CreateEntityInstance(entity, script.ClassName);
 		}
-
-		for (const auto& [uuid, instance] : s_ScriptInstances)
-		{
-			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
-			scriptInstance->SetInstanceFields(instance->GetInstanceFields());
-		}
-
-		s_ScriptInstances.clear();
 	}
 
 	void Scene::UpdateRuntime(bool update)
@@ -188,22 +188,23 @@ namespace MoonEngine
 		return entity;
 	}
 
-	Entity Scene::DuplicateEntity(Entity& entity)
+	Entity Scene::DuplicateEntity(Entity from)
 	{
 		entt::entity entt = m_Registry.create();
-		Entity e = { entt, this };
+		Entity to = { entt, this };
 
-		UUID uuid = e.AddComponent<UUIDComponent>().ID;
+		UUID uuid = to.AddComponent<UUIDComponent>().ID;
 		m_UUIDRegistry[uuid] = entt;
 
-		CopyIfExists<IdentityComponent>(e, entity);
-		CopyIfExists<TransformComponent>(e, entity);
-		CopyIfExists<SpriteComponent>(e, entity);
-		CopyIfExists<ParticleComponent>(e, entity);
-		CopyIfExists<PhysicsBodyComponent>(e, entity);
-		CopyIfExists<ScriptComponent>(e, entity);
+		CopyIfExists<IdentityComponent>(to, from);
+		CopyIfExists<TransformComponent>(to, from);
+		CopyIfExists<SpriteComponent>(to, from);
+		CopyIfExists<CameraComponent>(to, from);
+		CopyIfExists<ParticleComponent>(to, from);
+		CopyIfExists<PhysicsBodyComponent>(to, from);
+		CopyIfExists<ScriptComponent>(to, from);
 
-		return e;
+		return to;
 	}
 
 	void Scene::DestroyEntity(Entity e)
@@ -213,6 +214,7 @@ namespace MoonEngine
 		RemoveIfExists<ScriptComponent>(e);
 		RemoveIfExists<PhysicsBodyComponent>(e);
 		RemoveIfExists<ParticleComponent>(e);
+		RemoveIfExists<CameraComponent>(e);
 		RemoveIfExists<SpriteComponent>(e);
 		RemoveIfExists<IdentityComponent>(e);
 		RemoveIfExists<TransformComponent>(e);
@@ -316,8 +318,7 @@ namespace MoonEngine
 	void Scene::OnRemoveComponent(Entity entity, CameraComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) 
-	{ }
+	void Scene::OnAddComponent(Entity entity, ScriptComponent& component) {}
 
 	template<>
 	void Scene::OnRemoveComponent(Entity entity, ScriptComponent& component)

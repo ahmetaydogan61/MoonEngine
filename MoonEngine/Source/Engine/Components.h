@@ -122,8 +122,6 @@ namespace MoonEngine
 	struct ScriptComponent
 	{
 		std::string ClassName;
-		bool HasValidClass = false;
-		uint64_t EntityHandle;
 
 		REFLECT(("ClassName", ClassName))
 	};
@@ -140,5 +138,5 @@ namespace MoonEngine
 	};
 
 	using AllComponents = ComponentGroup
-		<TransformComponent, SpriteComponent, CameraComponent, ScriptComponent, PhysicsBodyComponent, ParticleComponent>;
+		<UUIDComponent, IdentityComponent, TransformComponent, SpriteComponent, CameraComponent, ScriptComponent, PhysicsBodyComponent, ParticleComponent>;
 }

@@ -35,7 +35,7 @@ namespace MoonEngine
 		ScriptFieldType Type;
 		std::string FieldName;
 		MonoClassField* MonoField;
-
+	
 		uint8_t Data[16];
 	};
 
@@ -84,6 +84,7 @@ namespace MoonEngine
 
 		std::unordered_map<std::string, ScriptField>& GetInstanceFields() { return m_InstanceFields; }
 		void SetInstanceFields(const std::unordered_map<std::string, ScriptField>& instanceFields) { m_InstanceFields = instanceFields; }
+		void CopyInstanceFields(std::unordered_map<std::string, ScriptField>& instanceFields);
 	private:
 		Shared<ScriptClass> m_ScriptClass;
 		MonoObject* m_Instance = nullptr;
@@ -106,13 +107,14 @@ namespace MoonEngine
 
 		static void LoadAssembly(const std::filesystem::path& path);
 		static void LoadAppAssembly(const std::filesystem::path& path);
+		static void ReloadAssembly();
 
 		static MonoImage* GetScripterImage();
 
 		static void SetRuntimeScene(Scene* scene);
 		static Scene* GetRuntimeScene();
 
-		static void CreateEntityInstance(Entity entity, const std::string& scriptName);
+		static Shared<ScriptInstance> CreateEntityInstance(Entity entity, const std::string& scriptName);
 		static void AwakeEntity(Entity entity, const std::string& scriptName);
 		static void UpdateEntity(Entity entity, const std::string& scriptName, float dt);
 		static void DestroyEntity(Entity entity);

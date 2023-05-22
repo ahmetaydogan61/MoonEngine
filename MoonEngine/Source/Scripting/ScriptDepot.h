@@ -5,7 +5,7 @@ namespace MoonEngine
 	class ScriptDepot
 	{
 	public:
-		static void InitializeScripts();
+		static void InitializeCalls();
 		static void RegisterComponents();
 	};
 }

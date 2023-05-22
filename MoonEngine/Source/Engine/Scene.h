@@ -21,7 +21,7 @@ namespace MoonEngine
 		Entity CreateEntity();
 		Entity CreateEntity(UUID uuid);
 		void DestroyEntity(Entity e);
-		Entity DuplicateEntity(Entity& entity);
+		Entity DuplicateEntity(Entity entity);
 		  
 		void StartRuntime();
 		void StopRuntime();
