@@ -35,7 +35,8 @@ project "MoonEngine"
         includeIconFont,
         includeImGuizmo,
         includeBox2D,
-        includeMono
+        includeMono,
+        includeFileWatch
     }
 
     links

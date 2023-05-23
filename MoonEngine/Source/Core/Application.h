@@ -53,14 +53,20 @@ namespace MoonEngine
 		static GLFWwindow* GetWindow() { return s_Instance->m_Window->GetNative(); }
 
 		static void SetVsync(bool state) { GetPrefs().Window.VsyncOn = state; s_Instance->m_Window->SetVsync(state); }
-
+		
+		void AddToThreadQueue(const std::function<void()>& threadFunc);
 	private:
 		static Application* s_Instance;
 
 		ApplicationPrefs m_Prefs;
 		ImGuiLayer* m_ImGuiLayer;
 		Window* m_Window;
+		
 		std::vector<Shared<ApplicationLayer>> m_ApplicationLayers;
+		
+		std::vector<std::function<void()>> m_ThreadQueue;
+		std::mutex m_ThreadQueueMutex;
+		void ExecuteThreadQueue();
 
 		bool m_IsRunning = false;
 

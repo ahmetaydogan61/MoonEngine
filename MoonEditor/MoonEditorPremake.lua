@@ -25,7 +25,8 @@ project "MoonEditor"
         includeSpdlog,
         includeYaml,
         includeIconFont,
-        includeImGuizmo
+        includeImGuizmo,
+        includeFileWatch,
     }
 
     links

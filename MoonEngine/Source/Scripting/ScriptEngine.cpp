@@ -3,6 +3,8 @@
 #include "Scripting/ScriptDepot.h"
 #include "Scripting/ScriptingUtils.h"
 
+#include "Core/Application.h"
+
 #include "Engine/Entity.h"
 #include "Engine/Components.h"
 
@@ -10,6 +12,8 @@
 #include "mono/metadata/assembly.h"
 #include "mono/metadata/object.h"
 #include "mono/metadata/tabledefs.h"
+
+#include "FileWatch.hpp"
 
 namespace MoonEngine
 {
@@ -31,10 +35,27 @@ namespace MoonEngine
 
 		std::unordered_map<UUID, Shared<ScriptInstance>> ScriptInstances;
 
+		Unique< filewatch::FileWatch<std::string>> DLLWatcher;
+		bool DLLReloading = false;
+
 		Scene* RuntimeScene;
 	};
 
 	static ScriptEngineData* s_Data = nullptr;
+
+	static void FileWatchEvent(const std::string& path, const filewatch::Event change_type)
+	{
+		if (!s_Data->DLLReloading && change_type == filewatch::Event::modified)
+		{
+			s_Data->DLLReloading = true;
+
+			Application::GetApp()->AddToThreadQueue([]()
+			{
+				s_Data->DLLWatcher.reset();
+				ScriptEngine::ReloadAssembly();
+			});
+		}
+	}
 
 	void ScriptEngine::Init()
 	{
@@ -68,6 +89,9 @@ namespace MoonEngine
 		MonoAssembly* assm = s_Data->ScripterAssembly;
 
 		s_Data->ScripterImage = mono_assembly_get_image(s_Data->ScripterAssembly);
+
+		s_Data->DLLWatcher = MakeUnique<filewatch::FileWatch<std::string>>("TemplateProject/Build/Template.dll", FileWatchEvent);
+		s_Data->DLLReloading = false;
 	}
 
 	void ScriptEngine::LoadAppAssembly(const std::filesystem::path& path)
@@ -276,7 +300,7 @@ namespace MoonEngine
 	bool ScriptEngine::CheckScriptClass(const std::string& scriptName)
 	{
 		bool result = s_Data->ScriptClasses.contains(scriptName);
-		if(!result)
+		if (!result)
 			ME_SYS_WAR("Script Class Does Not Exist! (Script Name: {})", scriptName);
 		return result;
 	}
@@ -299,7 +323,7 @@ namespace MoonEngine
 	bool ScriptEngine::CheckScriptInstance(UUID id)
 	{
 		bool result = s_Data->ScriptInstances.contains(id);
-		if(!result)
+		if (!result)
 			ME_SYS_WAR("Entity Instance Does Not Exist! (UUID: {})", id);
 		return result;
 	}
@@ -448,7 +472,24 @@ namespace MoonEngine
 	{
 		switch (fieldType)
 		{
+			case MoonEngine::ScriptFieldType::Byte:  return "Byte";
+			case MoonEngine::ScriptFieldType::Char:  return "Char";
+			case MoonEngine::ScriptFieldType::Bool: return "Bool";
+
 			case MoonEngine::ScriptFieldType::Float: return "Float";
+			case MoonEngine::ScriptFieldType::Double: return "Double";
+
+			case MoonEngine::ScriptFieldType::Short: return "Short";
+			case MoonEngine::ScriptFieldType::Int:   return "Int";
+			case MoonEngine::ScriptFieldType::Long:  return "Long";
+
+			case MoonEngine::ScriptFieldType::UShort: return "UShort";
+			case MoonEngine::ScriptFieldType::UInt:   return "UInt";
+			case MoonEngine::ScriptFieldType::ULong:  return "ULong";
+
+			case MoonEngine::ScriptFieldType::Vector2: return "Vector2";
+			case MoonEngine::ScriptFieldType::Vector3: return "Vector3";
+			case MoonEngine::ScriptFieldType::Vector4: return "Vector4";
 
 			case MoonEngine::ScriptFieldType::Entity: return "Entity";
 		}
@@ -459,7 +500,24 @@ namespace MoonEngine
 
 	ScriptFieldType ScriptFieldTypeConverter::FromString(std::string_view fieldName)
 	{
+		if (fieldName == "Byte")  return ScriptFieldType::Byte;
+		if (fieldName == "Char")  return ScriptFieldType::Char;
+		if (fieldName == "Bool") return ScriptFieldType::Bool;
+
 		if (fieldName == "Float") return ScriptFieldType::Float;
+		if (fieldName == "Double") return ScriptFieldType::Double;
+
+		if (fieldName == "Short") return ScriptFieldType::Short;
+		if (fieldName == "Int")   return ScriptFieldType::Int;
+		if (fieldName == "Long")  return ScriptFieldType::Long;
+
+		if (fieldName == "UShort") return ScriptFieldType::UShort;
+		if (fieldName == "UInt")   return ScriptFieldType::UInt;
+		if (fieldName == "ULong")  return ScriptFieldType::ULong;
+
+		if (fieldName == "Vector2")  return ScriptFieldType::Vector2;
+		if (fieldName == "Vector3")  return ScriptFieldType::Vector3;
+		if (fieldName == "Vector4")  return ScriptFieldType::Vector4;
 
 		if (fieldName == "Entity") return ScriptFieldType::Entity;
 
@@ -472,7 +530,24 @@ namespace MoonEngine
 		MonoType* type = mono_field_get_type(monoField);
 		std::string typeName = mono_type_get_name(type);
 
+		if (typeName == "System.Byte") return ScriptFieldType::Byte;
+		if (typeName == "System.Char") return ScriptFieldType::Char;
+		if (typeName == "System.Boolean") return ScriptFieldType::Bool;
+
 		if (typeName == "System.Single") return ScriptFieldType::Float;
+		if (typeName == "System.Double") return ScriptFieldType::Double;
+
+		if (typeName == "System.Int16") return ScriptFieldType::Short;
+		if (typeName == "System.Int32") return ScriptFieldType::Int;
+		if (typeName == "System.Int64") return ScriptFieldType::Long;
+
+		if (typeName == "System.UInt16") return ScriptFieldType::UShort;
+		if (typeName == "System.UInt32") return ScriptFieldType::UInt;
+		if (typeName == "System.UInt64") return ScriptFieldType::ULong;
+
+		if (typeName == "MoonEngine.Vector2") return ScriptFieldType::Vector2;
+		if (typeName == "MoonEngine.Vector3") return ScriptFieldType::Vector3;
+		if (typeName == "MoonEngine.Vector4") return ScriptFieldType::Vector4;
 
 		if (typeName == "MoonEngine.Entity") return ScriptFieldType::Entity;
 

@@ -18,6 +18,7 @@ includeIconFont = "%{wks.location}/Externals/IconFontCppHeaders"
 includeImGuizmo = "%{wks.location}/Externals/ImGuizmo"
 includeBox2D = "%{wks.location}/Externals/Box2D/include"
 includeMono = "%{wks.location}/Externals/mono/include"
+includeFileWatch = "%{wks.location}/Externals/filewatch"
 
 LibraryDir = {}
 LibraryDir["mono"] = "%{wks.location}/Externals/mono/lib/%{cfg.buildcfg}"

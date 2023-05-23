@@ -19,7 +19,11 @@ namespace MoonEngine
 	enum class ScriptFieldType
 	{
 		Unknown = 0,
-		Float,
+		Byte, Char, Bool,
+		Float, Double,
+		Short, Int, Long,
+		UShort, UInt, ULong,
+		Vector2, Vector3, Vector4,
 		Entity
 	};
 
@@ -37,6 +41,7 @@ namespace MoonEngine
 		MonoClassField* MonoField;
 	
 		uint8_t Data[16];
+		char* stringData = nullptr;
 	};
 	
 	class ScriptClass

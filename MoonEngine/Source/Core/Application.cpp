@@ -54,6 +54,22 @@ namespace MoonEngine
 		ME_SYS_SUC("ImGui Initialized...");
 	}
 
+	void Application::AddToThreadQueue(const std::function<void()>& eventListener)
+	{
+		std::scoped_lock<std::mutex> lock(m_ThreadQueueMutex);
+		m_ThreadQueue.emplace_back(eventListener);
+	}
+
+	void Application::ExecuteThreadQueue()
+	{
+		std::scoped_lock<std::mutex> lock(m_ThreadQueueMutex);
+
+		for (auto& func : m_ThreadQueue)
+			func();
+
+		m_ThreadQueue.clear();
+	}
+
 	void Application::Run()
 	{
 		for (auto& layer : m_ApplicationLayers)
@@ -68,6 +84,8 @@ namespace MoonEngine
 		while (m_IsRunning)
 		{
 			time.Calculate((float)glfwGetTime());
+
+			ExecuteThreadQueue();
 
 			for (auto& layer : m_ApplicationLayers)
 				layer->Update();
