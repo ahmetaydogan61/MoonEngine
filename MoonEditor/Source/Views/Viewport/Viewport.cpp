@@ -28,6 +28,7 @@ namespace MoonEngine
 		FramebufferProps props = { {FramebufferTextureFormat::RGBA8}, {FramebufferTextureFormat::RED_INTEGER}, {FramebufferTextureFormat::DEPTH} };
 		Viewbuffer = MakeShared<Framebuffer>(props);
 		m_EditorCamera = MakeShared<EditorCamera>();
+		m_EditorCamera->Zoom(2.5f);
 	}
 
 	void ViewportView::Update()

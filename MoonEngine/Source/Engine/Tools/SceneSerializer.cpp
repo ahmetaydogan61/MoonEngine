@@ -510,7 +510,6 @@ namespace MoonEngine
 					auto scriptFields = scriptNode["Fields"];
 					if (scriptFields)
 					{
-						ME_LOG("Script Field Exists");
 						auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
 						if (scriptInstance)
 						{
@@ -523,7 +522,6 @@ namespace MoonEngine
 									continue;
 
 								ScriptField& field = instanceFields.at(name);
-								ME_LOG(field.FieldName);
 
 								switch (field.Type)
 								{
