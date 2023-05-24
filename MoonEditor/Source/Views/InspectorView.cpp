@@ -13,98 +13,6 @@
 
 namespace MoonEngine
 {
-	void ImGuiFieldConverter(ScriptInstance& instance, const ScriptField& field)
-	{
-		switch (field.Type)
-		{
-			case ScriptFieldType::Float:
-			{
-				float data = 0.0f;
-				instance.GetFieldValue(field, &data);
-
-				if (ImGui::DragFloat(field.FieldName.c_str(), &data))
-					instance.SetFieldValue(field, &data);
-
-				break;
-			}
-			case ScriptFieldType::Entity:
-			{
-				ImGuiUtils::Label(field.FieldName.c_str());
-
-				bool reset = false;
-				if (ImGui::Button(" X "))
-					reset = true;
-
-				ImGui::SameLine();
-
-				uint64_t data = 0;
-
-				instance.GetEntityReference(field, &data);
-
-				ImGui::Text("%llu", data);
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
-					{
-						uint64_t id = *(const uint64_t*)payload->Data;
-						instance.SetEntityReference(field, &id);
-					}
-
-					ImGui::EndDragDropTarget();
-				}
-
-				if (reset)
-					instance.SetEntityReference(field, 0);
-				break;
-			}
-		}
-	}
-
-	void ImGuiInstanceFieldConverter(ScriptInstance& instance, ScriptField& field)
-	{
-		switch (field.Type)
-		{
-			case ScriptFieldType::Float:
-			{
-				ImGui::DragFloat(field.FieldName.c_str(), &*(float*)field.Data);
-				break;
-			}
-			case ScriptFieldType::Entity:
-			{
-				ImGuiUtils::Label(field.FieldName.c_str());
-
-				bool reset = false;
-				if (ImGui::Button(" X "))
-					reset = true;
-
-				ImGui::SameLine();
-
-				ImGui::Text("%llu", *(uint64_t*)field.Data);
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
-					{
-						memcpy(field.Data, payload->Data, sizeof(uint64_t));
-					}
-
-					ImGui::EndDragDropTarget();
-				}
-
-				if (reset)
-					memset(field.Data, 0, sizeof(uint64_t));
-				break;
-			}
-		}
-	}
-
-	InspectorView::InspectorView()
-	{
-		Name = ICON_MD_MANAGE_SEARCH;
-		Name += "Inspector";
-	}
-
 	void BeginDrawProp(const char* label)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_CellPadding, { 8.0f, 2.0f });
@@ -126,6 +34,232 @@ namespace MoonEngine
 		ImGui::TableNextColumn();
 		func();
 		ImGui::PopID();
+	}
+
+#define ImGuiFieldDrag(DataType, data) ImGui::DragScalar("##scalarfield", ImGuiDataType_##DataType, &data, 0.1f)
+
+	static void ImGuiFieldConverter(ScriptInstance& instance, const ScriptField& field)
+	{
+		RenderProp(field.FieldName.c_str(), [&]()
+		{
+			void* data;
+			instance.GetFieldValue(field, &data);
+			switch (field.Type)
+			{
+				case ScriptFieldType::Bool:
+				{
+					uint8_t boolData = (uint8_t)data;
+					bool result = boolData;
+					if (ImGui::Checkbox("##boolfield", &result))
+						instance.SetFieldValue(field, &result);
+					break;
+				}
+				case ScriptFieldType::Double:
+				{
+					if (ImGuiFieldDrag(Double, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::Float:
+				{
+					if (ImGuiFieldDrag(Float, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::Short:
+				{
+					if (ImGuiFieldDrag(S16, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::Int:
+				{
+					if (ImGuiFieldDrag(S32, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::Long:
+				{
+					if (ImGuiFieldDrag(S64, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::UShort:
+				{
+					if (ImGuiFieldDrag(U16, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::UInt:
+				{
+					if (ImGuiFieldDrag(U32, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::ULong:
+				{
+					if (ImGuiFieldDrag(U64, data))
+						instance.SetFieldValue(field, &data);
+					break;
+				}
+				case ScriptFieldType::Vector2:
+				{
+					void* data;
+					glm::vec2* vec2 = (glm::vec2*)instance.GetFieldValue(field, &data);
+					if (ImGui::DragFloat2("##vec2", &(*vec2)[0]))
+						instance.SetFieldValue(field, vec2);
+					break;
+				}
+				case ScriptFieldType::Vector3:
+				{
+					void* data;
+					glm::vec3* vec3 = (glm::vec3*)instance.GetFieldValue(field, &data);
+					if (ImGui::DragFloat3("##vec3", &(*vec3)[0]))
+						instance.SetFieldValue(field, vec3);
+					break;
+				}
+				case ScriptFieldType::Vector4:
+				{
+					void* data;
+					glm::vec4* vec4 = (glm::vec4*)instance.GetFieldValue(field, &data);
+					if (ImGui::DragFloat4("##vec4", &(*vec4)[0]))
+						instance.SetFieldValue(field, vec4);
+					break;
+				}
+				case ScriptFieldType::Entity:
+				{
+					bool reset = false;
+					if (ImGui::Button(" X "))
+						reset = true;
+
+					ImGui::SameLine();
+
+					instance.GetEntityReference(field, &data);
+					ImGui::Text("%llu", data);
+
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
+						{
+							uint64_t id = *(const uint64_t*)payload->Data;
+							instance.SetEntityReference(field, &id);
+						}
+
+						ImGui::EndDragDropTarget();
+					}
+					if (reset)
+						instance.SetEntityReference(field, 0);
+					break;
+				}
+			}
+		});
+	}
+
+	static void ImGuiInstanceFieldConverter(ScriptInstance& instance, ScriptField& field)
+	{
+		RenderProp(field.FieldName.c_str(), [&]()
+		{
+			switch (field.Type)
+			{
+				case ScriptFieldType::Bool:
+				{
+					uint8_t* result = (uint8_t*)field.Data;
+					bool data = *result;
+					if (ImGui::Checkbox("##boolfield", &data))
+						memcpy(field.Data, &data, sizeof(data));
+					break;
+				}
+				case ScriptFieldType::Float:
+				{
+					ImGuiFieldDrag(Float, field.Data);
+					break;
+				}
+				case ScriptFieldType::Double:
+				{
+					ImGuiFieldDrag(Double, field.Data);
+					break;
+				}
+				case ScriptFieldType::Short:
+				{
+					ImGuiFieldDrag(S16, field.Data);
+					break;
+				}
+				case ScriptFieldType::Int:
+				{
+					ImGuiFieldDrag(S32, field.Data);
+					break;
+				}
+				case ScriptFieldType::Long:
+				{
+					ImGuiFieldDrag(S64, field.Data);
+					break;
+				}
+				case ScriptFieldType::UShort:
+				{
+					ImGuiFieldDrag(U16, field.Data);
+					break;
+				}
+				case ScriptFieldType::UInt:
+				{
+					ImGuiFieldDrag(U32, field.Data);
+					break;
+				}
+				case ScriptFieldType::ULong:
+				{
+					ImGuiFieldDrag(U64, field.Data);
+					break;
+				}
+				case ScriptFieldType::Vector2:
+				{
+					glm::vec2* result = (glm::vec2*)field.Data;
+					ImGui::DragFloat2("##vec2", &(*result)[0]);
+					break;
+				}
+				case ScriptFieldType::Vector3:
+				{
+					glm::vec3* result = (glm::vec3*)field.Data;
+					ImGui::DragFloat3("##vec3", &(*result)[0]);
+					break;
+				}
+				case ScriptFieldType::Vector4:
+				{
+					glm::vec4* result = (glm::vec4*)field.Data;
+					ImGui::DragFloat4("##vec4", &(*result)[0]);
+					break;
+				}
+				case ScriptFieldType::Entity:
+				{
+					bool reset = false;
+					if (ImGui::Button(" X "))
+						reset = true;
+
+					ImGui::SameLine();
+
+					ImGui::Text("%llu", *(uint64_t*)field.Data);
+
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ME_Entity"))
+						{
+							memcpy(field.Data, payload->Data, sizeof(uint64_t));
+						}
+
+						ImGui::EndDragDropTarget();
+					}
+
+					if (reset)
+						memset(field.Data, 0, sizeof(uint64_t));
+
+					break;
+				}
+			}
+		});
+	}
+
+	InspectorView::InspectorView()
+	{
+		Name = ICON_MD_MANAGE_SEARCH;
+		Name += "Inspector";
 	}
 
 	void DrawTreeProp(const char* label, std::function<void()> func)
@@ -380,58 +514,58 @@ namespace MoonEngine
 
 		ShowComponent<ScriptComponent>("Script", [&](ScriptComponent& component)
 		{
-			BeginDrawProp("##Script");
+			bool isEditorPlaying = EditorLayer::State() != EditorLayer::EditorState::Edit;
 
-			RenderProp("Class", [&]
+			std::vector<std::string> classes;
+
+			for (const auto& [name, scriptClass] : ScriptEngine::GetScriptClasses())
+				classes.push_back(name);
+
+			ImGuiUtils::Label("Class");
+			const char* currentItem = component.ClassName.c_str();
+			if (ImGui::BeginCombo("##Type", currentItem, ImGuiComboFlags_::ImGuiComboFlags_NoArrowButton))
 			{
-				bool isEditorPlaying = EditorLayer::State() != EditorLayer::EditorState::Edit;
-
-				std::vector<std::string> classes;
-
-				for (const auto& [name, scriptClass] : ScriptEngine::GetScriptClasses())
-					classes.push_back(name);
-
-				const char* currentItem = component.ClassName.c_str();
-				if (ImGui::BeginCombo("##Type", currentItem, ImGuiComboFlags_::ImGuiComboFlags_NoArrowButton))
+				for (int n = 0; n < classes.size(); n++)
 				{
-					for (int n = 0; n < classes.size(); n++)
+					bool is_selected = (currentItem == classes[n]);
+
+					if (ImGui::Selectable(classes[n].c_str(), is_selected))
 					{
-						bool is_selected = (currentItem == classes[n]);
-
-						if (ImGui::Selectable(classes[n].c_str(), is_selected))
-						{
-							component.ClassName = classes[n];
-							ScriptEngine::CreateEntityInstance(selectedEntity, component.ClassName);
-							if (isEditorPlaying)
-								ScriptEngine::AwakeEntity(selectedEntity, component.ClassName);
-						}
-
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
-				}
-
-				if (ScriptEngine::CheckScriptClass(component.ClassName))
-				{
-					Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
-					if (scriptInstance)
-					{
+						component.ClassName = classes[n];
+						ScriptEngine::CreateEntityInstance(selectedEntity, component.ClassName);
 						if (isEditorPlaying)
-						{
-							const auto& fields = scriptInstance->GetScriptClass()->GetFields();
-							for (const auto& [name, field] : fields)
-								ImGuiFieldConverter(*scriptInstance, field);
-						}
-						else
-						{
-							auto& fields = scriptInstance->GetInstanceFields();
-							for (auto& [name, field] : fields)
-								ImGuiInstanceFieldConverter(*scriptInstance, field);
-						}
+							ScriptEngine::AwakeEntity(selectedEntity, component.ClassName);
+					}
+
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+
+			ImGuiUtils::SeparatorDistanced(10.0f, 10.0f);
+
+			BeginDrawProp("##ScriptFields");
+
+			if (ScriptEngine::CheckScriptClass(component.ClassName))
+			{
+				Shared<ScriptInstance> scriptInstance = ScriptEngine::GetScriptInstance(selectedEntity.GetUUID());
+				if (scriptInstance)
+				{
+					if (isEditorPlaying)
+					{
+						const auto& fields = scriptInstance->GetScriptClass()->GetFields();
+						for (const auto& [name, field] : fields)
+							ImGuiFieldConverter(*scriptInstance, field);
+					}
+					else
+					{
+						auto& fields = scriptInstance->GetInstanceFields();
+						for (auto& [name, field] : fields)
+							ImGuiInstanceFieldConverter(*scriptInstance, field);
 					}
 				}
-			});
+			}
 
 			EndDrawProp();
 		}, selectedEntity);

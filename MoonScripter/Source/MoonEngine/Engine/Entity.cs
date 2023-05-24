@@ -8,12 +8,14 @@ namespace MoonEngine
 
         internal Entity(ulong id)
         {
-            ID = id;
+            m_InstanceID = id;
             Transform = new TransformComponent() { Entity = this };
         }
 
-        public ulong ID;
+        private readonly ulong m_InstanceID = 0;
         private TransformComponent m_Transform;
+
+        public ulong ID => m_InstanceID;
 
         public TransformComponent Transform
         {
@@ -21,7 +23,6 @@ namespace MoonEngine
             {
                 return m_Transform;
             }
-
             private set
             {
                 m_Transform = value;

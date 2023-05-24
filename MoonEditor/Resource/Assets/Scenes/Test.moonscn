@@ -1,0 +1,45 @@
+Scene: Test
+Entities:
+  - Entity: 5227484474770350105
+    IdentityComponent:
+      Name: Camera
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      IsMain: true
+      Size: 1
+    ScriptComponent:
+      ClassName: Game.Camera
+      Fields:
+        - Name: ADoubleVal
+          Type: Double
+          Value: 1
+        - Name: IntegerTest
+          Type: Int
+          Value: 1
+        - Name: LongTest
+          Type: Long
+          Value: 213
+        - Name: Other
+          Type: Entity
+          Value: 5227484474770350105
+        - Name: ShortTest
+          Type: Short
+          Value: 3
+        - Name: StartPosition
+          Type: Vector2
+          Value: [12, 4]
+        - Name: ZoomSpeed
+          Type: Float
+          Value: 12
+        - Name: s
+          Type: Bool
+          Value: false
+        - Name: sas
+          Type: Bool
+          Value: false
+        - Name: ss
+          Type: Bool
+          Value: false

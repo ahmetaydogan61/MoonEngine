@@ -108,18 +108,12 @@ namespace YAML
 
 namespace MoonEngine
 {
-#define WRITE_SCRIPT_FIELD_TYPE(FieldType, Type) \
-		case ScriptFieldType::FieldType:		 \
-			out << scriptField.GetValue<Type>(); \
-			break
+#define SERIALIZE_FIELD(FieldType, Type) case ScriptFieldType::FieldType: out << *(Type*)field.Data; break;
 
-#define READ_SCRIPT_FIELD_TYPE(FieldType, Type)			\
-		case ScriptFieldType::FieldType:				\
-		{												\
-			Type data = scriptField["Value"].as<Type>(); \
-			fieldInstance.SetValue(data);				\
-			break;										\
-		}
+#define DESERIALIZE_FIELD(FieldType, Type) case ScriptFieldType::FieldType: {\
+		Type value = scriptField["Value"].as<Type>();\
+		memcpy(field.Data, &value, sizeof(Type));\
+		break; }
 
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
@@ -349,7 +343,7 @@ namespace MoonEngine
 	{
 		out << YAML::BeginMap;
 		const auto& uuid = entity.GetComponent<UUIDComponent>();
-		out << YAML::Key << "Entity" << YAML::Value << uuid.ID.ToString();
+		out << YAML::Key << "Entity" << YAML::Value << uuid.ID;
 
 		SerializeIfExists<IdentityComponent>(out, entity);
 		SerializeIfExists<TransformComponent>(out, entity);
@@ -358,9 +352,62 @@ namespace MoonEngine
 
 		if (entity.HasComponent<ScriptComponent>())
 		{
+			YAMLSerializer parser(out);
+			ScriptComponent& c = entity.GetComponent<ScriptComponent>();
+			parser.BeginParse(GetTypeName<ScriptComponent>());
+			parser.Serialize(c);
+
+			auto scriptInstance = ScriptEngine::GetScriptInstance(uuid.ID);
+			if (scriptInstance && scriptInstance->GetInstanceFields().size() > 0)
+			{
+				out << YAML::Key << "Fields" << YAML::Value;
+				out << YAML::BeginSeq;
+
+				for (const auto& [name, field] : scriptInstance->GetInstanceFields())
+				{
+					if (!scriptInstance->GetScriptClass()->GetFields().contains(name))
+						continue;
+
+					out << YAML::BeginMap;
+					out << YAML::Key << "Name" << YAML::Value << name;
+					out << YAML::Key << "Type" << YAML::Value << ScriptFieldTypeConverter::ToString(field.Type);
+					out << YAML::Key << "Value" << YAML::Value;
+
+					switch (field.Type)
+					{
+						SERIALIZE_FIELD(Char, char);
+						SERIALIZE_FIELD(Bool, bool);
+
+						SERIALIZE_FIELD(Float, float);
+						SERIALIZE_FIELD(Double, double);
+
+						SERIALIZE_FIELD(Byte, int8_t);
+						SERIALIZE_FIELD(Short, int16_t);
+						SERIALIZE_FIELD(Int, int32_t);
+						SERIALIZE_FIELD(Long, int64_t);
+
+						SERIALIZE_FIELD(UByte, uint8_t);
+						SERIALIZE_FIELD(UShort, uint16_t);
+						SERIALIZE_FIELD(UInt, uint32_t);
+						SERIALIZE_FIELD(ULong, uint64_t);
+
+						SERIALIZE_FIELD(Vector2, glm::vec2);
+						SERIALIZE_FIELD(Vector3, glm::vec3);
+						SERIALIZE_FIELD(Vector4, glm::vec4);
+
+						SERIALIZE_FIELD(Entity, UUID);
+					}
+
+					out << YAML::EndMap;
+				}
+
+				out << YAML::EndSeq;
+			}
+			parser.EndParse();
 		}
 
 		SerializeIfExists<PhysicsBodyComponent>(out, entity);
+
 		if (entity.HasComponent<ParticleComponent>())
 		{
 			YAMLSerializer parser(out);
@@ -436,8 +483,7 @@ namespace MoonEngine
 		{
 			for (auto entity : entities)
 			{
-				const auto& uuidStr = entity["Entity"].as<std::string>();
-				UUID uuid(uuidStr);
+				UUID uuid(entity["Entity"].as<uint64_t>());
 
 				Entity deserializedEntity = scene->CreateEntity(uuid);
 
@@ -459,6 +505,69 @@ namespace MoonEngine
 					component.ClassName = scriptNode["ClassName"].as<std::string>();
 
 					deserializedEntity.ReplaceComponent<ScriptComponent>(component);
+					auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
+
+					auto scriptFields = scriptNode["Fields"];
+					if (scriptFields)
+					{
+						ME_LOG("Script Field Exists");
+						auto scriptInstance = ScriptEngine::GetScriptInstance(uuid);
+						if (scriptInstance)
+						{
+							auto& instanceFields = scriptInstance->GetInstanceFields();
+							for (const auto& scriptField : scriptFields)
+							{
+								const auto& name = scriptField["Name"].as<std::string>();
+
+								if (!instanceFields.contains(name))
+									continue;
+
+								ScriptField& field = instanceFields.at(name);
+								ME_LOG(field.FieldName);
+
+								switch (field.Type)
+								{
+									DESERIALIZE_FIELD(Char, char);
+									DESERIALIZE_FIELD(Bool, bool);
+
+									DESERIALIZE_FIELD(Float, float);
+									DESERIALIZE_FIELD(Double, double);
+
+									DESERIALIZE_FIELD(Byte, int8_t);
+									DESERIALIZE_FIELD(Short, int16_t);
+									DESERIALIZE_FIELD(Int, int32_t);
+									DESERIALIZE_FIELD(Long, int64_t);
+
+									DESERIALIZE_FIELD(UByte, uint8_t);
+									DESERIALIZE_FIELD(UShort, uint16_t);
+									DESERIALIZE_FIELD(UInt, uint32_t);
+									DESERIALIZE_FIELD(ULong, uint64_t);
+
+									case ScriptFieldType::Vector2:
+									{
+										glm::vec2 value = glm::make_vec2(scriptField["Value"].as<std::vector<float>>().data());
+										memcpy(field.Data, &value, sizeof(glm::vec2));
+										break;
+									}
+									case ScriptFieldType::Vector3:
+									{
+										glm::vec3 value = glm::make_vec3(scriptField["Value"].as<std::vector<float>>().data());
+										memcpy(field.Data, &value, sizeof(glm::vec3));
+										break;
+									}
+									case ScriptFieldType::Vector4:
+									{
+										glm::vec4 value = glm::make_vec4(scriptField["Value"].as<std::vector<float>>().data());
+										memcpy(field.Data, &value, sizeof(glm::vec4));
+										break;
+									}
+
+									DESERIALIZE_FIELD(Entity, UUID);
+								}
+
+							}
+						}
+					}
 				}
 
 				auto particleNode = entity[GetTypeName<ParticleComponent>()];

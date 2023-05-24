@@ -146,13 +146,9 @@ namespace MoonEngine
 		while (MonoClassField* field = mono_class_get_fields(entityClass, &iterator))
 		{
 			uint32_t flags = mono_field_get_flags(field);
-			if (flags & FIELD_ATTRIBUTE_PUBLIC)
-			{
-				const char* fieldName = mono_field_get_name(field);
-				ScriptFieldType fieldType = ScriptFieldTypeConverter::FromMonoType(field);
-
-				s_Data->EntityClass.m_Fields[fieldName] = { fieldType, fieldName, field };
-			}
+			const char* fieldName = mono_field_get_name(field);
+			ScriptFieldType fieldType = ScriptFieldTypeConverter::FromMonoType(field);
+			s_Data->EntityClass.m_Fields[fieldName] = { fieldType, fieldName, field };
 		}
 		//-EntityClass Init
 
@@ -403,16 +399,16 @@ namespace MoonEngine
 		return mono_runtime_invoke(method, m_Instance, params, nullptr);
 	}
 
-	bool ScriptInstance::GetFieldValue(const ScriptField& field, void* value)
+	void* ScriptInstance::GetFieldValue(const ScriptField& field, void* value)
 	{
 		if (field.Type == ScriptFieldType::Entity)
 		{
 			GetEntityReference(field, value);
-			return true;
+			return value;
 		}
-
 		mono_field_get_value(m_Instance, field.MonoField, value);
-		return true;
+
+		return value;
 	}
 
 	bool ScriptInstance::SetFieldValue(const ScriptField& field, const void* value)
@@ -434,7 +430,7 @@ namespace MoonEngine
 			MonoObject* instance = mono_field_get_value_object(s_Data->AppDomain, field.MonoField, m_Instance);
 
 			if (instance)
-				mono_field_get_value(instance, s_Data->EntityClass.GetFields().at("ID").MonoField, value);
+				mono_field_get_value(instance, s_Data->EntityClass.GetFields().at("m_InstanceID").MonoField, value);
 		}
 	}
 
@@ -472,17 +468,18 @@ namespace MoonEngine
 	{
 		switch (fieldType)
 		{
-			case MoonEngine::ScriptFieldType::Byte:  return "Byte";
 			case MoonEngine::ScriptFieldType::Char:  return "Char";
 			case MoonEngine::ScriptFieldType::Bool: return "Bool";
 
 			case MoonEngine::ScriptFieldType::Float: return "Float";
 			case MoonEngine::ScriptFieldType::Double: return "Double";
 
+			case MoonEngine::ScriptFieldType::Byte:  return "Byte";
 			case MoonEngine::ScriptFieldType::Short: return "Short";
 			case MoonEngine::ScriptFieldType::Int:   return "Int";
 			case MoonEngine::ScriptFieldType::Long:  return "Long";
 
+			case MoonEngine::ScriptFieldType::UByte:  return "UByte";
 			case MoonEngine::ScriptFieldType::UShort: return "UShort";
 			case MoonEngine::ScriptFieldType::UInt:   return "UInt";
 			case MoonEngine::ScriptFieldType::ULong:  return "ULong";
@@ -500,17 +497,18 @@ namespace MoonEngine
 
 	ScriptFieldType ScriptFieldTypeConverter::FromString(std::string_view fieldName)
 	{
-		if (fieldName == "Byte")  return ScriptFieldType::Byte;
 		if (fieldName == "Char")  return ScriptFieldType::Char;
 		if (fieldName == "Bool") return ScriptFieldType::Bool;
 
 		if (fieldName == "Float") return ScriptFieldType::Float;
 		if (fieldName == "Double") return ScriptFieldType::Double;
 
+		if (fieldName == "Byte")  return ScriptFieldType::Byte;
 		if (fieldName == "Short") return ScriptFieldType::Short;
 		if (fieldName == "Int")   return ScriptFieldType::Int;
 		if (fieldName == "Long")  return ScriptFieldType::Long;
 
+		if (fieldName == "UByte")  return ScriptFieldType::UByte;
 		if (fieldName == "UShort") return ScriptFieldType::UShort;
 		if (fieldName == "UInt")   return ScriptFieldType::UInt;
 		if (fieldName == "ULong")  return ScriptFieldType::ULong;
@@ -530,17 +528,18 @@ namespace MoonEngine
 		MonoType* type = mono_field_get_type(monoField);
 		std::string typeName = mono_type_get_name(type);
 
-		if (typeName == "System.Byte") return ScriptFieldType::Byte;
 		if (typeName == "System.Char") return ScriptFieldType::Char;
 		if (typeName == "System.Boolean") return ScriptFieldType::Bool;
 
 		if (typeName == "System.Single") return ScriptFieldType::Float;
 		if (typeName == "System.Double") return ScriptFieldType::Double;
 
+		if (typeName == "System.Byte") return ScriptFieldType::Byte;
 		if (typeName == "System.Int16") return ScriptFieldType::Short;
 		if (typeName == "System.Int32") return ScriptFieldType::Int;
 		if (typeName == "System.Int64") return ScriptFieldType::Long;
 
+		if (typeName == "System.UByte") return ScriptFieldType::UByte;
 		if (typeName == "System.UInt16") return ScriptFieldType::UShort;
 		if (typeName == "System.UInt32") return ScriptFieldType::UInt;
 		if (typeName == "System.UInt64") return ScriptFieldType::ULong;

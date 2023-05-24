@@ -19,10 +19,10 @@ namespace MoonEngine
 	enum class ScriptFieldType
 	{
 		Unknown = 0,
-		Byte, Char, Bool,
+		Char, Bool,
 		Float, Double,
-		Short, Int, Long,
-		UShort, UInt, ULong,
+		Byte, Short, Int, Long,
+		UByte, UShort, UInt, ULong,
 		Vector2, Vector3, Vector4,
 		Entity
 	};
@@ -81,7 +81,7 @@ namespace MoonEngine
 		Shared<ScriptClass> GetScriptClass() { return m_ScriptClass; }
 		MonoObject* GetMonoObject() { return m_Instance; }
 
-		bool GetFieldValue(const ScriptField& field, void* value);
+		void* GetFieldValue(const ScriptField& field, void* value);
 		bool SetFieldValue(const ScriptField& field, const void* value);
 
 		void GetEntityReference(const ScriptField& field, void* value);
