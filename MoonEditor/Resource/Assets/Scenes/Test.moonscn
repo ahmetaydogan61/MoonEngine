@@ -13,33 +13,158 @@ Entities:
     ScriptComponent:
       ClassName: Game.Camera
       Fields:
-        - Name: ADoubleVal
-          Type: Double
-          Value: 1
-        - Name: IntegerTest
-          Type: Int
-          Value: 1
-        - Name: LongTest
-          Type: Long
-          Value: 213
-        - Name: Other
+        - Name: Player
           Type: Entity
-          Value: 5227484474770350105
-        - Name: ShortTest
-          Type: Short
-          Value: 3
-        - Name: StartPosition
-          Type: Vector2
-          Value: [12, 4]
+          Value: 15546570032356366730
         - Name: ZoomSpeed
           Type: Float
           Value: 12
-        - Name: s
-          Type: Bool
-          Value: false
-        - Name: sas
-          Type: Bool
-          Value: false
-        - Name: ss
-          Type: Bool
-          Value: false
+  - Entity: 15546570032356366730
+    IdentityComponent:
+      Name: Player
+    TransformComponent:
+      Position: [-3.96577835, 1.48162222, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\spritesheet.png
+      Layer: 1
+      SpriteCoords: [0, 1]
+      SpriteSize: [128, 128]
+      HasSpriteSheet: true
+    ScriptComponent:
+      ClassName: Game.Player
+      Fields:
+        - Name: BulletEntity
+          Type: Entity
+          Value: 15469803454077676650
+        - Name: FireRate
+          Type: Float
+          Value: 0.150000006
+        - Name: ShootForce
+          Type: Float
+          Value: 1.25
+        - Name: Speed
+          Type: Float
+          Value: 1250
+    PhysicsBodyComponent:
+      Type: Dynamic
+      FreezeRotation: true
+      ContinuousDetection: false
+      IsTrigger: false
+      LinearDamping: 0
+      AngularDamping: 0.00999999978
+      GravityScale: 1
+      Offset: [0.0500000007, -0.100000001]
+      Size: [0.300000012, 0.400000006]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 12477169920163655165
+    IdentityComponent:
+      Name: Static Square
+    TransformComponent:
+      Position: [0, -2.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [10, 0.5, 1]
+    SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [10, 0.5]
+      Texture: Resource\Assets\Textures\LearnOpenGL\wall.jpg
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
+    PhysicsBodyComponent:
+      Type: Static
+      FreezeRotation: false
+      ContinuousDetection: false
+      IsTrigger: false
+      LinearDamping: 0
+      AngularDamping: 0.00999999978
+      GravityScale: 1
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 15469803454077676650
+    IdentityComponent:
+      Name: Bullet
+    TransformComponent:
+      Position: [-0.207604676, 3.52395415, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.25, 0.25, 1]
+    SpriteComponent:
+      Color: [1, 1, 1, 1]
+      Tiling: [1, 1]
+      Texture: Resource\Assets\Textures\BrackeysPack\Pong\Ball.png
+      Layer: 0
+      SpriteCoords: [0, 0]
+      SpriteSize: [0, 0]
+      HasSpriteSheet: false
+    ScriptComponent:
+      ClassName: Game.TimedDestroyer
+      Fields:
+        - Name: TimeToDestroy
+          Type: Float
+          Value: 1
+    PhysicsBodyComponent:
+      Type: Static
+      FreezeRotation: true
+      ContinuousDetection: true
+      IsTrigger: false
+      LinearDamping: 0
+      AngularDamping: 0.00999999978
+      GravityScale: 0
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    ParticleComponent:
+      EmitterType: 1
+      PlayOnAwake: true
+      Looping: true
+      Duration: 5
+      ParticlePerSecond: 0
+      ParticlePerUnit: 50
+      SortMode: 1
+      Layer: 0
+      IsLifetimeConstant: false
+      Lifetime: [0.699999988, 1]
+      IsSpeedConstant: true
+      Speed: [0, 3]
+      SpawnPosition: [0, 0, 0]
+      SpawnRadius: [0.200000003, 0.200000003, 0]
+      RandomDirectionFactor: 1
+      DirectionRadiusFactor: 1
+      IsScale3D: false
+      IsScaleConstant: true
+      ScaleStart: [0.150000006, 1, 1]
+      ScaleStartRandom: [1, 1, 1]
+      IsScaleCycle: true
+      IsScaleEndConstant: true
+      ScaleEnd: [0, 0, 0]
+      ScaleEndRandom: [0, 0, 0]
+      IsRotation3D: false
+      IsRotationConstant: false
+      RotationStart: [0, 0, 0]
+      RotationStartRandom: [0, 0, 6.28318548]
+      IsRotationCycle: true
+      IsRotationEndConstant: false
+      RotationEnd: [0, 0, 0]
+      RotationEndRandom: [0, 0, 6.28318548]
+      Texture: Resource\Assets\Textures\BrackeysPack\Pong\Ball.png
+      IsColorConstant: false
+      ColorStart: [1, 1, 1, 1]
+      ColorStartRandom: [0.0114613175, 1, 0.991502583, 1]
+      IsColorCycle: true
+      IsColorEndConstant: false
+      ColorEnd: [0, 0.287239015, 0.421203434, 1]
+      ColorEndRandom: [0, 0.187190577, 0.343839526, 1]
