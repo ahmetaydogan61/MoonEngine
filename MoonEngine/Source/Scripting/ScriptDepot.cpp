@@ -9,6 +9,7 @@
 
 #include "mono/metadata/object.h"
 #include <mono/metadata/reflection.h>
+#include <box2d/b2_body.h>
 
 namespace MoonEngine
 {
@@ -25,6 +26,34 @@ namespace MoonEngine
 	}
 
 #pragma region Entity
+
+	uint64_t Entity_Instantiate(uint64_t entityId, glm::vec3* position)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		Entity e = scene->FindEntityWithUUID(entityId);
+		Entity newE = scene->DuplicateEntity(e);
+
+		newE.GetComponent<TransformComponent>().Position = *position;
+		newE.GetComponent<PhysicsBodyComponent>().SetPosition(*position);
+
+		return newE.GetUUID();
+	}
+
+	void Entity_Destroy(uint64_t entityId)
+	{
+		Entity e = GetEntity(entityId);
+		e.Destroy();
+	}
+
+	static MonoObject* Entity_GetScript(UUID entityId)
+	{
+		auto instance = ScriptEngine::GetScriptInstance(entityId);
+		ME_ASSERT(instance, "Script Instance does not exist!");
+		auto obj = instance->GetMonoObject();
+		ME_ASSERT(obj, "Mono Object does not exist!");
+
+		return obj;
+	}
 
 	bool Entity_HasComponent(uint64_t id, MonoReflectionType* type)
 	{
@@ -70,12 +99,41 @@ namespace MoonEngine
 
 #pragma region Physics
 
+	static void PhysicsBody_SetBodyType(UUID entityId, PhysicsBodyComponent::BodyType bodyType)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		auto entity = scene->FindEntityWithUUID(entityId);
+		entity.GetComponent<PhysicsBodyComponent>().Type = bodyType;
+		b2Body* body = (b2Body*)entity.GetComponent<PhysicsBodyComponent>().RuntimeBody;
+		body->SetType(PhysicsWorld::ConvertBodyType(bodyType));
+	}
+
 	static void PhysicsBody_AddForce(UUID entityId, glm::vec2* force, glm::vec2* position)
 	{
 		Scene* scene = ScriptEngine::GetRuntimeScene();
 		auto entity = scene->FindEntityWithUUID(entityId);
-
 		entity.GetComponent<PhysicsBodyComponent>().AddForce(*force, *position);
+	}
+
+	static void PhysicsBody_AddImpulse(UUID entityId, glm::vec2* force, glm::vec2* position)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		auto entity = scene->FindEntityWithUUID(entityId);
+		entity.GetComponent<PhysicsBodyComponent>().AddImpulse(*force, *position);
+	}
+
+	static void PhysicsBody_AddAngularImpulse(UUID entityId, float impulse)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		auto entity = scene->FindEntityWithUUID(entityId);
+		entity.GetComponent<PhysicsBodyComponent>().AddAngularImpulse(impulse);
+	}
+
+	static void PhysicsBody_AddTorque(UUID entityId, float force)
+	{
+		Scene* scene = ScriptEngine::GetRuntimeScene();
+		auto entity = scene->FindEntityWithUUID(entityId);
+		entity.GetComponent<PhysicsBodyComponent>().AddTorque(force);
 	}
 
 #pragma endregion
@@ -92,6 +150,11 @@ namespace MoonEngine
 	void ScriptDepot::InitializeCalls()
 	{
 		//Entity
+		ME_ADD_INTERNAL_CALL(Entity_Instantiate);
+		ME_ADD_INTERNAL_CALL(Entity_Destroy);
+		
+		ME_ADD_INTERNAL_CALL(Entity_GetScript);
+
 		ME_ADD_INTERNAL_CALL(Entity_HasComponent);
 
 		//Transform
@@ -103,7 +166,12 @@ namespace MoonEngine
 		ME_ADD_INTERNAL_CALL(Camera_SetSize);
 
 		//Physics
+		ME_ADD_INTERNAL_CALL(PhysicsBody_SetBodyType);
+
 		ME_ADD_INTERNAL_CALL(PhysicsBody_AddForce);
+		ME_ADD_INTERNAL_CALL(PhysicsBody_AddImpulse);
+		ME_ADD_INTERNAL_CALL(PhysicsBody_AddAngularImpulse);
+		ME_ADD_INTERNAL_CALL(PhysicsBody_AddTorque);
 
 		//Input
 		ME_ADD_INTERNAL_CALL(Input_GetKey);

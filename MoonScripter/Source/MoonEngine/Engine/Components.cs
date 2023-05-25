@@ -1,4 +1,6 @@
-﻿namespace MoonEngine
+﻿using System;
+
+namespace MoonEngine
 {
     public abstract class Component
     {
@@ -38,9 +40,34 @@
 
     public class PhysicsBodyComponent : Component
     {
+        public enum PhysicsBodyType
+        {
+            Static, Dynamic, Kinematic
+        }
+
+        public PhysicsBodyType BodyType
+        {
+            set { InternalCalls.PhysicsBody_SetBodyType(Entity.ID, value); }
+        }
+
         public void AddForce(Vector2 Force, Vector2 Position = new Vector2())
         {
             InternalCalls.PhysicsBody_AddForce(Entity.ID, ref Force, ref Position);
+        }
+
+        public void AddImpulse(Vector2 Force, Vector2 Position = new Vector2())
+        {
+            InternalCalls.PhysicsBody_AddImpulse(Entity.ID, ref Force, ref Position);
+        }
+
+        public void AddAngularImpulse(float impulse)
+        {
+            InternalCalls.PhysicsBody_AddAngularImpulse(Entity.ID, impulse);
+        }
+
+        public void AddTorque(float force)
+        {
+            InternalCalls.PhysicsBody_AddTorque(Entity.ID, force);
         }
     }
 }

@@ -29,6 +29,7 @@ namespace MoonEngine
 		float Restitution = 0.0f;
 		float RestitutionThreshold = 0.5f;
 
+		void SetPosition(const glm::vec2& position);
 		void AddForce(const glm::vec2& force, const glm::vec2& position);
 		void AddImpulse(const glm::vec2& force, const glm::vec2& position);
 		void AddTorque(float torque);

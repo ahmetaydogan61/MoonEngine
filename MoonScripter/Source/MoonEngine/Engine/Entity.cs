@@ -12,7 +12,7 @@ namespace MoonEngine
             Transform = new TransformComponent() { Entity = this };
         }
 
-        private readonly ulong m_InstanceID = 0;
+        private ulong m_InstanceID = 0;
         private TransformComponent m_Transform;
 
         public ulong ID => m_InstanceID;
@@ -31,10 +31,32 @@ namespace MoonEngine
 
         public T GetComponent<T>() where T : Component, new()
         {
-            if (!InternalCalls.Entity_HasComponent(ID, typeof(T)))
+            if (!InternalCalls.Entity_HasComponent(m_InstanceID, typeof(T)))
                 return null;
 
             return new T() { Entity = this };
         }
+
+        public T As<T>() where T : Entity, new()
+        {
+            object instance = InternalCalls.Entity_GetScript(m_InstanceID);
+            if (instance == null)
+            {
+                Console.WriteLine("Instance not found!");
+                return null;
+            }
+            return instance as T;
+        }
+
+        public static Entity Instantiate(Entity entity, Vector3 position)
+        {
+            return new Entity() { m_InstanceID = InternalCalls.Entity_Instantiate(entity.m_InstanceID, ref position) };
+        }
+
+        public static void Destroy(Entity entity)
+        {
+            InternalCalls.Entity_Destroy(entity.m_InstanceID);
+        }
     }
 }
+ 

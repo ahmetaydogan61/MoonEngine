@@ -18,7 +18,7 @@ namespace MoonEngine
 	float PhysicsWorld::Gravity = -9.8f, PhysicsWorld::FixedTimestep = 1 / 60.0f;
 	int32_t PhysicsWorld::VelocityIterations = 8, PhysicsWorld::PositionIterations = 3, PhysicsWorld::MaxSteps = 5;
 
-	static b2BodyType ConvertBodyType(PhysicsBodyComponent::BodyType type)
+	b2BodyType PhysicsWorld::ConvertBodyType(PhysicsBodyComponent::BodyType type)
 	{
 		switch (type)
 		{

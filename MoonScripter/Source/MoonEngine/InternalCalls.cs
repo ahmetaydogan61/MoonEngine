@@ -8,6 +8,17 @@ namespace MoonEngine
         #region Entity
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static ulong Entity_Instantiate(ulong entityId, ref Vector3 position);
+        
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static ulong Entity_Destroy(ulong entityId);
+
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static object Entity_GetScript(ulong entityId);
+
+        
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(ulong entityId, Type componentType);
 
         #endregion
@@ -34,8 +45,22 @@ namespace MoonEngine
 
         #region Physics
 
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void PhysicsBody_SetBodyType(ulong entityId, PhysicsBodyComponent.PhysicsBodyType bodyType);
+
+
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void PhysicsBody_AddForce(ulong entityId, ref Vector2 force, ref Vector2 position);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void PhysicsBody_AddImpulse(ulong entityId, ref Vector2 force, ref Vector2 position);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void PhysicsBody_AddAngularImpulse(ulong entityId, float impulse);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void PhysicsBody_AddTorque(ulong entityId, float force);
 
         #endregion
 
@@ -43,7 +68,7 @@ namespace MoonEngine
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Input_GetKey(Keycode key);
-        
+
         #endregion
     }
 }

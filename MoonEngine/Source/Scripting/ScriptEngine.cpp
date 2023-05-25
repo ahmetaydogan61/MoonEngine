@@ -441,10 +441,14 @@ namespace MoonEngine
 			if (value != 0)
 			{
 				uint64_t castedValue = *(uint64_t*)value;
-				if (!s_Data->ScriptInstances.contains(castedValue))
-					return;
 
-				mono_field_set_value(m_Instance, field.MonoField, (void*)s_Data->ScriptInstances.at(castedValue)->GetMonoObject());
+				MonoObject* refObj = mono_object_new(s_Data->AppDomain, s_Data->EntityClass.GetMonoClass());
+
+				MonoMethod* consturctor = s_Data->EntityClass.GetMethod(".ctor", 1);
+				void* param = &castedValue;
+				mono_runtime_invoke(consturctor, refObj, &param, nullptr);
+
+				mono_field_set_value(m_Instance, field.MonoField, (void*)refObj);
 			}
 			else
 				mono_field_set_value(m_Instance, field.MonoField, 0);

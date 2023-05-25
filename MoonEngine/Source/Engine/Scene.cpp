@@ -359,7 +359,7 @@ namespace MoonEngine
 	void Scene::OnAddComponent(Entity entity, PhysicsBodyComponent& component)
 	{
 		if (m_PhysicsWorld.WorldExists())
-			m_PhysicsWorld.RegisterPhysicsBody(entity, entity.GetComponent<TransformComponent>(), component, true);
+			m_PhysicsWorld.RegisterPhysicsBody(entity, entity.GetComponent<TransformComponent>(), component, false);
 	}
 
 	template<>

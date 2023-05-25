@@ -2,6 +2,7 @@
 #include "Engine/Components.h"
 
 class b2World;
+enum b2BodyType;
 
 #define BIND_LISTENER(func) std::bind(&func, this, std::placeholders::_1, std::placeholders::_2)
 
@@ -32,6 +33,8 @@ namespace MoonEngine
 
 		//Call after BeginWorld(), pass callbacks to gather body userdata pointer from the colliding two objects.
 		void SetContactListeners(std::function<void(void*, void*)> begin, std::function<void(void*, void*)> end);
+
+		static  b2BodyType ConvertBodyType(PhysicsBodyComponent::BodyType type);
 
 		static float Gravity;
 		static int32_t VelocityIterations;

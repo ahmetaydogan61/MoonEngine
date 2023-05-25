@@ -5,6 +5,15 @@
 
 namespace MoonEngine
 {
+	void PhysicsBodyComponent::SetPosition(const glm::vec2& position)
+	{
+		if (RuntimeBody)
+		{
+			b2Body* body = (b2Body*)RuntimeBody;
+			body->SetTransform({ position.x, position.y }, 0.0f);
+		}
+	}
+
 	void PhysicsBodyComponent::AddForce(const glm::vec2& force, const glm::vec2& position)
 	{
 		if (RuntimeBody)
