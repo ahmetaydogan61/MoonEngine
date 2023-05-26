@@ -1,63 +1,115 @@
-Moon Engine is a 2D rendering application which currently in a development state.
-</br>
+![](Docs/Images/Moon_Engine_Banner.png)
 
-<h2><b>Setup</b></h2>
+Moon Engine is a 2D game engine which currently in a development state.
+Follow the progress on [Trello](https://trello.com/b/IAxK4TI0/moonengine).
+
+## Table of Content
+
+- [Features](#features)
+- [Setup](#setup)
+  - [Building The Engine](#building-the-engine)
+  - [Setup Scripting](#setup-scripting)
+  - [Release](#release)
+- [Using The Editor](#using-the-editor)
+  - [Camera](#camera)
+  - [Shortcuts](#shortcuts)
+- [Scripting](#scripting)
+- [License](#license)
+
+## Features
+
+- Batch Renderer with texture layering.
+- Particle System.
+- Scene Serializer/Deserializer with a simple Reflection.
+- Entity Component System wrapper for [entt](https://github.com/skypjack/entt).
+- [Mono](https://github.com/mono/mono) C# Scripting.
+- Implementation and wrapper for [Box2D](https://github.com/erincatto/box2d) physics.
+
+## Setup
+
+If you dont want to build the entire project and use the engine only, you can use the release build. Otherwise, you can follow the steps below to build the project with the source code.
+
+**Requirements:** .Net Framework 4.7.2, C++ 20 and Visual Studio.
+**Supported Platforms:** Windows 10-11
+
+#### Building The Engine
+
 <ol>
   <li>Download the repository.</li>
   <li>Run the MakeProject.bat file.</li>
   <li>Open MoonEngine2D.sln and build the solution.</li>
 </ol>
+  
+#### Setup Scripting
 
-Note that you can create a new solution and use "MoonEngine" features like Scene, Entity System, Renderer etc. Make sure that you link "MoonEngine" to the solution and add the necessary include directories.
+<ol>
+  <li>Go to "MoonEngine/MoonEditor/TemplateProject"</li>
+  <li>Run the MakeProject.bat file.</li>
+  <li>Open TemplateProject.sln and build the solution.</li>
+</ol>
 
-<h2><b>Features</b></h2>
-<ul>
-   <li>Batch Renderer</li>
-   <li>Particle System</li>
-   <li>Scene Serializer/Deserializer with simple Reflection</li>
-   <li>Entity Component System wrapper for entt</li>
-   <li>Box2D Physics</li>
-</ul>
+**Note:** that you can create a new solution and use "MoonEngine" features like Scene, Entity System, Renderer etc. Make sure that you link "MoonEngine" to the solution and add the necessary include directories.
 
-<h2><b>The Editor</b></h2>
-The editor can be used to create/delete entities, add/remove components, play/pause/stop and save/load scenes.
-<ul>
-   <h4><b>Camera</b></h4>
-      <ul>
-         <li>
-            Movement: LeftShift + W/A/S/D or Middle Mouse Button.
-         </li>
-         <li>
-            Zoom: Mouse wheel to zoom in/out.
-         </li> 
-      </ul>
-   <h4><b>Scene Management</b></h4> 
-      <ul> 
-         <li>
-            From File you can choose to save/load scenes.
-         </li>
-      </ul>
-   <h4><b>Content Browser</b></h4> 
-   MoonEngine currently doesn't have a project system. Because of that, all the assets are in a constant directory.
-      <ul> 
-         <li>
-            Content Browser Directory: "MoonEngine/MoonEditor/Resource/Assets"
-         </li>
-         <li>
-           Search file: Search any file inside browser directory.
-         </li>
-      </ul>
-</ul>
+#### Release
 
-<h3><b>Shortcuts</b></h3>
-<ul>
-  <li>LeftCtrl+D: Duplicate selected entity.</li>
-  <li>Delete: Delete selected entity.</li>
-  <li>LeftCtrl+N: New Scene.</li>
-  <li>LeftCtrl+S: Save Scene.</li>
-  <li>LeftCtrl+L: Load Scene.</li>
-  <li>
-  Gizmo operation selection
-  </br> Q: Select, W: Translate, E: Scale, R: Rotate.
-  </li>
-</ul>
+Download the latest version of MoonEngine [here](https://github.com/ImMoonBorn/MoonEngine/releases/tag/PreRelease3).
+
+For scripting open the TemplateProject.sln located in TemplateProject folder. You can find a simple guide to use scripting in the [Scripting Seciton](#scripting).
+
+**Note:** Do not change any directory or delete any folders and files outside of the Assets and Scripts directories.
+
+## Using The Editor
+
+The Editor can be used for:
+
+- Creation and deletion of entities, adding and removing components from existing entities.
+- Controlling the scene by playing, pausing, and stopping, as well as creating, saving, and loading scenes.
+- Browsing through or searching for assets to use in the project.
+
+#### Camera
+
+- Movement: LeftShift + W/A/S/D or Middle Mouse Button.
+- Zoom: Mouse wheel to zoom in/out.
+
+#### Shortcuts
+
+- LeftCtrl+D: Duplicate selected entity.
+- Delete: Delete selected entity.
+- LeftCtrl+N: New Scene.
+- LeftCtrl+S: Save Scene.
+- LeftCtrl+L: Load Scene.
+- Gizmo: Q: Select, W: Translate, E: Scale, R: Rotate.
+
+## Scripting
+
+Edit, add or delete scripts in the "TemplateProject.sln".
+
+A simple Scripting class to attach to an Entity.
+
+```cpp
+public class Player : Entity
+{
+    public float Speed = 1250.0f;
+
+     void Awake()
+     {
+        //Gets called on entity creation.
+     }
+
+     void Update(float dt)
+     {
+        //Gets called on every frame update.
+        //dt: Is the time difference between two frames.
+     }
+}
+```
+
+After making changes in the script or adding new scripts, you need to build the project (Ctrl + B) in order to apply the changes. Even if the editor is running, the script changes will be automatically applied. However, avoid building the project while in play mode, as it may result in a crash.
+
+In the editor, select the class and edit the variables.
+
+<img src="Docs/Images/Inspector_Scripting.png" width="350">
+
+## License
+
+MoonEngine is licensed under the terms of the [Apache License](http://www.apache.org/licenses/) and is available for free.
