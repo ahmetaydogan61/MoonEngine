@@ -38,6 +38,8 @@ namespace MoonEngine
 
 #define ImGuiFieldDrag(DataType, data) ImGui::DragScalar("##scalarfield", ImGuiDataType_##DataType, &data, 0.1f)
 
+#define ImGuiFieldDragExt(DataType, data, min, max, format) ImGui::DragScalar("##scalarfield", ImGuiDataType_##DataType, &data, 0.1f, min, max, "%.2f")
+
 	static void ImGuiFieldConverter(ScriptInstance& instance, const ScriptField& field)
 	{
 		RenderProp(field.FieldName.c_str(), [&]()
@@ -56,13 +58,13 @@ namespace MoonEngine
 				}
 				case ScriptFieldType::Double:
 				{
-					if (ImGuiFieldDrag(Double, data))
+					if (ImGuiFieldDragExt(Double, data, 0, 0, "%.21f"))
 						instance.SetFieldValue(field, &data);
 					break;
 				}
 				case ScriptFieldType::Float:
 				{
-					if (ImGuiFieldDrag(Float, data))
+					if (ImGuiFieldDragExt(Float, data, 0, 0, "%.2f"))
 						instance.SetFieldValue(field, &data);
 					break;
 				}
@@ -106,7 +108,7 @@ namespace MoonEngine
 				{
 					void* data;
 					glm::vec2* vec2 = (glm::vec2*)instance.GetFieldValue(field, &data);
-					if (ImGui::DragFloat2("##vec2", &(*vec2)[0]))
+					if (ImGui::DragFloat2("##vec2", &(*vec2)[0], 0.1f, 0, 0, "%.2f"))
 						instance.SetFieldValue(field, vec2);
 					break;
 				}
@@ -114,7 +116,7 @@ namespace MoonEngine
 				{
 					void* data;
 					glm::vec3* vec3 = (glm::vec3*)instance.GetFieldValue(field, &data);
-					if (ImGui::DragFloat3("##vec3", &(*vec3)[0]))
+					if (ImGui::DragFloat3("##vec3", &(*vec3)[0], 0.1f, 0, 0, "%.2f"))
 						instance.SetFieldValue(field, vec3);
 					break;
 				}
@@ -122,7 +124,7 @@ namespace MoonEngine
 				{
 					void* data;
 					glm::vec4* vec4 = (glm::vec4*)instance.GetFieldValue(field, &data);
-					if (ImGui::DragFloat4("##vec4", &(*vec4)[0]))
+					if (ImGui::DragFloat4("##vec4", &(*vec4)[0], 0.1f, 0.0f, 0.0f, "%.2f"))
 						instance.SetFieldValue(field, vec4);
 					break;
 				}
@@ -171,12 +173,12 @@ namespace MoonEngine
 				}
 				case ScriptFieldType::Float:
 				{
-					ImGuiFieldDrag(Float, field.Data);
+					ImGuiFieldDragExt(Float, field.Data, 0, 0, "%.2f");
 					break;
 				}
 				case ScriptFieldType::Double:
 				{
-					ImGuiFieldDrag(Double, field.Data);
+					ImGuiFieldDragExt(Double, field.Data, 0, 0, "%.21f");
 					break;
 				}
 				case ScriptFieldType::Short:
@@ -212,19 +214,19 @@ namespace MoonEngine
 				case ScriptFieldType::Vector2:
 				{
 					glm::vec2* result = (glm::vec2*)field.Data;
-					ImGui::DragFloat2("##vec2", &(*result)[0]);
+					ImGui::DragFloat2("##vec2", &(*result)[0], 0.1f, 0.0f, 0.0f, "%.2f");
 					break;
 				}
 				case ScriptFieldType::Vector3:
 				{
 					glm::vec3* result = (glm::vec3*)field.Data;
-					ImGui::DragFloat3("##vec3", &(*result)[0]);
+					ImGui::DragFloat3("##vec3", &(*result)[0], 0.1f, 0.0f, 0.0f, "%.2f");
 					break;
 				}
 				case ScriptFieldType::Vector4:
 				{
 					glm::vec4* result = (glm::vec4*)field.Data;
-					ImGui::DragFloat4("##vec4", &(*result)[0]);
+					ImGui::DragFloat4("##vec4", &(*result)[0], 0.1f, 0.0f, 0.0f, "%.2f");
 					break;
 				}
 				case ScriptFieldType::Entity:

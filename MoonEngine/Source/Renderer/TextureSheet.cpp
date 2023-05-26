@@ -13,8 +13,8 @@ namespace MoonEngine
 
 	void TextureSheet::CalculateTexCoords()
 	{
-		float width = m_Texture->GetWidth();
-		float height = m_Texture->GetHeight();
+		float width = (float)m_Texture->GetWidth();
+		float height = (float)m_Texture->GetHeight();
 
 		float spriteX = m_SpriteSize.x;
 		float spriteY = m_SpriteSize.y;

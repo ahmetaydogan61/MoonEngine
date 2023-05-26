@@ -65,14 +65,12 @@ namespace MoonEngine
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthAttachment.ID, 0);
 		}
 
-		uint32_t colorAttachmentsSize = m_Props.ColorAttachments.size();
+		int32_t colorAttachmentsSize = m_Props.ColorAttachments.size();
 		if (colorAttachmentsSize > 1 && colorAttachmentsSize < 4)
 		{
 			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 			glDrawBuffers(colorAttachmentsSize, buffers);
 		}
-
-		ME_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Failed To Create Framebuffer");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}

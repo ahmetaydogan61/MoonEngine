@@ -256,7 +256,7 @@ namespace MoonEngine
 				uint32_t quadQuadVertexIndex = s_Data->QLayerArray[layer].QuadVertexIndex;
 
 				glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(QuadVertex) * quadQuadVertexIndex, s_Data->QLayerArray[layer].QuadVertices);
-				glDrawElements(GL_TRIANGLES, quadQuadVertexIndex * 1.5f, GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_TRIANGLES, (GLsizei)quadQuadVertexIndex * 1.5f, GL_UNSIGNED_INT, 0);
 				s_Stats->DrawCalls++;
 			}
 			s_Data->QLayerArray[layer].QuadVertexIndex = 0;

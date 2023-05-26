@@ -68,7 +68,7 @@ namespace MoonEngine
 		if (m_PoolSize <= 0)
 			return;
 
-		for (int i = 0; i < m_PoolSize; i++)
+		for (uint32_t i = 0; i < m_PoolSize; i++)
 		{
 			Particle& particle = m_Particles[i];
 

@@ -9,12 +9,16 @@
 
 namespace MoonEngine
 {
+#ifdef ENGINE_DEBUG
+
 	void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 					   GLsizei length, const GLchar* message, const void* userParam)
 	{
 		if (type == GL_DEBUG_TYPE_ERROR)
 			ME_ERR("OpenGL Error: (src: {0}, typ: {1}, id: {2}, svr: {3})\n\t{4}", source, type, id, severity, message);
 	}
+
+#endif
 
 	bool Window::Init()
 	{
@@ -39,7 +43,7 @@ namespace MoonEngine
 
 		BindWindowCallbacks();
 
-#ifdef OpenGLDebug
+#if  defined(OpenGLDebug) && defined(ENGINE_DEBUG)
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(DebugCallback, nullptr);
