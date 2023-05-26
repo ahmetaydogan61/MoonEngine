@@ -52,7 +52,7 @@ If you dont want to build the entire project and use the engine only, you can us
 
 #### Release
 
-Download the latest version of MoonEngine [here](https://github.com/ImMoonBorn/MoonEngine/releases/tag/PreRelease3).
+Download the latest version of MoonEngine [here](https://github.com/ImMoonBorn/MoonEngine/releases/tag/PreRelease4).
 
 For scripting open the TemplateProject.sln located in TemplateProject folder. You can find a simple guide to use scripting in the [Scripting Seciton](#scripting).
 
