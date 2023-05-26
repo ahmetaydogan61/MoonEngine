@@ -1,4 +1,5 @@
 ![](Docs/Images/Moon_Engine_Banner.png)
+![](Docs/Images/Moon_Engine.gif)
 
 Moon Engine is a 2D game engine which currently in a development state.
 Follow the progress on [Trello](https://trello.com/b/IAxK4TI0/moonengine).
